@@ -8,9 +8,8 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
   const drawerContent = useRef();
 
   useGSAP(() => {
-    // Animación de entrada: overlay se desvanece y el contenido se desliza lateralmente
     gsap.fromTo(drawerOverlay.current, { opacity: 0 }, { opacity: 1, duration: 0.3 });
-    gsap.fromTo(drawerContent.current, { x: '100%' }, { x: '0%', duration: 0.45, ease: 'power3.out' });
+    gsap.fromTo(drawerContent.current, { x: '100%' }, { x: '0%', duration: 0.4, ease: 'power3.out' });
   }, { scope: drawerOverlay });
 
   const handleClose = () => {
@@ -35,8 +34,8 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: 'rgba(90, 22, 35, 0.4)',
-        backdropFilter: 'blur(5px)',
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        backdropFilter: 'blur(8px)',
         display: 'flex',
         justifyContent: 'flex-end',
         zIndex: 2000
@@ -46,25 +45,25 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
         ref={drawerContent}
         onClick={(e) => e.stopPropagation()}
         style={{
-          backgroundColor: 'var(--color-white)',
+          backgroundColor: 'var(--color-panel-dark)',
           width: '100%',
-          maxWidth: '460px',
+          maxWidth: '440px',
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '-10px 0 35px rgba(90, 22, 35, 0.1)',
+          boxShadow: '-10px 0 35px rgba(0, 0, 0, 0.5)',
           borderLeft: 'var(--border-glass)'
         }}
       >
-        {/* Cabecera del Carrito */}
+        {/* Header */}
         <div style={{
-          padding: '24px',
+          padding: '20px 24px',
           borderBottom: 'var(--border-glass)',
           display: 'flex',
           justifyContent: 'space-between',
           alignItems: 'center'
         }}>
-          <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.6rem', fontWeight: '400', color: 'var(--color-burgundy)' }}>
+          <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: '400', color: 'var(--color-gold)' }}>
             Tu Pedido
           </h3>
           <button 
@@ -72,9 +71,9 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
             style={{ 
               background: 'none', 
               border: 'none', 
-              fontSize: '1.2rem', 
+              fontSize: '1.3rem', 
               cursor: 'pointer',
-              color: 'var(--color-burgundy)',
+              color: 'var(--color-gold)',
               padding: '4px'
             }}
           >
@@ -82,12 +81,12 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
           </button>
         </div>
 
-        {/* Lista de Ítems */}
+        {/* List */}
         <div style={{ flexGrow: 1, overflowY: 'auto', padding: '24px' }} className="no-scrollbar">
           {cart.length === 0 ? (
             <div style={{ textAlign: 'center', marginTop: '60px', color: 'var(--color-text-muted)', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <p style={{ fontSize: '1.2rem', fontFamily: 'var(--font-serif)', color: 'var(--color-burgundy)' }}>El carrito está vacío</p>
-              <p style={{ fontSize: '0.9rem' }}>¡Agrega tus cosméticos favoritos para coordinar el envío!</p>
+              <p style={{ fontSize: '1.15rem', fontFamily: 'var(--font-serif)', color: 'var(--color-gold)' }}>El carrito está vacío</p>
+              <p style={{ fontSize: '0.85rem' }}>¡Agrega tus cosméticos favoritos para coordinar el envío!</p>
             </div>
           ) : (
             cart.map((item) => {
@@ -104,73 +103,72 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
                     display: 'flex', 
                     gap: '16px', 
                     marginBottom: '20px', 
-                    borderBottom: '1px solid rgba(90, 22, 35, 0.05)', 
+                    borderBottom: '1px solid rgba(255, 255, 255, 0.05)', 
                     paddingBottom: '16px' 
                   }}
                 >
                   <img 
                     src={item.image} 
                     alt={item.productName} 
-                    style={{ width: '80px', height: '80px', objectFit: 'cover', borderRadius: '8px', border: 'var(--border-glass)' }} 
+                    style={{ width: '70px', height: '70px', objectFit: 'cover', borderRadius: '8px', border: 'var(--border-glass)' }} 
                   />
                   
-                  <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justify: 'space-between' }}>
                     <div>
-                      <h4 style={{ fontSize: '1.05rem', fontWeight: '500', color: 'var(--color-text-dark)' }}>
+                      <h4 style={{ fontSize: '0.95rem', fontWeight: '400', color: 'var(--color-text-light)' }}>
                         {item.productName}
                       </h4>
                       {item.toneName && (
-                        <p style={{ fontSize: '0.85rem', color: 'var(--color-burgundy)', fontWeight: '500', marginTop: '2px' }}>
+                        <p style={{ fontSize: '0.8rem', color: 'var(--color-gold)', fontWeight: '500', marginTop: '2px' }}>
                           💄 {item.toneName}
                         </p>
                       )}
                     </div>
                     
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
-                      {/* Control de Cantidad */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ display: 'flex', justify: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <button 
                           onClick={() => onUpdateQuantity(item.key, -1)}
                           style={{ 
-                            width: '26px', 
-                            height: '26px', 
-                            borderRadius: '6px', 
-                            border: '1px solid rgba(90, 22, 35, 0.15)', 
-                            backgroundColor: '#fff', 
+                            width: '24px', 
+                            height: '24px', 
+                            borderRadius: '4px', 
+                            border: '1px solid rgba(255,255,255,0.15)', 
+                            backgroundColor: 'transparent', 
                             cursor: 'pointer',
-                            color: 'var(--color-burgundy)',
-                            fontSize: '1rem',
+                            color: 'var(--color-gold)',
+                            fontSize: '0.9rem',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             transition: 'all 0.2s'
                           }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-pastel-pink)'}
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#fff'}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                         >-</button>
-                        <span style={{ fontWeight: '500', fontSize: '0.95rem' }}>{item.quantity}</span>
+                        <span style={{ fontWeight: '500', fontSize: '0.85rem' }}>{item.quantity}</span>
                         <button 
                           onClick={() => onUpdateQuantity(item.key, 1)}
                           style={{ 
-                            width: '26px', 
-                            height: '26px', 
-                            borderRadius: '6px', 
-                            border: '1px solid rgba(90, 22, 35, 0.15)', 
-                            backgroundColor: '#fff', 
+                            width: '24px', 
+                            height: '24px', 
+                            borderRadius: '4px', 
+                            border: '1px solid rgba(255,255,255,0.15)', 
+                            backgroundColor: 'transparent', 
                             cursor: 'pointer',
-                            color: 'var(--color-burgundy)',
-                            fontSize: '1rem',
+                            color: 'var(--color-gold)',
+                            fontSize: '0.9rem',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             transition: 'all 0.2s'
                           }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-pastel-pink)'}
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#fff'}
+                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'}
+                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                         >+</button>
                       </div>
                       
-                      <p style={{ fontWeight: '600', color: 'var(--color-burgundy)', fontSize: '1.1rem' }}>
+                      <p style={{ fontWeight: '600', color: 'var(--color-gold)', fontSize: '1rem' }}>
                         {formattedItemPrice}
                       </p>
                     </div>
@@ -181,40 +179,39 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
           )}
         </div>
 
-        {/* Footer del Carrito */}
+        {/* Footer */}
         {cart.length > 0 && (
           <div style={{ 
             padding: '24px', 
             borderTop: 'var(--border-glass)', 
-            backgroundColor: 'rgba(90, 22, 35, 0.015)' 
+            backgroundColor: 'rgba(0, 0, 0, 0.2)' 
           }}>
             <div style={{ 
               display: 'flex', 
               justifyContent: 'space-between', 
               marginBottom: '20px', 
-              fontSize: '1.3rem', 
-              fontWeight: '600',
+              fontSize: '1.2rem', 
+              fontWeight: '400',
               fontFamily: 'var(--font-serif)'
             }}>
               <span>Total:</span>
-              <span style={{ color: 'var(--color-burgundy)' }}>{formattedTotal}</span>
+              <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>{formattedTotal}</span>
             </div>
             
             <button
-              className="btn-shine-effect"
               onClick={onCheckout}
               style={{
                 width: '100%',
                 backgroundColor: 'var(--color-burgundy)',
                 color: 'var(--color-white)',
-                border: 'none',
-                padding: '14px 0',
-                borderRadius: '12px',
+                border: '1px solid var(--color-gold)',
+                padding: '12px 0',
+                borderRadius: '8px',
                 cursor: 'pointer',
                 fontWeight: '600',
-                fontSize: '1rem',
+                fontSize: '0.95rem',
                 letterSpacing: '1px',
-                boxShadow: 'var(--shadow-premium)',
+                boxShadow: 'var(--shadow-gold)',
                 transition: 'background-color 0.3s'
               }}
               onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-burgundy-light)'}
