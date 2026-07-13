@@ -19,14 +19,25 @@ export default function Header({ cartCount, onCartClick }) {
       zIndex: 1000
     }}>
       <div style={{
-        fontFamily: 'var(--font-serif)',
-        fontSize: '1.7rem',
-        fontWeight: '700',
-        color: 'var(--color-burgundy)',
-        letterSpacing: '2px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '10px',
         cursor: 'pointer'
       }} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-        BELLA FOREVER
+        <img 
+          src="/isotipo.png" 
+          alt="Bella Forever Isotipo" 
+          style={{ height: '36px', objectFit: 'contain' }} 
+        />
+        <span style={{
+          fontFamily: 'var(--font-serif)',
+          fontSize: '1.6rem',
+          fontWeight: '700',
+          color: 'var(--color-burgundy)',
+          letterSpacing: '2px'
+        }}>
+          BELLA FOREVER
+        </span>
       </div>
       
       <button 

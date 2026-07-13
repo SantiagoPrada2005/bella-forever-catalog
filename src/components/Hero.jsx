@@ -39,17 +39,17 @@ export default function Hero() {
       }} />
 
       <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px', margin: '0 auto' }}>
-        <h1 className="hero-animate" style={{
-          fontFamily: 'var(--font-serif)',
-          fontSize: '3.5rem',
-          fontWeight: '300',
-          letterSpacing: '3px',
-          marginBottom: '12px',
-          color: 'var(--color-gold)',
-          textTransform: 'uppercase'
-        }}>
-          Bella Forever
-        </h1>
+        <img 
+          className="hero-animate" 
+          src="/logo.webp" 
+          alt="Bella Forever Logo" 
+          style={{ 
+            height: '110px', 
+            objectFit: 'contain', 
+            marginBottom: '16px',
+            maxWidth: '100%'
+          }} 
+        />
         <p className="hero-animate" style={{
           fontFamily: 'var(--font-serif)',
           fontSize: '1.6rem',
