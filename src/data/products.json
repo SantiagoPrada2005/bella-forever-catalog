@@ -1,0 +1,136 @@
+[
+  {
+    "id": "blush-loops",
+    "name": "Blush Loops",
+    "price": 18000,
+    "description": "Rubor en crema de larga duración con acabado sedoso. Aporta un rubor natural y saludable con destellos dorados sutiles que iluminan tu rostro todo el día.",
+    "category": "rubor",
+    "mainImage": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=600&auto=format&fit=crop",
+    "isNew": true,
+    "isFeatured": true,
+    "inStock": true,
+    "tones": [
+      {
+        "id": "rose-gold",
+        "name": "01 Rose Gold",
+        "hex": "#DDA3A9",
+        "image": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=600&auto=format&fit=crop",
+        "inStock": true
+      },
+      {
+        "id": "peach-glow",
+        "name": "02 Peach Glow",
+        "hex": "#E8D0B7",
+        "image": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=600&auto=format&fit=crop",
+        "inStock": true
+      },
+      {
+        "id": "berry-kiss",
+        "name": "03 Berry Kiss",
+        "hex": "#5A1623",
+        "image": "https://images.unsplash.com/photo-1631730359577-3847a64d98c8?q=80&w=600&auto=format&fit=crop",
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "id": "velvet-lips",
+    "name": "Velvet Lips - Labial Líquido",
+    "price": 15000,
+    "description": "Labial líquido con acabado mate aterciopelado que hidrata tus labios sin cuartearse.",
+    "category": "labiales",
+    "mainImage": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?q=80&w=600&auto=format&fit=crop",
+    "isNew": false,
+    "isFeatured": true,
+    "inStock": true,
+    "tones": [
+      {
+        "id": "classic-red",
+        "name": "10 Classic Red",
+        "hex": "#8B0000",
+        "image": "https://images.unsplash.com/photo-1586495777744-4413f21062fa?q=80&w=600&auto=format&fit=crop",
+        "inStock": true
+      },
+      {
+        "id": "soft-rose",
+        "name": "12 Soft Rose",
+        "hex": "#DDA3A9",
+        "image": "https://images.unsplash.com/photo-1625093742435-6fa192b6fb10?q=80&w=600&auto=format&fit=crop",
+        "inStock": true
+      },
+      {
+        "id": "nude-touch",
+        "name": "15 Nude Touch",
+        "hex": "#C59B8A",
+        "image": "https://images.unsplash.com/photo-1590156546746-c58a70d6a2f3?q=80&w=600&auto=format&fit=crop",
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "id": "brow-blend",
+    "name": "Brow Blend - Compacto para Cejas",
+    "price": 22000,
+    "description": "Fórmula compacta híbrida de cera y polvo para definir y fijar las cejas con acabado ultra natural.",
+    "category": "cejas",
+    "mainImage": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=600&auto=format&fit=crop",
+    "isNew": true,
+    "isFeatured": false,
+    "inStock": true,
+    "tones": [
+      {
+        "id": "soft-brown",
+        "name": "01 Soft Brown",
+        "hex": "#8B7355",
+        "image": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=600&auto=format&fit=crop",
+        "inStock": true
+      },
+      {
+        "id": "dark-brown",
+        "name": "02 Dark Brown",
+        "hex": "#4A3B32",
+        "image": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=600&auto=format&fit=crop",
+        "inStock": true
+      }
+    ]
+  },
+  {
+    "id": "lash-kit",
+    "name": "Kit para Pestañas Pro",
+    "price": 28000,
+    "description": "Kit profesional que incluye pestañina efecto pestañas postizas a prueba de agua y un encrespador de precisión ergonómico.",
+    "category": "pestanas",
+    "mainImage": "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=600&auto=format&fit=crop",
+    "isNew": false,
+    "isFeatured": true,
+    "inStock": true,
+    "tones": []
+  },
+  {
+    "id": "perfect-concealer",
+    "name": "Corrector Perfect Concealer",
+    "price": 14000,
+    "description": "Corrector de alta cobertura que difumina imperfecciones y ojeras sin marcar líneas de expresión.",
+    "category": "correctores",
+    "mainImage": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=600&auto=format&fit=crop",
+    "isNew": false,
+    "isFeatured": false,
+    "inStock": true,
+    "tones": [
+      {
+        "id": "light-beige",
+        "name": "01 Light Beige",
+        "hex": "#F5E1D3",
+        "image": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=600&auto=format&fit=crop",
+        "inStock": true
+      },
+      {
+        "id": "medium-beige",
+        "name": "02 Medium Beige",
+        "hex": "#ECCFB2",
+        "image": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=600&auto=format&fit=crop",
+        "inStock": true
+      }
+    ]
+  }
+]
