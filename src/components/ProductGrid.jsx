@@ -31,7 +31,7 @@ export default function ProductGrid({ products, onProductClick, onAddToCart }) {
           <style>{`
             .catalog-grid {
               display: grid;
-              grid-template-columns: repeat(2, 1fr) !important;
+              grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
               gap: 16px !important;
             }
             @media (min-width: 768px) {

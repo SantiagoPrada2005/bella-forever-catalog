@@ -206,7 +206,9 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
             fontWeight: '600',
             fontSize: '0.85rem',
             transition: 'all 0.3s ease',
-            letterSpacing: '0.5px'
+            letterSpacing: '0.5px',
+            whiteSpace: 'normal',
+            wordBreak: 'break-word'
           }}
           onMouseEnter={(e) => {
             if (product.inStock) {
@@ -219,7 +221,7 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
             }
           }}
         >
-          {product.inStock ? 'Agregar al pedido' : 'Agotado'}
+          {product.inStock ? 'Agregar' : 'Agotado'}
         </button>
       </div>
     </div>
