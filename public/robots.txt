@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://bella-forever-catalog.pages.dev/sitemap.xml
