@@ -71,8 +71,26 @@ Para transmitir esa percepción costosa y elaborada, aplicaremos micro-interacci
 
 ---
 
-## 5. Plan de Verificación
+## 5. Análisis de Viabilidad Móvil (Mobile-First)
+
+Debido a que el catálogo está destinado principalmente a un público que compra desde teléfonos móviles (Instagram/WhatsApp), las interacciones y el layout se optimizan específicamente para pantallas táctiles:
+
+### Adaptación de Interacciones y Animaciones
+*   **Efecto Magnético (Desktop-Only):** Este efecto depende de la posición física del cursor. En móviles se desactivará usando la consulta de medios `@media (hover: hover)`. En pantallas táctiles, los botones tendrán un cambio de color inmediato y una vibración de escala ligera al pulsarse (estado `:active`).
+*   **Brillo Satinado (Auto-Shimmer):** Dado que en móvil no hay hover para disparar el destello, el brillo satinado de las tarjetas destacadas se ejecutará automáticamente de manera cíclica cada 4 segundos, o mediante un disparo único cuando la tarjeta aparezca en pantalla por primera vez.
+*   **Optimizaciones de GPU (GSAP ScrollTrigger):** Para evitar retrasos y saltos de renderizado en navegadores móviles (como Safari en iOS o Chrome en Android), las animaciones de scroll evitarán propiedades pesadas de pintura. Usaremos propiedades aceleradas por hardware (`transform: translate3d` y `opacity`).
+
+### Adaptaciones de Layout y Usabilidad Móvil
+*   **Héroe Apilado:** El héroe asimétrico se transformará en una columna vertical en pantallas de menos de `768px`, colocando el texto de marca centrado y la composición de imágenes en un contenedor de altura controlada de 250px para evitar el desbordamiento horizontal.
+*   **Carrusel Táctil Nativo:** El `FeaturedCarousel` utilizará el scroll de hardware nativo de móvil (`overflow-x: auto` con `-webkit-overflow-scrolling: touch`) combinado con CSS Snap Points (`scroll-snap-type: x mandatory`). Esto garantiza una fricción de arrastre perfectamente fluida e idéntica a una aplicación nativa.
+*   **Cuadrícula Adaptativa (2 Columnas):** En móvil, el catálogo principal mostrará los productos en **2 columnas** en lugar de 3 o 4, lo que equilibra el espacio disponible y permite mostrar detalles legibles de las imágenes y precios.
+*   **Bottom Sheet en Detalle:** En pantallas móviles, el `ProductModal` se deslizará desde la parte inferior cubriendo el 90% de la pantalla (estilo *Bottom Sheet* nativo de iOS/Android) con una zona superior de arrastre fácil para cerrar, maximizando el espacio de visualización para imágenes y descripción del tono.
+
+---
+
+## 6. Plan de Verificación
 
 *   **Verificación de Compilación:** Ejecutar `bun run build` para asegurar que el bundle de Vite se compila sin errores.
 *   **Ajuste Responsivo:** Probar el comportamiento del carrusel horizontal y el héroe asimétrico en pantallas de móviles (iPhone/Android simulados) y escritorios.
 *   **Prueba de Checkout:** Confirmar que al realizar clic en "Confirmar pedido por WhatsApp", el mensaje generado para WhatsApp Web incluye el total, los tonos seleccionados y se abre en una nueva pestaña.
+
