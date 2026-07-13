@@ -3,11 +3,14 @@ import Header from './components/Header';
 import Hero from './components/Hero';
 import CategoryFilters from './components/CategoryFilters';
 import ProductGrid from './components/ProductGrid';
+import ProductModal from './components/ProductModal';
 import productsData from './data/products.json';
 
 export default function App() {
   const [cart, setCart] = useState([]);
   const [activeCategory, setActiveCategory] = useState('todos');
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [selectedProductTone, setSelectedProductTone] = useState(null);
 
   const handleAddToCart = (product, selectedTone) => {
     setCart((prev) => {
@@ -29,6 +32,11 @@ export default function App() {
     });
   };
 
+  const handleProductCardClick = (product, tone) => {
+    setSelectedProduct(product);
+    setSelectedProductTone(tone);
+  };
+
   const filteredProducts = activeCategory === 'todos' 
     ? productsData 
     : productsData.filter(p => p.category === activeCategory);
@@ -47,9 +55,20 @@ export default function App() {
       <CategoryFilters activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
       <ProductGrid 
         products={filteredProducts} 
-        onProductClick={(p, t) => console.log('product clicked', p, t)} 
+        onProductClick={handleProductCardClick} 
         onAddToCart={handleAddToCart} 
       />
+      {selectedProduct && (
+        <ProductModal 
+          product={selectedProduct}
+          initialTone={selectedProductTone}
+          onClose={() => {
+            setSelectedProduct(null);
+            setSelectedProductTone(null);
+          }}
+          onAddToCart={handleAddToCart}
+        />
+      )}
     </div>
   );
 }
