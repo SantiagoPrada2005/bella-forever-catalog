@@ -1,9 +1,11 @@
 import React, { useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 
 export default function EditorialHero() {
   const containerRef = useRef();
+  const navigate = useNavigate();
 
   useGSAP(() => {
     // Animación de textos
@@ -50,12 +52,7 @@ export default function EditorialHero() {
     });
   }, { scope: containerRef });
 
-  const handleScrollToGrid = () => {
-    const grid = document.getElementById('catalog-grid-section');
-    if (grid) {
-      grid.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
+
 
   return (
     <section 
@@ -121,7 +118,7 @@ export default function EditorialHero() {
           </p>
           <div className="hero-fade-up">
             <button 
-              onClick={handleScrollToGrid}
+              onClick={() => navigate('/catalogo')}
               style={{
                 backgroundColor: 'var(--color-burgundy)',
                 color: 'var(--color-white)',
