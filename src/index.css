@@ -5,45 +5,45 @@
 }
 
 :root {
-  /* Paleta Bella Forever */
+  /* Paleta Bella Forever Luxury Dark Mode */
+  --color-bg-dark: #0A0405;
+  --color-panel-dark: #12090B;
   --color-burgundy: #5A1623;
   --color-burgundy-light: #7E2636;
   --color-burgundy-dark: #3D0D16;
   --color-gold: #D7B06A;
-  --color-gold-hover: #C59F59;
+  --color-gold-hover: #E8C17F;
   --color-pastel-pink: #F6D6D9;
   --color-makeup-pink: #DDA3A9;
-  --color-beige: #E8D0B7;
-  
-  /* Tonos neutros */
-  --color-bg-light: #FCF9F9;
-  --color-text-dark: #221B1C;
-  --color-text-muted: #6B5B5C;
   --color-white: #FFFFFF;
+  
+  /* Tonos de texto */
+  --color-text-light: #FCF9F9;
+  --color-text-muted: #A39092;
   
   /* Fuentes */
   --font-serif: 'Cormorant Garamond', serif;
   --font-sans: 'Outfit', sans-serif;
   
   /* Acabados y Sombras */
-  --shadow-premium: 0 12px 35px rgba(90, 22, 35, 0.05);
-  --shadow-hover: 0 18px 45px rgba(90, 22, 35, 0.1);
-  --shadow-gold: 0 4px 20px rgba(215, 176, 106, 0.2);
-  --border-glass: 1px solid rgba(90, 22, 35, 0.08);
+  --shadow-premium: 0 15px 45px rgba(0, 0, 0, 0.4);
+  --shadow-hover: 0 20px 55px rgba(90, 22, 35, 0.2);
+  --shadow-gold: 0 4px 20px rgba(215, 176, 106, 0.15);
+  --border-glass: 1px solid rgba(215, 176, 106, 0.12);
   --radius-premium: 16px;
   --radius-pill: 9999px;
 }
 
 body {
   font-family: var(--font-sans);
-  background-color: var(--color-bg-light);
-  color: var(--color-text-dark);
+  background-color: var(--color-bg-dark);
+  color: var(--color-text-light);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
 }
 
-/* Ocultar barra de scroll para filtros */
+/* Ocultar barra de scroll */
 .no-scrollbar::-webkit-scrollbar {
   display: none;
 }
@@ -52,71 +52,110 @@ body {
   scrollbar-width: none;
 }
 
-/* Animación del brillo para botones */
-@keyframes shine {
-  100% {
-    left: 125%;
-  }
-}
-
-.btn-shine-effect {
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-shine-effect::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -60%;
-  width: 20%;
-  height: 200%;
-  background: rgba(255, 255, 255, 0.3);
-  transform: rotate(30deg);
-  transition: 0s;
-}
-
-.btn-shine-effect:hover::after {
-  left: 120%;
-  transition: all 0.6s ease-in-out;
-}
-
-/* Fondo decorativo con mancha de acuarela/makeup de fondo */
+/* Mancha de brillo difuminada de fondo */
 .bg-makeup-blur {
   position: fixed;
-  width: 50vw;
-  height: 50vw;
+  width: 60vw;
+  height: 60vw;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(246, 214, 217, 0.4) 0%, rgba(232, 208, 183, 0.1) 70%, rgba(255,255,255,0) 100%);
-  filter: blur(80px);
+  background: radial-gradient(circle, rgba(90, 22, 35, 0.25) 0%, rgba(215, 176, 106, 0.03) 70%, rgba(0,0,0,0) 100%);
+  filter: blur(100px);
   z-index: -1;
   pointer-events: none;
+  opacity: 0.8;
 }
 
 .bg-makeup-blur-1 {
-  top: -10%;
+  top: -15%;
   right: -10%;
 }
 
 .bg-makeup-blur-2 {
-  bottom: -10%;
+  bottom: -15%;
   left: -10%;
 }
 
-/* Scrollbar premium para el body */
+/* Brillo satinado shimmer diagonal */
+.satin-shimmer-container {
+  position: relative;
+  overflow: hidden;
+}
+
+.satin-shimmer-container::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(215, 176, 106, 0.2), transparent);
+  transform: skewX(-25deg);
+  pointer-events: none;
+  transition: 0s;
+}
+
+@media (hover: hover) {
+  .satin-shimmer-container:hover::after {
+    left: 150%;
+    transition: left 0.9s cubic-bezier(0.25, 1, 0.5, 1);
+  }
+}
+
+/* Scrollbar premium oscura */
 ::-webkit-scrollbar {
   width: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-bg-light);
+  background: var(--color-bg-dark);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-makeup-pink);
+  background: var(--color-burgundy);
   border-radius: 4px;
+  border: 2px solid var(--color-bg-dark);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: var(--color-gold);
+}
+
+/* Estilos del Bottom Sheet para móvil */
+.bottom-sheet-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(8px);
+  z-index: 2000;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.bottom-sheet-content {
+  background: var(--color-panel-dark);
+  border-top-left-radius: 24px;
+  border-top-right-radius: 24px;
+  width: 100%;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  border-top: var(--border-glass);
+  border-left: var(--border-glass);
+  border-right: var(--border-glass);
+}
+
+@media (min-width: 768px) {
+  .bottom-sheet-overlay {
+    align-items: center;
+  }
+  .bottom-sheet-content {
+    border-radius: var(--radius-premium);
+    max-width: 680px;
+    border: var(--border-glass);
+    max-height: 85vh;
+  }
 }
