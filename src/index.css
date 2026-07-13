@@ -1,111 +1,122 @@
-:root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
-
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
-
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-
-  @media (max-width: 1024px) {
-    font-size: 16px;
-  }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
-
-  #social .button-icon {
-    filter: invert(1) brightness(2);
-  }
+:root {
+  /* Paleta Bella Forever */
+  --color-burgundy: #5A1623;
+  --color-burgundy-light: #7E2636;
+  --color-burgundy-dark: #3D0D16;
+  --color-gold: #D7B06A;
+  --color-gold-hover: #C59F59;
+  --color-pastel-pink: #F6D6D9;
+  --color-makeup-pink: #DDA3A9;
+  --color-beige: #E8D0B7;
+  
+  /* Tonos neutros */
+  --color-bg-light: #FCF9F9;
+  --color-text-dark: #221B1C;
+  --color-text-muted: #6B5B5C;
+  --color-white: #FFFFFF;
+  
+  /* Fuentes */
+  --font-serif: 'Cormorant Garamond', serif;
+  --font-sans: 'Outfit', sans-serif;
+  
+  /* Acabados y Sombras */
+  --shadow-premium: 0 12px 35px rgba(90, 22, 35, 0.05);
+  --shadow-hover: 0 18px 45px rgba(90, 22, 35, 0.1);
+  --shadow-gold: 0 4px 20px rgba(215, 176, 106, 0.2);
+  --border-glass: 1px solid rgba(90, 22, 35, 0.08);
+  --radius-premium: 16px;
+  --radius-pill: 9999px;
 }
 
 body {
-  margin: 0;
+  font-family: var(--font-sans);
+  background-color: var(--color-bg-light);
+  color: var(--color-text-dark);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+/* Ocultar barra de scroll para filtros */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+/* Animación del brillo para botones */
+@keyframes shine {
+  100% {
+    left: 125%;
   }
 }
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
-  }
-}
-p {
-  margin: 0;
+
+.btn-shine-effect {
+  position: relative;
+  overflow: hidden;
 }
 
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
+.btn-shine-effect::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 20%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.3);
+  transform: rotate(30deg);
+  transition: 0s;
+}
+
+.btn-shine-effect:hover::after {
+  left: 120%;
+  transition: all 0.6s ease-in-out;
+}
+
+/* Fondo decorativo con mancha de acuarela/makeup de fondo */
+.bg-makeup-blur {
+  position: fixed;
+  width: 50vw;
+  height: 50vw;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(246, 214, 217, 0.4) 0%, rgba(232, 208, 183, 0.1) 70%, rgba(255,255,255,0) 100%);
+  filter: blur(80px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.bg-makeup-blur-1 {
+  top: -10%;
+  right: -10%;
+}
+
+.bg-makeup-blur-2 {
+  bottom: -10%;
+  left: -10%;
+}
+
+/* Scrollbar premium para el body */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-bg-light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-makeup-pink);
   border-radius: 4px;
-  color: var(--text-h);
 }
 
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gold);
 }
