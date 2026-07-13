@@ -1,15 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Header from './components/Header';
-import EditorialHero from './components/EditorialHero';
-import BrandStory from './components/BrandStory';
-import FeaturedCarousel from './components/FeaturedCarousel';
-import CategoryFilters from './components/CategoryFilters';
-import ProductGrid from './components/ProductGrid';
-import ProductModal from './components/ProductModal';
-import CartDrawer from './components/CartDrawer';
-import productsData from './data/products.json';
-import { CONFIG } from './config';
 import IntroLoader from './components/IntroLoader';
+import Home from './pages/Home';
+import Catalog from './pages/Catalog';
+import { CONFIG } from './config';
 
 export default function App() {
   const [isIntroComplete, setIsIntroComplete] = useState(false);
@@ -17,9 +12,6 @@ export default function App() {
     const saved = localStorage.getItem('bella_cart');
     return saved ? JSON.parse(saved) : [];
   });
-  const [activeCategory, setActiveCategory] = useState('todos');
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [selectedProductTone, setSelectedProductTone] = useState(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
   useEffect(() => {
@@ -58,11 +50,6 @@ export default function App() {
     });
   };
 
-  const handleProductCardClick = (product, tone) => {
-    setSelectedProduct(product);
-    setSelectedProductTone(tone);
-  };
-
   const handleCheckout = () => {
     const numberFormatter = new Intl.NumberFormat(CONFIG.currency.locale, {
       style: 'currency',
@@ -85,101 +72,41 @@ export default function App() {
     const encodedMessage = encodeURIComponent(message);
     const cleanNumber = CONFIG.whatsappNumber.replace('+', '').replace(/\s+/g, '');
     const url = `https://wa.me/${cleanNumber}?text=${encodedMessage}`;
-    
+
     window.open(url, '_blank');
   };
-
-  const filteredProducts = activeCategory === 'todos' 
-    ? productsData 
-    : productsData.filter(p => p.category === activeCategory);
 
   return (
     <>
       {!isIntroComplete && <IntroLoader onComplete={() => setIsIntroComplete(true)} />}
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', paddingBottom: '40px', backgroundColor: 'var(--color-bg-dark)' }}>
-        {/* Brillos difuminados */}
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg-dark)' }}>
         <div className="bg-makeup-blur bg-makeup-blur-1" />
         <div className="bg-makeup-blur bg-makeup-blur-2" />
-      
-      <Header 
-        cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)} 
-        onCartClick={() => setIsCartOpen(true)} 
-      />
-      
-      <main style={{ flex: '1 0 auto' }}>
-        <EditorialHero />
-        
-        <BrandStory />
-        
-        <FeaturedCarousel 
-          products={productsData} 
-          onProductClick={handleProductCardClick} 
-          onAddToCart={handleAddToCart}
+
+        <Header
+          cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)}
+          onCartClick={() => setIsCartOpen(true)}
         />
 
-        <div id="catalog-grid-section" style={{ padding: '40px 0 20px 0' }}>
-          <h2 style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: '2rem',
-            textAlign: 'center',
-            fontWeight: '300',
-            color: 'var(--color-white)',
-            marginBottom: '10px'
-          }}>
-            Nuestro Catálogo
-          </h2>
-          <CategoryFilters activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
-          <ProductGrid 
-            products={filteredProducts} 
-            onProductClick={handleProductCardClick} 
-            onAddToCart={handleAddToCart} 
-          />
-        </div>
-      </main>
-
-      {/* Modal de Detalle / Bottom Sheet */}
-      {selectedProduct && (
-        <ProductModal 
-          product={selectedProduct}
-          initialTone={selectedProductTone}
-          onClose={() => {
-            setSelectedProduct(null);
-            setSelectedProductTone(null);
-          }}
-          onAddToCart={handleAddToCart}
-        />
-      )}
-
-      {/* Carrito Lateral */}
-      {isCartOpen && (
-        <CartDrawer 
-          cart={cart}
-          onClose={() => setIsCartOpen(false)}
-          onUpdateQuantity={handleUpdateQuantity}
-          onCheckout={handleCheckout}
-        />
-      )}
-      
-      <footer style={{
-        marginTop: '60px',
-        padding: '40px 24px',
-        borderTop: 'var(--border-glass)',
-        textAlign: 'center',
-        color: 'var(--color-text-muted)',
-        fontSize: '0.85rem',
-        backgroundColor: 'rgba(18, 9, 11, 0.4)',
-        backdropFilter: 'blur(10px)',
-        zIndex: 50
-      }}>
-        <p style={{ fontFamily: 'var(--font-serif)', fontSize: '1.4rem', color: 'var(--color-gold)', marginBottom: '8px', letterSpacing: '2px' }}>
-          BELLA FOREVER
-        </p>
-        <p style={{ marginBottom: '6px' }}>📍 {CONFIG.defaultCity} (Valle del Cauca)</p>
-        <p>
-          By: <a href={`https://instagram.com/${CONFIG.instagramUser}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-gold)', fontWeight: '600', textDecoration: 'none' }}>@{CONFIG.instagramUser}</a>
-        </p>
-      </footer>
-    </div>
+        <main style={{ flex: '1 0 auto' }}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route 
+              path="/catalogo" 
+              element={
+                <Catalog 
+                  cart={cart}
+                  isCartOpen={isCartOpen}
+                  setIsCartOpen={setIsCartOpen}
+                  handleAddToCart={handleAddToCart}
+                  handleUpdateQuantity={handleUpdateQuantity}
+                  handleCheckout={handleCheckout}
+                />
+              } 
+            />
+          </Routes>
+        </main>
+      </div>
     </>
   );
 }
