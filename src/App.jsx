@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import Header from './components/Header';
-import Hero from './components/Hero';
+import EditorialHero from './components/EditorialHero';
+import BrandStory from './components/BrandStory';
+import FeaturedCarousel from './components/FeaturedCarousel';
 import CategoryFilters from './components/CategoryFilters';
 import ProductGrid from './components/ProductGrid';
 import ProductModal from './components/ProductModal';
@@ -9,7 +11,6 @@ import productsData from './data/products.json';
 import { CONFIG } from './config';
 
 export default function App() {
-  // Inicialización del carrito desde localStorage
   const [cart, setCart] = useState(() => {
     const saved = localStorage.getItem('bella_cart');
     return saved ? JSON.parse(saved) : [];
@@ -19,7 +20,6 @@ export default function App() {
   const [selectedProductTone, setSelectedProductTone] = useState(null);
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Sincronizar carrito con localStorage
   useEffect(() => {
     localStorage.setItem('bella_cart', JSON.stringify(cart));
   }, [cart]);
@@ -52,7 +52,7 @@ export default function App() {
           return nextQty > 0 ? { ...item, quantity: nextQty } : null;
         }
         return item;
-      }).filter(Boolean); // Filtrar nulos si cantidad <= 0
+      }).filter(Boolean);
     });
   };
 
@@ -81,7 +81,6 @@ export default function App() {
     message += `\n👇 ¿Me confirmas disponibilidad para coordinar el pago y el envío a ${CONFIG.defaultCity}? 🌸`;
 
     const encodedMessage = encodeURIComponent(message);
-    // wa.me usa número telefónico sin el prefijo +
     const cleanNumber = CONFIG.whatsappNumber.replace('+', '').replace(/\s+/g, '');
     const url = `https://wa.me/${cleanNumber}?text=${encodedMessage}`;
     
@@ -93,8 +92,8 @@ export default function App() {
     : productsData.filter(p => p.category === activeCategory);
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', paddingBottom: '40px' }}>
-      {/* Fondos difuminados decorativos tipo makeup */}
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', paddingBottom: '40px', backgroundColor: 'var(--color-bg-dark)' }}>
+      {/* Brillos difuminados */}
       <div className="bg-makeup-blur bg-makeup-blur-1" />
       <div className="bg-makeup-blur bg-makeup-blur-2" />
       
@@ -104,16 +103,37 @@ export default function App() {
       />
       
       <main style={{ flex: '1 0 auto' }}>
-        <Hero />
-        <CategoryFilters activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
-        <ProductGrid 
-          products={filteredProducts} 
+        <EditorialHero />
+        
+        <BrandStory />
+        
+        <FeaturedCarousel 
+          products={productsData} 
           onProductClick={handleProductCardClick} 
-          onAddToCart={handleAddToCart} 
+          onAddToCart={handleAddToCart}
         />
+
+        <div id="catalog-grid-section" style={{ padding: '40px 0 20px 0' }}>
+          <h2 style={{
+            fontFamily: 'var(--font-serif)',
+            fontSize: '2rem',
+            textAlign: 'center',
+            fontWeight: '300',
+            color: 'var(--color-white)',
+            marginBottom: '10px'
+          }}>
+            Nuestro Catálogo
+          </h2>
+          <CategoryFilters activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
+          <ProductGrid 
+            products={filteredProducts} 
+            onProductClick={handleProductCardClick} 
+            onAddToCart={handleAddToCart} 
+          />
+        </div>
       </main>
 
-      {/* Modal de Detalle de Producto */}
+      {/* Modal de Detalle / Bottom Sheet */}
       {selectedProduct && (
         <ProductModal 
           product={selectedProduct}
@@ -126,7 +146,7 @@ export default function App() {
         />
       )}
 
-      {/* Carrito Lateral deslizable */}
+      {/* Carrito Lateral */}
       {isCartOpen && (
         <CartDrawer 
           cart={cart}
@@ -136,24 +156,23 @@ export default function App() {
         />
       )}
       
-      {/* Footer elegante */}
       <footer style={{
         marginTop: '60px',
-        padding: '32px 24px',
+        padding: '40px 24px',
         borderTop: 'var(--border-glass)',
         textAlign: 'center',
         color: 'var(--color-text-muted)',
-        fontSize: '0.9rem',
-        backgroundColor: 'rgba(255,255,255,0.5)',
-        backdropFilter: 'blur(5px)',
+        fontSize: '0.85rem',
+        backgroundColor: 'rgba(18, 9, 11, 0.4)',
+        backdropFilter: 'blur(10px)',
         zIndex: 50
       }}>
-        <p style={{ fontFamily: 'var(--font-serif)', fontSize: '1.2rem', color: 'var(--color-burgundy)', marginBottom: '8px', letterSpacing: '1px' }}>
+        <p style={{ fontFamily: 'var(--font-serif)', fontSize: '1.4rem', color: 'var(--color-gold)', marginBottom: '8px', letterSpacing: '2px' }}>
           BELLA FOREVER
         </p>
         <p style={{ marginBottom: '6px' }}>📍 {CONFIG.defaultCity} (Valle del Cauca)</p>
-        <p style={{ fontSize: '0.85rem' }}>
-          By: <a href={`https://instagram.com/${CONFIG.instagramUser}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-burgundy)', fontWeight: '600', textDecoration: 'none' }}>@{CONFIG.instagramUser}</a>
+        <p>
+          By: <a href={`https://instagram.com/${CONFIG.instagramUser}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-gold)', fontWeight: '600', textDecoration: 'none' }}>@{CONFIG.instagramUser}</a>
         </p>
       </footer>
     </div>

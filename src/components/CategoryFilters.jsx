@@ -6,13 +6,20 @@ export default function CategoryFilters({ activeCategory, onCategoryChange }) {
     <div style={{
       display: 'flex',
       overflowX: 'auto',
-      padding: '24px 24px 12px 24px',
+      padding: '16px 24px 24px 24px',
       gap: '12px',
       whiteSpace: 'nowrap',
       maxWidth: '1200px',
       margin: '0 auto',
-      justifyContent: 'center'
-    }} className="no-scrollbar">
+      justifyContent: 'flex-start'
+    }} className="no-scrollbar filters-container">
+      <style>{`
+        @media (min-width: 768px) {
+          .filters-container {
+            justify-content: center !important;
+          }
+        }
+      `}</style>
       {CONFIG.categories.map((cat) => {
         const isActive = cat.id === activeCategory;
         return (
@@ -20,29 +27,28 @@ export default function CategoryFilters({ activeCategory, onCategoryChange }) {
             key={cat.id}
             onClick={() => onCategoryChange(cat.id)}
             style={{
-              padding: '10px 22px',
+              padding: '10px 20px',
               borderRadius: 'var(--radius-pill)',
-              border: isActive ? '1px solid var(--color-gold)' : '1px solid rgba(90, 22, 35, 0.1)',
-              backgroundColor: isActive ? 'var(--color-burgundy)' : 'rgba(255, 255, 255, 0.6)',
-              color: isActive ? 'var(--color-gold)' : 'var(--color-burgundy)',
+              border: isActive ? '1px solid var(--color-gold)' : '1px solid rgba(215, 176, 106, 0.15)',
+              backgroundColor: isActive ? 'var(--color-burgundy)' : 'var(--color-panel-dark)',
+              color: isActive ? 'var(--color-gold)' : 'var(--color-text-muted)',
               cursor: 'pointer',
               fontFamily: 'var(--font-sans)',
               fontWeight: '500',
-              fontSize: '0.9rem',
+              fontSize: '0.85rem',
               transition: 'all 0.3s ease',
-              boxShadow: isActive ? 'var(--shadow-gold)' : 'none',
-              backdropFilter: 'blur(4px)'
+              boxShadow: isActive ? 'var(--shadow-gold)' : 'none'
             }}
             onMouseEnter={(e) => {
               if (!isActive) {
-                e.currentTarget.style.backgroundColor = 'rgba(90, 22, 35, 0.05)';
-                e.currentTarget.style.borderColor = 'var(--color-burgundy)';
+                e.currentTarget.style.color = 'var(--color-gold)';
+                e.currentTarget.style.borderColor = 'var(--color-gold)';
               }
             }}
             onMouseLeave={(e) => {
               if (!isActive) {
-                e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.6)';
-                e.currentTarget.style.borderColor = 'rgba(90, 22, 35, 0.1)';
+                e.currentTarget.style.color = 'var(--color-text-muted)';
+                e.currentTarget.style.borderColor = 'rgba(215, 176, 106, 0.15)';
               }
             }}
           >
