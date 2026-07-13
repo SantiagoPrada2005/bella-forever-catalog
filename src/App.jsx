@@ -9,8 +9,10 @@ import ProductModal from './components/ProductModal';
 import CartDrawer from './components/CartDrawer';
 import productsData from './data/products.json';
 import { CONFIG } from './config';
+import IntroLoader from './components/IntroLoader';
 
 export default function App() {
+  const [isIntroComplete, setIsIntroComplete] = useState(false);
   const [cart, setCart] = useState(() => {
     const saved = localStorage.getItem('bella_cart');
     return saved ? JSON.parse(saved) : [];
@@ -92,10 +94,12 @@ export default function App() {
     : productsData.filter(p => p.category === activeCategory);
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', paddingBottom: '40px', backgroundColor: 'var(--color-bg-dark)' }}>
-      {/* Brillos difuminados */}
-      <div className="bg-makeup-blur bg-makeup-blur-1" />
-      <div className="bg-makeup-blur bg-makeup-blur-2" />
+    <>
+      {!isIntroComplete && <IntroLoader onComplete={() => setIsIntroComplete(true)} />}
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', paddingBottom: '40px', backgroundColor: 'var(--color-bg-dark)' }}>
+        {/* Brillos difuminados */}
+        <div className="bg-makeup-blur bg-makeup-blur-1" />
+        <div className="bg-makeup-blur bg-makeup-blur-2" />
       
       <Header 
         cartCount={cart.reduce((sum, item) => sum + item.quantity, 0)} 
@@ -176,5 +180,6 @@ export default function App() {
         </p>
       </footer>
     </div>
+    </>
   );
 }

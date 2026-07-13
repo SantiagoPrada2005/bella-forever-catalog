@@ -7,9 +7,21 @@ export default function ProductGrid({ products, onProductClick, onAddToCart }) {
   const gridRef = useRef();
 
   useGSAP(() => {
+    // Animación de entrada diagonal premium
     gsap.fromTo('.product-card-anim', 
-      { opacity: 0, y: 20 },
-      { opacity: 1, y: 0, stagger: 0.06, duration: 0.6, ease: 'power2.out' }
+      { opacity: 0, y: 30, scale: 0.95 },
+      { 
+        opacity: 1, 
+        y: 0, 
+        scale: 1,
+        stagger: {
+          amount: 0.4,
+          grid: 'auto',
+          from: 'start'
+        },
+        duration: 0.8, 
+        ease: 'power3.out' 
+      }
     );
   }, { dependencies: [products], scope: gridRef });
 

@@ -20,15 +20,22 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
   useGSAP(() => {
     const isMobile = !window.matchMedia('(min-width: 768px)').matches;
     
-    gsap.fromTo(modalOverlay.current, { opacity: 0 }, { opacity: 1, duration: 0.3 });
+    const tl = gsap.timeline();
+    
+    tl.fromTo(modalOverlay.current, { opacity: 0 }, { opacity: 1, duration: 0.3 });
     
     if (isMobile) {
-      // Slide up bottom sheet
-      gsap.fromTo(modalContent.current, { y: '100%' }, { y: '0%', duration: 0.4, ease: 'power3.out' });
+      tl.fromTo(modalContent.current, { y: '100%' }, { y: '0%', duration: 0.5, ease: 'power4.out' }, '-=0.2');
     } else {
-      // Zoom-in modal
-      gsap.fromTo(modalContent.current, { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.4, ease: 'back.out(1.2)' });
+      tl.fromTo(modalContent.current, { scale: 0.9, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.5, ease: 'back.out(1.1)' }, '-=0.2');
     }
+
+    // Staggered entry for inner details
+    tl.fromTo('.modal-anim-item', 
+      { opacity: 0, y: 15 },
+      { opacity: 1, y: 0, stagger: 0.08, duration: 0.4, ease: 'power2.out' },
+      '-=0.25'
+    );
   }, { scope: modalOverlay });
 
   const handleClose = () => {
@@ -139,7 +146,7 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
             
             {/* Contenido */}
             <div className="modal-text-container" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div>
+              <div className="modal-anim-item">
                 <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.8rem', fontWeight: '400', color: 'var(--color-white)', marginBottom: '4px' }}>
                   {product.name}
                 </h2>
@@ -148,13 +155,13 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
                 </p>
               </div>
               
-              <p style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
+              <p className="modal-anim-item" style={{ color: 'var(--color-text-muted)', fontSize: '0.9rem', lineHeight: '1.5' }}>
                 {product.description}
               </p>
 
               {/* Tonos */}
               {product.tones && product.tones.length > 0 && (
-                <div>
+                <div className="modal-anim-item">
                   <h4 style={{ 
                     fontSize: '0.75rem', 
                     textTransform: 'uppercase', 
@@ -193,6 +200,7 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
 
               {/* Botón */}
               <button
+                className="modal-anim-item"
                 disabled={!product.inStock || (selectedTone && !selectedTone.inStock)}
                 onClick={() => {
                   onAddToCart(product, selectedTone);

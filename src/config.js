@@ -1,7 +1,7 @@
 export const CONFIG = {
   brandName: "Bella Forever",
   instagramUser: "bellaforeverbeauty",
-  whatsappNumber: "+573123456789", // Reemplazar con el número del cliente para recepción de pedidos
+  whatsappNumber: "+573117887806", // Reemplazar con el número del cliente para recepción de pedidos
   defaultCity: "Roldanillo",
   currency: {
     symbol: "$",

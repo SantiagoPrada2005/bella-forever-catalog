@@ -6,10 +6,19 @@ export default function EditorialHero() {
   const containerRef = useRef();
 
   useGSAP(() => {
+    // Animación de textos
     gsap.fromTo('.hero-fade-up', 
       { opacity: 0, y: 30 }, 
       { opacity: 1, y: 0, stagger: 0.15, duration: 1.2, ease: 'power3.out' }
     );
+    
+    // Revelado por máscara
+    gsap.fromTo('.hero-text-mask-span', 
+      { y: '100%' }, 
+      { y: '0%', stagger: 0.12, duration: 1.2, ease: 'power4.out', delay: 0.2 }
+    );
+
+    // Animación inicial de imágenes
     gsap.fromTo('.hero-img-left',
       { opacity: 0, scale: 0.95, y: 20 },
       { opacity: 0.9, scale: 1, y: 0, duration: 1.4, delay: 0.2, ease: 'power2.out' }
@@ -18,6 +27,27 @@ export default function EditorialHero() {
       { opacity: 0, scale: 0.95, y: -20 },
       { opacity: 1, scale: 1, y: 0, duration: 1.4, delay: 0.4, ease: 'power2.out' }
     );
+
+    // Parallax de imágenes al hacer scroll
+    gsap.to('.hero-img-left', {
+      y: -50,
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true
+      }
+    });
+
+    gsap.to('.hero-img-right', {
+      y: 50,
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: 'top top',
+        end: 'bottom top',
+        scrub: true
+      }
+    });
   }, { scope: containerRef });
 
   const handleScrollToGrid = () => {
@@ -65,7 +95,7 @@ export default function EditorialHero() {
           }}>
             Boutique de Belleza
           </span>
-          <h1 className="hero-fade-up" style={{
+          <h1 style={{
             fontFamily: 'var(--font-serif)',
             fontSize: 'clamp(2.5rem, 5vw, 4.2rem)',
             lineHeight: '1.05',
@@ -73,7 +103,12 @@ export default function EditorialHero() {
             marginBottom: '20px',
             fontWeight: '300'
           }}>
-            Revela tu <span style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>brillo</span> natural
+            <span style={{ display: 'block', overflow: 'hidden' }}>
+              <span className="hero-text-mask-span" style={{ display: 'inline-block' }}>Revela tu</span>
+            </span>
+            <span style={{ display: 'block', overflow: 'hidden' }}>
+              <span className="hero-text-mask-span" style={{ display: 'inline-block', fontStyle: 'italic', color: 'var(--color-gold)' }}>brillo natural</span>
+            </span>
           </h1>
           <p className="hero-fade-up" style={{
             color: 'var(--color-text-muted)',
