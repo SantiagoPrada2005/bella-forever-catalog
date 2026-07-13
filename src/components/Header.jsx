@@ -51,16 +51,23 @@ export default function Header({ cartCount, onCartClick }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
         <Link 
           to="/catalogo" 
+          aria-label="Catálogo"
           style={{
             color: isCatalog ? 'var(--color-gold)' : 'var(--color-text-light)',
             textDecoration: 'none',
-            fontSize: '0.9rem',
-            fontWeight: '600',
-            letterSpacing: '1px',
-            transition: 'color 0.2s'
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: '8px',
+            transition: 'color 0.2s, transform 0.2s ease'
           }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         >
-          CATÁLOGO
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
+            <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
+          </svg>
         </Link>
 
         {isCatalog && (

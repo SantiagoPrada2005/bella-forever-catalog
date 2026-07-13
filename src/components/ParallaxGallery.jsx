@@ -30,7 +30,7 @@ const GALLERIES = [
   },
   {
     id: 4,
-    image: "https://images.unsplash.com/photo-1631730359575-38e4755d772b?q=80&w=800&auto=format&fit=crop",
+    image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=600&auto=format&fit=crop",
     title: "Cejas Perfectas",
     speed: -20,
     width: '100%',
@@ -74,7 +74,7 @@ export default function ParallaxGallery() {
   }, { scope: containerRef });
 
   return (
-    <section 
+    <section
       ref={containerRef}
       style={{
         padding: '80px 24px',
@@ -83,7 +83,7 @@ export default function ParallaxGallery() {
         overflow: 'hidden'
       }}
     >
-      <h2 
+      <h2
         className="gallery-title"
         style={{
           fontFamily: 'var(--font-serif)',
@@ -111,9 +111,9 @@ export default function ParallaxGallery() {
             }
           }
         `}</style>
-        
+
         {GALLERIES.map((item, idx) => (
-          <div 
+          <div
             key={item.id}
             className="parallax-item"
             data-speed={item.speed}
@@ -142,9 +142,9 @@ export default function ParallaxGallery() {
               aspectRatio: item.aspect,
               overflow: 'hidden'
             }}>
-              <img 
-                src={item.image} 
-                alt={item.title} 
+              <img
+                src={item.image}
+                alt={item.title}
                 style={{
                   width: '100%',
                   height: '100%',
@@ -154,7 +154,7 @@ export default function ParallaxGallery() {
                 onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
               />
-              
+
               {/* Overlay oscuro y título */}
               <div style={{
                 position: 'absolute',
