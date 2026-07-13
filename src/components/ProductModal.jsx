@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { CONFIG } from '../config';
@@ -7,6 +7,15 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
   const modalOverlay = useRef();
   const modalContent = useRef();
   const [selectedTone, setSelectedTone] = useState(initialTone || (product.tones && product.tones.length > 0 ? product.tones[0] : null));
+
+  // Bloquear el scroll del body al abrir y desbloquear al cerrar
+  useEffect(() => {
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, []);
 
   useGSAP(() => {
     const isMobile = !window.matchMedia('(min-width: 768px)').matches;
