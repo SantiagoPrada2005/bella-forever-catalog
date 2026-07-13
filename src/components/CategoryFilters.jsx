@@ -9,7 +9,6 @@ export default function CategoryFilters({ activeCategory, onCategoryChange }) {
       padding: '16px 24px 24px 24px',
       gap: '12px',
       whiteSpace: 'nowrap',
-      width: '100%',
       maxWidth: '1200px',
       margin: '0 auto',
       justifyContent: 'flex-start'
