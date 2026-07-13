@@ -14,7 +14,7 @@ export default function ProductGrid({ products, onProductClick, onAddToCart }) {
   }, { dependencies: [products], scope: gridRef });
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px 48px 16px' }}>
+    <div style={{ width: '100%', maxWidth: '1200px', margin: '0 auto', padding: '0 16px 48px 16px' }}>
       {products.length === 0 ? (
         <div style={{
           textAlign: 'center',

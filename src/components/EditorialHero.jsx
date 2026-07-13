@@ -35,6 +35,7 @@ export default function EditorialHero() {
         padding: '80px 24px 60px 24px',
         position: 'relative',
         overflow: 'hidden',
+        width: '100%',
         maxWidth: '1200px',
         margin: '0 auto'
       }}

@@ -4,6 +4,11 @@
   padding: 0;
 }
 
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
 :root {
   /* Paleta Bella Forever Luxury Dark Mode */
   --color-bg-dark: #0A0405;

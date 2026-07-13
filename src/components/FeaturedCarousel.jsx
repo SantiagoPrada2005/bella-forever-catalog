@@ -18,6 +18,7 @@ export default function FeaturedCarousel({ products, onProductClick, onAddToCart
   return (
     <section style={{
       padding: '60px 0 60px 24px',
+      width: '100%',
       maxWidth: '1200px',
       margin: '0 auto',
       overflow: 'hidden'
