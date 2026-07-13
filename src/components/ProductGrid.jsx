@@ -7,15 +7,14 @@ export default function ProductGrid({ products, onProductClick, onAddToCart }) {
   const gridRef = useRef();
 
   useGSAP(() => {
-    // Animación de entrada de las tarjetas con retraso progresivo (stagger)
     gsap.fromTo('.product-card-anim', 
-      { opacity: 0, y: 30 },
-      { opacity: 1, y: 0, stagger: 0.08, duration: 0.7, ease: 'power2.out' }
+      { opacity: 0, y: 20 },
+      { opacity: 1, y: 0, stagger: 0.06, duration: 0.6, ease: 'power2.out' }
     );
   }, { dependencies: [products], scope: gridRef });
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 24px 48px 24px' }}>
+    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px 48px 16px' }}>
       {products.length === 0 ? (
         <div style={{
           textAlign: 'center',
@@ -28,23 +27,34 @@ export default function ProductGrid({ products, onProductClick, onAddToCart }) {
           <p>Pronto añadiremos más productos en esta sección.</p>
         </div>
       ) : (
-        <div 
-          ref={gridRef}
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-            gap: '30px'
-          }}
-        >
-          {products.map((prod) => (
-            <div key={prod.id} className="product-card-anim" style={{ height: '100%' }}>
-              <ProductCard 
-                product={prod} 
-                onProductClick={onProductClick} 
-                onAddToCart={onAddToCart}
-              />
-            </div>
-          ))}
+        <div>
+          <style>{`
+            .catalog-grid {
+              display: grid;
+              grid-template-columns: repeat(2, 1fr) !important;
+              gap: 16px !important;
+            }
+            @media (min-width: 768px) {
+              .catalog-grid {
+                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
+                gap: 30px !important;
+              }
+            }
+          `}</style>
+          <div 
+            ref={gridRef}
+            className="catalog-grid"
+          >
+            {products.map((prod) => (
+              <div key={prod.id} className="product-card-anim" style={{ height: '100%' }}>
+                <ProductCard 
+                  product={prod} 
+                  onProductClick={onProductClick} 
+                  onAddToCart={onAddToCart}
+                />
+              </div>
+            ))}
+          </div>
         </div>
       )}
     </div>

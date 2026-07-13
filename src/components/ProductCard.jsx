@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { CONFIG } from '../config';
+import gsap from 'gsap';
 
 export default function ProductCard({ product, onProductClick, onAddToCart }) {
   const [selectedTone, setSelectedTone] = useState(product.tones && product.tones.length > 0 ? product.tones[0] : null);
+  const buttonRef = useRef();
 
   const formattedPrice = new Intl.NumberFormat(CONFIG.currency.locale, {
     style: 'currency',
@@ -17,29 +19,82 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
     onAddToCart(product, selectedTone);
   };
 
+  // Efecto Magnético para el botón - solo en dispositivos con puntero (no táctil)
+  useEffect(() => {
+    const btn = buttonRef.current;
+    if (!btn) return;
+
+    // Comprobar si el dispositivo soporta hover (desktop)
+    const isHoverSupported = window.matchMedia('(hover: hover)').matches;
+    if (!isHoverSupported) return;
+
+    const onMouseMove = (e) => {
+      const bound = btn.getBoundingClientRect();
+      const btnX = bound.left + bound.width / 2;
+      const btnY = bound.top + bound.height / 2;
+      const distX = e.clientX - btnX;
+      const distY = e.clientY - btnY;
+      const dist = Math.sqrt(distX * distX + distY * distY);
+
+      if (dist < 70) {
+        gsap.to(btn, {
+          x: distX * 0.25,
+          y: distY * 0.25,
+          duration: 0.3,
+          ease: 'power2.out'
+        });
+      } else {
+        gsap.to(btn, {
+          x: 0,
+          y: 0,
+          duration: 0.3,
+          ease: 'power2.out'
+        });
+      }
+    };
+
+    const onMouseLeave = () => {
+      gsap.to(btn, {
+        x: 0,
+        y: 0,
+        duration: 0.5,
+        ease: 'elastic.out(1.1, 0.4)'
+      });
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    btn.addEventListener('mouseleave', onMouseLeave);
+
+    return () => {
+      window.removeEventListener('mousemove', onMouseMove);
+      if (btn) btn.removeEventListener('mouseleave', onMouseLeave);
+    };
+  }, [product]);
+
   return (
     <div 
       onClick={() => onProductClick(product, selectedTone)}
       style={{
-        backgroundColor: 'var(--color-white)',
+        backgroundColor: 'var(--color-panel-dark)',
         borderRadius: 'var(--radius-premium)',
         boxShadow: 'var(--shadow-premium)',
         border: 'var(--border-glass)',
         overflow: 'hidden',
         cursor: 'pointer',
-        transition: 'transform 0.3s ease, box-shadow 0.3s ease',
+        transition: 'transform 0.3s ease, border-color 0.3s ease',
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
         height: '100%'
       }}
+      className="satin-shimmer-container"
       onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-6px)';
-        e.currentTarget.style.boxShadow = 'var(--shadow-hover)';
+        e.currentTarget.style.transform = 'translateY(-5px)';
+        e.currentTarget.style.borderColor = 'var(--color-gold)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.boxShadow = 'var(--shadow-premium)';
+        e.currentTarget.style.borderColor = 'rgba(215, 176, 106, 0.12)';
       }}
     >
       {/* Imagen del Producto */}
@@ -54,9 +109,9 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            transition: 'transform 0.5s ease'
+            transition: 'transform 0.6s ease'
           }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.04)'}
           onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
         />
         {product.isNew && (
@@ -66,12 +121,12 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
             left: '12px',
             backgroundColor: 'var(--color-gold)',
             color: 'var(--color-burgundy)',
-            fontSize: '0.7rem',
+            fontSize: '0.65rem',
             fontWeight: '700',
             padding: '4px 10px',
             borderRadius: 'var(--radius-pill)',
             textTransform: 'uppercase',
-            boxShadow: '0 2px 6px rgba(0,0,0,0.1)',
+            boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
             letterSpacing: '0.5px'
           }}>
             Nuevo
@@ -79,36 +134,36 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
         )}
       </div>
 
-      {/* Información del Producto */}
-      <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+      {/* Info */}
+      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
         <h3 style={{ 
-          fontSize: '1.2rem', 
-          fontWeight: '500', 
+          fontSize: '1.05rem', 
+          fontWeight: '400', 
           marginBottom: '6px',
           textOverflow: 'ellipsis', 
           overflow: 'hidden', 
           whiteSpace: 'nowrap',
-          color: 'var(--color-text-dark)'
+          color: 'var(--color-text-light)'
         }}>
           {product.name}
         </h3>
         
         <p style={{ 
-          color: 'var(--color-burgundy)', 
+          color: 'var(--color-gold)', 
           fontWeight: '700', 
-          fontSize: '1.3rem', 
-          marginBottom: '16px' 
+          fontSize: '1.15rem', 
+          marginBottom: '14px' 
         }}>
           {formattedPrice}
         </p>
 
-        {/* Selector de Tonos */}
+        {/* Tonos */}
         {product.tones && product.tones.length > 0 && (
           <div style={{ 
             display: 'flex', 
             flexWrap: 'wrap',
             gap: '8px', 
-            marginBottom: '20px' 
+            marginBottom: '16px' 
           }} onClick={(e) => e.stopPropagation()}>
             {product.tones.map((tone) => {
               const isSelected = selectedTone?.id === tone.id;
@@ -118,16 +173,15 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
                   title={tone.name}
                   onClick={() => setSelectedTone(tone)}
                   style={{
-                    width: '26px',
-                    height: '26px',
+                    width: '22px',
+                    height: '22px',
                     borderRadius: '50%',
                     backgroundColor: tone.hex,
-                    border: isSelected ? '2px solid var(--color-burgundy)' : '1px solid rgba(0,0,0,0.12)',
-                    outline: isSelected ? '2px solid var(--color-gold)' : 'none',
+                    border: isSelected ? '2px solid var(--color-gold)' : '1px solid rgba(255,255,255,0.2)',
                     cursor: tone.inStock ? 'pointer' : 'not-allowed',
-                    transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-                    transform: isSelected ? 'scale(1.1)' : 'scale(1)',
-                    opacity: tone.inStock ? 1 : 0.35
+                    transition: 'all 0.2s ease',
+                    transform: isSelected ? 'scale(1.15)' : 'scale(1)',
+                    opacity: tone.inStock ? 1 : 0.3
                   }}
                 />
               );
@@ -137,22 +191,22 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
 
         {/* Botón de Agregar */}
         <button 
-          className="btn-shine-effect"
+          ref={buttonRef}
           onClick={handleAdd}
           disabled={!product.inStock || (selectedTone && !selectedTone.inStock)}
           style={{
             marginTop: 'auto',
             width: '100%',
-            backgroundColor: product.inStock ? 'var(--color-burgundy)' : '#e5e0e0',
-            color: product.inStock ? 'var(--color-white)' : '#a59b9c',
-            border: 'none',
-            padding: '12px 0',
-            borderRadius: '10px',
+            backgroundColor: product.inStock ? 'var(--color-burgundy)' : 'rgba(255, 255, 255, 0.05)',
+            color: product.inStock ? 'var(--color-white)' : 'var(--color-text-muted)',
+            border: product.inStock ? '1px solid var(--color-gold)' : '1px solid rgba(255,255,255,0.05)',
+            padding: '11px 0',
+            borderRadius: '8px',
             cursor: product.inStock ? 'pointer' : 'default',
             fontWeight: '600',
-            fontSize: '0.9rem',
+            fontSize: '0.85rem',
             transition: 'all 0.3s ease',
-            boxShadow: product.inStock ? 'var(--shadow-premium)' : 'none'
+            letterSpacing: '0.5px'
           }}
           onMouseEnter={(e) => {
             if (product.inStock) {
