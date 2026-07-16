@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 
@@ -40,7 +40,7 @@ const GALLERIES = [
 
 export default function ParallaxGallery() {
   const containerRef = useRef();
-  const navigate = useNavigate();
+  const router = useRouter();
 
   useGSAP(() => {
     const items = gsap.utils.toArray('.parallax-item');
@@ -117,7 +117,7 @@ export default function ParallaxGallery() {
             key={item.id}
             className="parallax-item"
             data-speed={item.speed}
-            onClick={() => navigate('/catalogo')}
+            onClick={() => router.push('/catalogo')}
             style={{
               width: item.width,
               margin: idx % 2 === 0 ? '0 auto 0 0' : '80px 0 0 auto',

@@ -1,16 +1,23 @@
+'use client';
+
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import EditorialHero from '../components/EditorialHero';
-import BrandStory from '../components/BrandStory';
-import ParallaxGallery from '../components/ParallaxGallery';
-import { CONFIG } from '../config';
+import Link from 'next/link';
+import Header from '../src/components/Header';
+import EditorialHero from '../src/components/EditorialHero';
+import BrandStory from '../src/components/BrandStory';
+import ParallaxGallery from '../src/components/ParallaxGallery';
+import { CONFIG } from '../src/config';
 
 export default function Home() {
-  const navigate = useNavigate();
-
   return (
-    <div>
-      <EditorialHero />
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg-dark)', paddingTop: '70px' }}>
+      <div className="bg-makeup-blur bg-makeup-blur-1" />
+      <div className="bg-makeup-blur bg-makeup-blur-2" />
+
+      <Header cartCount={0} onCartClick={() => {}} />
+
+      <main style={{ flex: '1 0 auto' }}>
+        <EditorialHero />
       
       <BrandStory />
 
@@ -42,27 +49,30 @@ export default function Home() {
         }}>
           Descubre nuestra línea completa de maquillaje, rubores, labiales y correctores seleccionados para realzar tu belleza.
         </p>
-        <button 
-          onClick={() => navigate('/catalogo')}
-          style={{
-            backgroundColor: 'var(--color-burgundy)',
-            color: 'var(--color-white)',
-            border: '1px solid var(--color-gold)',
-            padding: '16px 36px',
-            borderRadius: '8px',
-            cursor: 'pointer',
-            fontSize: '1rem',
-            fontWeight: '600',
-            letterSpacing: '1px',
-            boxShadow: 'var(--shadow-gold)',
-            transition: 'all 0.3s ease'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-burgundy-light)'}
-          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--color-burgundy)'}
-        >
-          INGRESAR AL CATÁLOGO
-        </button>
+        
+        <Link href="/catalogo" style={{ textDecoration: 'none' }}>
+          <button 
+            style={{
+              backgroundColor: 'var(--color-burgundy)',
+              color: 'var(--color-white)',
+              border: '1px solid var(--color-gold)',
+              padding: '16px 36px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              fontWeight: '600',
+              letterSpacing: '1px',
+              boxShadow: 'var(--shadow-gold)',
+              transition: 'all 0.3s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-burgundy-light)'}
+            onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--color-burgundy)'}
+          >
+            INGRESAR AL CATÁLOGO
+          </button>
+        </Link>
       </section>
+      </main>
 
       {/* Footer */}
       <footer style={{

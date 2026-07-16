@@ -1,10 +1,11 @@
 import React from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { CONFIG } from '../config';
 
 export default function Header({ cartCount, onCartClick }) {
-  const location = useLocation();
-  const isCatalog = location.pathname === '/catalogo';
+  const pathname = usePathname();
+  const isCatalog = pathname === '/catalogo';
 
   return (
     <header style={{
@@ -23,7 +24,7 @@ export default function Header({ cartCount, onCartClick }) {
       zIndex: 1000
     }}>
       <Link 
-        to="/" 
+        href="/" 
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -50,7 +51,7 @@ export default function Header({ cartCount, onCartClick }) {
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
         <Link 
-          to="/catalogo" 
+          href="/catalogo" 
           aria-label="Catálogo"
           style={{
             color: isCatalog ? 'var(--color-gold)' : 'var(--color-text-light)',
