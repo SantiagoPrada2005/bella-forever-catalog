@@ -4,11 +4,15 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "dev": "next dev",
     "build": "next build",
+    "dev": "next dev",
     "start": "next start",
     "db:seed": "prisma db seed",
-    "lint": "oxlint"
+    "lint": "oxlint",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
     "@gsap/react": "^2.1.2",
@@ -23,10 +27,12 @@
     "@aws-sdk/client-s3": "^3.600.0"
   },
   "devDependencies": {
+    "@opennextjs/cloudflare": "^1.20.1",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "oxlint": "^1.71.0",
-    "prisma": "^6.1.0"
+    "prisma": "^6.1.0",
+    "wrangler": "^4.112.0"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
