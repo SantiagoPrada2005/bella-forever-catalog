@@ -4,7 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "next build",
+    "build": "opennextjs-cloudflare build",
     "build:cf": "opennextjs-cloudflare build",
     "dev": "next dev",
     "start": "next start",
