@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../../../src/components/Header';
+import ImageUpload from '../../../src/components/ui/ImageUpload';
 import { createProduct } from '../actions';
 import { CONFIG } from '../../../src/config';
 
@@ -137,16 +138,11 @@ export default function NewProduct() {
               </select>
             </div>
             <div>
-              <label style={{ display: 'block', color: 'var(--color-gold)', fontSize: '0.85rem', marginBottom: '6px', fontWeight: '600' }}>
-                Imagen Principal (URL) *
-              </label>
-              <input 
-                type="url" 
-                name="mainImage" 
-                value={formData.mainImage} 
-                onChange={handleChange}
+              <ImageUpload
+                label="Imagen Principal"
+                value={formData.mainImage}
+                onChange={(url) => setFormData(prev => ({ ...prev, mainImage: url }))}
                 required
-                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(215,176,106,0.2)', backgroundColor: 'rgba(0,0,0,0.3)', color: '#fff' }}
               />
             </div>
           </div>
@@ -258,13 +254,11 @@ export default function NewProduct() {
                       />
                     </div>
                     <div>
-                      <input 
-                        type="url" 
-                        placeholder="Imagen (URL o misma del prod.)" 
-                        value={tone.image} 
-                        onChange={(e) => handleToneChange(index, 'image', e.target.value)}
+                      <ImageUpload
+                        value={tone.image}
+                        onChange={(url) => handleToneChange(index, 'image', url)}
                         required
-                        style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid rgba(215,176,106,0.1)', backgroundColor: 'rgba(0,0,0,0.2)', color: '#fff', fontSize: '0.85rem' }}
+                        compact={true}
                       />
                     </div>
                     <div>
