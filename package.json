@@ -4,8 +4,7 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "build": "next build",
-    "build:cf": "opennextjs-cloudflare build",
+    "build": "opennextjs-cloudflare build",
     "dev": "next dev",
     "start": "next start",
     "db:seed": "prisma db seed",
