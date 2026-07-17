@@ -9,6 +9,7 @@
     "start": "next start",
     "db:seed": "prisma db seed",
     "lint": "oxlint",
+    "postinstall": "prisma generate",
     "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
     "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
     "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
