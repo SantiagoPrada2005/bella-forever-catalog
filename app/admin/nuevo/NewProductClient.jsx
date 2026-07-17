@@ -1,26 +1,20 @@
 'use client';
 
-export const dynamic = 'force-dynamic';
-
-import React, { useState, useEffect, use } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import Header from '../../../../src/components/Header';
-import ImageUpload from '../../../../src/components/ui/ImageUpload';
-import { getProductById, updateProduct } from '../../actions';
-import { CONFIG } from '../../../../src/config';
+import Header from '../../../src/components/Header';
+import ImageUpload from '../../../src/components/ui/ImageUpload';
+import { createProduct } from '../actions';
+import { CONFIG } from '../../../src/config';
 
-export default function EditProduct({ params }) {
+export default function NewProduct() {
   const router = useRouter();
-  const resolvedParams = use(params);
-  const id = resolvedParams.id;
-
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     price: '',
     description: '',
-    category: '',
+    category: CONFIG.categories[1]?.id || 'rubor', // Default to first actual category
     mainImage: '',
     isNew: false,
     isFeatured: false,
@@ -28,37 +22,6 @@ export default function EditProduct({ params }) {
   });
 
   const [tones, setTones] = useState([]);
-
-  useEffect(() => {
-    const loadProduct = async () => {
-      try {
-        const prod = await getProductById(id);
-        if (!prod) {
-          alert("Producto no encontrado");
-          router.push('/admin');
-          return;
-        }
-        setFormData({
-          name: prod.name,
-          price: prod.price.toString(),
-          description: prod.description || '',
-          category: prod.category,
-          mainImage: prod.mainImage,
-          isNew: prod.isNew,
-          isFeatured: prod.isFeatured,
-          inStock: prod.inStock
-        });
-        setTones(prod.tones || []);
-      } catch (err) {
-        console.error("Error al cargar producto", err);
-        alert("Ocurrió un error al cargar el producto");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadProduct();
-  }, [id, router]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -69,7 +32,7 @@ export default function EditProduct({ params }) {
   };
 
   const handleAddTone = () => {
-    setTones(prev => [...prev, { name: '', hex: '#DDA3A9', image: formData.mainImage, inStock: true }]);
+    setTones(prev => [...prev, { name: '', hex: '#DDA3A9', image: '', inStock: true }]);
   };
 
   const handleRemoveTone = (index) => {
@@ -87,25 +50,17 @@ export default function EditProduct({ params }) {
       return;
     }
 
-    setSaving(true);
+    setLoading(true);
     try {
-      await updateProduct(id, formData, tones);
+      await createProduct(formData, tones);
       router.push('/admin');
       router.refresh();
     } catch (err) {
       console.error(err);
-      alert("Ocurrió un error al actualizar el producto");
-      setSaving(false);
+      alert("Ocurrió un error al guardar el producto");
+      setLoading(false);
     }
   };
-
-  if (loading) {
-    return (
-      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg-dark)', paddingTop: '90px', alignItems: 'center', justifyContent: 'center' }}>
-        <p style={{ color: 'var(--color-text-muted)' }}>Cargando datos del producto...</p>
-      </div>
-    );
-  }
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg-dark)', paddingTop: '90px' }}>
@@ -123,7 +78,7 @@ export default function EditProduct({ params }) {
             ← Volver al panel
           </button>
           <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '2.2rem', fontWeight: '300', color: 'var(--color-white)', marginTop: '12px' }}>
-            Editar Producto: {formData.name}
+            Nuevo Producto
           </h1>
         </div>
 
@@ -335,7 +290,7 @@ export default function EditProduct({ params }) {
             <button 
               type="button" 
               onClick={() => router.push('/admin')}
-              disabled={saving}
+              disabled={loading}
               style={{
                 background: 'none',
                 border: '1px solid rgba(215, 176, 106, 0.3)',
@@ -350,7 +305,7 @@ export default function EditProduct({ params }) {
             </button>
             <button 
               type="submit" 
-              disabled={saving}
+              disabled={loading}
               style={{
                 backgroundColor: 'var(--color-gold)',
                 color: 'var(--color-bg-dark)',
@@ -360,10 +315,10 @@ export default function EditProduct({ params }) {
                 cursor: 'pointer',
                 fontWeight: '700',
                 boxShadow: 'var(--shadow-gold)',
-                opacity: saving ? 0.7 : 1
+                opacity: loading ? 0.7 : 1
               }}
             >
-              {saving ? 'Guardando...' : 'GUARDAR CAMBIOS'}
+              {loading ? 'Guardando...' : 'CREAR PRODUCTO'}
             </button>
           </div>
         </form>
