@@ -51,10 +51,10 @@ export default function ImageUpload({ label, value, onChange, required = false, 
       <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
         {/* Campo de URL */}
         <input 
-          type="url" 
+          type="text" 
           value={value} 
           onChange={(e) => onChange(e.target.value)}
-          placeholder="https://ejemplo.com/imagen.jpg o sube un archivo"
+          placeholder="URL de la imagen o sube un archivo"
           required={required}
           style={{ 
             flex: 1, 

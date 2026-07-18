@@ -21,6 +21,10 @@
 		{
 			"binding": "NEXT_INC_CACHE_R2_BUCKET",
 			"bucket_name": "bella-forever-catalog-opennext-cache"
+		},
+		{
+			"binding": "BELLA_IMAGES",
+			"bucket_name": "bella"
 		}
 	],
 	"images": {
