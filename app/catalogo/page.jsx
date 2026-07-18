@@ -1,18 +1,16 @@
 import React from 'react';
-import { prisma } from '../../src/lib/db';
+import { getDb } from '../../src/lib/db';
 import CatalogClient from './CatalogClient';
 
 export const dynamic = 'force-dynamic';
 
 export default async function CatalogPage() {
-  // Obtener productos de PostgreSQL con sus tonos correspondientes
-  const products = await prisma.product.findMany({
-    include: {
+  const db = getDb();
+  const products = await db.query.products.findMany({
+    with: {
       tones: true,
     },
-    orderBy: {
-      createdAt: 'desc',
-    },
+    orderBy: (products, { desc }) => [desc(products.createdAt)],
   });
 
   return <CatalogClient initialProducts={products} />;

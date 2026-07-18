@@ -1,63 +1,106 @@
 'use server';
 
-import { prisma } from '../../src/lib/db';
+import { getDb } from '../../src/lib/db';
+import { products, tones } from '../../src/db/schema';
+import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
-// Obtener todos los productos
 export async function getProducts() {
-  return await prisma.product.findMany({
-    include: {
+  const db = getDb();
+  return await db.query.products.findMany({
+    with: {
       tones: true,
     },
-    orderBy: {
-      createdAt: 'desc',
-    },
+    orderBy: (products, { desc }) => [desc(products.createdAt)],
   });
 }
 
-// Obtener un producto por ID
 export async function getProductById(id) {
-  return await prisma.product.findUnique({
-    where: { id },
-    include: {
+  const db = getDb();
+  return await db.query.products.findFirst({
+    where: eq(products.id, id),
+    with: {
       tones: true,
     },
   });
 }
 
-// Alternar stock del producto
 export async function toggleProductStock(id, inStock) {
-  await prisma.product.update({
-    where: { id },
-    data: { inStock },
-  });
+  const db = getDb();
+  await db.update(products)
+    .set({ inStock })
+    .where(eq(products.id, id))
+    .run();
   revalidatePath('/catalogo');
   revalidatePath('/admin');
 }
 
-// Alternar stock de un tono
 export async function toggleToneStock(id, inStock) {
-  await prisma.tone.update({
-    where: { id },
-    data: { inStock },
-  });
+  const db = getDb();
+  await db.update(tones)
+    .set({ inStock })
+    .where(eq(tones.id, id))
+    .run();
   revalidatePath('/catalogo');
   revalidatePath('/admin');
 }
 
-// Eliminar un producto
 export async function deleteProduct(id) {
-  await prisma.product.delete({
-    where: { id },
-  });
+  const db = getDb();
+  await db.delete(products)
+    .where(eq(products.id, id))
+    .run();
   revalidatePath('/catalogo');
   revalidatePath('/admin');
 }
 
-// Crear un producto
-export async function createProduct(data, tones) {
-  const created = await prisma.product.create({
-    data: {
+export async function createProduct(data, tonesData) {
+  const db = getDb();
+  const now = new Date().toISOString();
+  const productId = crypto.randomUUID();
+
+  await db.insert(products).values({
+    id: productId,
+    name: data.name,
+    price: parseFloat(data.price),
+    description: data.description,
+    category: data.category,
+    mainImage: data.mainImage,
+    isNew: data.isNew || false,
+    isFeatured: data.isFeatured || false,
+    inStock: data.inStock !== undefined ? data.inStock : true,
+    createdAt: now,
+    updatedAt: now,
+  }).run();
+
+  if (tonesData && tonesData.length > 0) {
+    await db.insert(tones).values(
+      tonesData.map(t => ({
+        id: crypto.randomUUID(),
+        name: t.name,
+        hex: t.hex,
+        image: t.image,
+        inStock: t.inStock !== undefined ? t.inStock : true,
+        productId,
+      }))
+    ).run();
+  }
+
+  revalidatePath('/catalogo');
+  revalidatePath('/admin');
+  return { id: productId };
+}
+
+export async function updateProduct(id, data, tonesData) {
+  const db = getDb();
+  const now = new Date().toISOString();
+
+  await db.delete(tones)
+    .where(eq(tones.productId, id))
+    .run();
+
+  await db.update(products)
+    .set({
       name: data.name,
       price: parseFloat(data.price),
       description: data.description,
@@ -66,50 +109,25 @@ export async function createProduct(data, tones) {
       isNew: data.isNew || false,
       isFeatured: data.isFeatured || false,
       inStock: data.inStock !== undefined ? data.inStock : true,
-      tones: {
-        create: tones.map(t => ({
-          name: t.name,
-          hex: t.hex,
-          image: t.image,
-          inStock: t.inStock !== undefined ? t.inStock : true,
-        })),
-      },
-    },
-  });
+      updatedAt: now,
+    })
+    .where(eq(products.id, id))
+    .run();
+
+  if (tonesData && tonesData.length > 0) {
+    await db.insert(tones).values(
+      tonesData.map(t => ({
+        id: crypto.randomUUID(),
+        name: t.name,
+        hex: t.hex,
+        image: t.image,
+        inStock: t.inStock !== undefined ? t.inStock : true,
+        productId: id,
+      }))
+    ).run();
+  }
+
   revalidatePath('/catalogo');
   revalidatePath('/admin');
-  return created;
-}
-
-// Actualizar un producto
-export async function updateProduct(id, data, tones) {
-  // Primero eliminamos los tonos existentes para volver a crearlos
-  await prisma.tone.deleteMany({
-    where: { productId: id },
-  });
-
-  const updated = await prisma.product.update({
-    where: { id },
-    data: {
-      name: data.name,
-      price: parseFloat(data.price),
-      description: data.description,
-      category: data.category,
-      mainImage: data.mainImage,
-      isNew: data.isNew || false,
-      isFeatured: data.isFeatured || false,
-      inStock: data.inStock !== undefined ? data.inStock : true,
-      tones: {
-        create: tones.map(t => ({
-          name: t.name,
-          hex: t.hex,
-          image: t.image,
-          inStock: t.inStock !== undefined ? t.inStock : true,
-        })),
-      },
-    },
-  });
-  revalidatePath('/catalogo');
-  revalidatePath('/admin');
-  return updated;
+  return { id };
 }
