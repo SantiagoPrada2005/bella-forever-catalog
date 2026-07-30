@@ -1,9 +1,98 @@
 'use server';
 
 import { getDb } from '../../src/lib/db';
-import { products, tones } from '../../src/db/schema';
+import { products, tones, categories } from '../../src/db/schema';
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
+
+function slugify(text) {
+  return text
+    .toString()
+    .toLowerCase()
+    .trim()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/[^\w-]+/g, '')
+    .replace(/--+/g, '-');
+}
+
+export async function getCategories() {
+  const db = getDb();
+  let result = await db.select().from(categories).all();
+  if (result.length === 0) {
+    const now = new Date().toISOString();
+    const defaultCats = [
+      { id: 'sin-categoria', name: 'Sin categoría', slug: 'sin-categoria', createdAt: now, updatedAt: now },
+      { id: crypto.randomUUID(), name: 'Rubor', slug: 'rubor', createdAt: now, updatedAt: now },
+      { id: crypto.randomUUID(), name: 'Labiales', slug: 'labiales', createdAt: now, updatedAt: now },
+      { id: crypto.randomUUID(), name: 'Cejas', slug: 'cejas', createdAt: now, updatedAt: now },
+      { id: crypto.randomUUID(), name: 'Pestañas', slug: 'pestanas', createdAt: now, updatedAt: now },
+      { id: crypto.randomUUID(), name: 'Correctores', slug: 'correctores', createdAt: now, updatedAt: now },
+    ];
+    await db.insert(categories).values(defaultCats).run();
+    result = await db.select().from(categories).all();
+  }
+  return result;
+}
+
+export async function createCategory(name) {
+  const db = getDb();
+  const now = new Date().toISOString();
+  const slug = slugify(name);
+  const id = crypto.randomUUID();
+
+  await db.insert(categories).values({
+    id,
+    name,
+    slug,
+    createdAt: now,
+    updatedAt: now,
+  }).run();
+
+  revalidatePath('/admin');
+  revalidatePath('/catalogo');
+  return { id, slug };
+}
+
+export async function updateCategory(id, name) {
+  const db = getDb();
+  const now = new Date().toISOString();
+  const slug = id === 'sin-categoria' ? 'sin-categoria' : slugify(name);
+
+  await db.update(categories)
+    .set({ name, slug, updatedAt: now })
+    .where(eq(categories.id, id))
+    .run();
+
+  revalidatePath('/admin');
+  revalidatePath('/catalogo');
+}
+
+export async function deleteCategory(id) {
+  if (id === 'sin-categoria') {
+    throw new Error('No se puede eliminar la categoría por defecto');
+  }
+  const db = getDb();
+  const targetCat = await db.query.categories.findFirst({
+    where: eq(categories.id, id),
+  });
+
+  if (!targetCat) return;
+
+  await db.update(products)
+    .set({ category: 'sin-categoria' })
+    .where(eq(products.category, targetCat.slug))
+    .run();
+
+  await db.delete(categories)
+    .where(eq(categories.id, id))
+    .run();
+
+  revalidatePath('/admin');
+  revalidatePath('/catalogo');
+}
+
 
 export async function getProducts() {
   const db = getDb();
