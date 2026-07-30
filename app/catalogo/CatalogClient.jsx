@@ -9,7 +9,7 @@ import ProductModal from '../../src/components/ProductModal';
 import CartDrawer from '../../src/components/CartDrawer';
 import { CONFIG } from '../../src/config';
 
-export default function CatalogClient({ initialProducts }) {
+export default function CatalogClient({ initialProducts, initialCategories }) {
   const [cart, setCart] = useState([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState('todos');
@@ -133,7 +133,7 @@ export default function CatalogClient({ initialProducts }) {
           }}>
             Nuestro Catálogo
           </h2>
-          <CategoryFilters activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
+          <CategoryFilters categories={initialCategories} activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
           <ProductGrid
             products={filteredProducts}
             onProductClick={handleProductCardClick}

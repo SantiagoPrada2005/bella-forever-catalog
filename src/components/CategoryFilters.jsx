@@ -1,7 +1,11 @@
 import React from 'react';
 import { CONFIG } from '../config';
 
-export default function CategoryFilters({ activeCategory, onCategoryChange }) {
+export default function CategoryFilters({ categories, activeCategory, onCategoryChange }) {
+  const catList = categories && categories.length > 0
+    ? [{ id: 'todos', name: 'Todos' }, ...categories.map(c => ({ id: c.slug, name: c.name }))]
+    : CONFIG.categories;
+
   return (
     <div style={{
       display: 'flex',
@@ -20,7 +24,7 @@ export default function CategoryFilters({ activeCategory, onCategoryChange }) {
           }
         }
       `}</style>
-      {CONFIG.categories.map((cat) => {
+      {catList.map((cat) => {
         const isActive = cat.id === activeCategory;
         return (
           <button
