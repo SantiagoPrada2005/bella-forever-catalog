@@ -24,6 +24,14 @@ export const tones = sqliteTable('Tone', {
   productId: text('productId').notNull().references(() => products.id, { onDelete: 'cascade' }),
 });
 
+export const categories = sqliteTable('Category', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  slug: text('slug').notNull().unique(),
+  createdAt: text('createdAt').notNull(),
+  updatedAt: text('updatedAt').notNull(),
+});
+
 export const productsRelations = relations(products, ({ many }) => ({
   tones: many(tones),
 }));
@@ -34,3 +42,4 @@ export const tonesRelations = relations(tones, ({ one }) => ({
     references: [products.id],
   }),
 }));
+
