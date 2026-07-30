@@ -6,8 +6,7 @@ import React, { useState, useEffect, use } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../../../../src/components/Header';
 import ImageUpload from '../../../../src/components/ui/ImageUpload';
-import { getProductById, updateProduct } from '../../actions';
-import { CONFIG } from '../../../../src/config';
+import { getProductById, updateProduct, getCategories } from '../../actions';
 
 export default function EditProduct({ params }) {
   const router = useRouter();
@@ -16,6 +15,7 @@ export default function EditProduct({ params }) {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [categoriesList, setCategoriesList] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -30,9 +30,13 @@ export default function EditProduct({ params }) {
   const [tones, setTones] = useState([]);
 
   useEffect(() => {
-    const loadProduct = async () => {
+    const loadProductAndCats = async () => {
       try {
-        const prod = await getProductById(id);
+        const [prod, cats] = await Promise.all([
+          getProductById(id),
+          getCategories()
+        ]);
+        setCategoriesList(cats);
         if (!prod) {
           alert("Producto no encontrado");
           router.push('/admin');
@@ -57,7 +61,7 @@ export default function EditProduct({ params }) {
       }
     };
 
-    loadProduct();
+    loadProductAndCats();
   }, [id, router]);
 
   const handleChange = (e) => {
@@ -175,8 +179,8 @@ export default function EditProduct({ params }) {
                 onChange={handleChange}
                 style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(215,176,106,0.2)', backgroundColor: 'rgba(0,0,0,0.3)', color: '#fff' }}
               >
-                {CONFIG.categories.filter(c => c.id !== 'todos').map(c => (
-                  <option key={c.id} value={c.id} style={{ backgroundColor: 'var(--color-panel-dark)', color: '#fff' }}>
+                {categoriesList.map(c => (
+                  <option key={c.id} value={c.slug} style={{ backgroundColor: 'var(--color-panel-dark)', color: '#fff' }}>
                     {c.name}
                   </option>
                 ))}

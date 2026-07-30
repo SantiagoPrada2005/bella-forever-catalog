@@ -1,25 +1,40 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '../../../src/components/Header';
 import ImageUpload from '../../../src/components/ui/ImageUpload';
-import { createProduct } from '../actions';
-import { CONFIG } from '../../../src/config';
+import { createProduct, getCategories } from '../actions';
 
 export default function NewProduct() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [categoriesList, setCategoriesList] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     price: '',
     description: '',
-    category: CONFIG.categories[1]?.id || 'rubor', // Default to first actual category
+    category: '',
     mainImage: '',
     isNew: false,
     isFeatured: false,
     inStock: true
   });
+
+  useEffect(() => {
+    async function loadCats() {
+      try {
+        const cats = await getCategories();
+        setCategoriesList(cats);
+        if (cats.length > 0) {
+          setFormData(prev => ({ ...prev, category: prev.category || cats[0].slug }));
+        }
+      } catch (err) {
+        console.error("Error al cargar categorías", err);
+      }
+    }
+    loadCats();
+  }, []);
 
   const [tones, setTones] = useState([]);
 
@@ -130,8 +145,8 @@ export default function NewProduct() {
                 onChange={handleChange}
                 style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(215,176,106,0.2)', backgroundColor: 'rgba(0,0,0,0.3)', color: '#fff' }}
               >
-                {CONFIG.categories.filter(c => c.id !== 'todos').map(c => (
-                  <option key={c.id} value={c.id} style={{ backgroundColor: 'var(--color-panel-dark)', color: '#fff' }}>
+                {categoriesList.map(c => (
+                  <option key={c.id} value={c.slug} style={{ backgroundColor: 'var(--color-panel-dark)', color: '#fff' }}>
                     {c.name}
                   </option>
                 ))}
