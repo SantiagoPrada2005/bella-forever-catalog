@@ -54,7 +54,7 @@ export default function ProductGallery({ images = [], selectedToneImage, product
             overflowX: 'auto',
             paddingBottom: '4px',
           }}
-          className="no-scrollbar"
+          className="product-gallery-thumbs no-scrollbar"
         >
           {images.map((img, index) => (
             <button

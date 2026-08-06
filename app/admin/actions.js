@@ -204,11 +204,16 @@ export async function createProduct(data, tonesData, imagesData = []) {
 }
 
 export async function updateProduct(id, data, tonesData, imagesData = []) {
+  // Guard: must have at least one image
+  if (!imagesData || imagesData.length === 0) {
+    throw new Error('Debe haber al menos una imagen');
+  }
+
   const db = getDb();
   const now = new Date().toISOString();
 
-  // Derive mainImage from first gallery image, fall back to explicit data.mainImage
-  const derivedMainImage = imagesData.length > 0 ? imagesData[0].url : data.mainImage;
+  // Derive mainImage from first gallery image
+  const derivedMainImage = imagesData[0].url;
 
   await db.delete(tones)
     .where(eq(tones.productId, id))
