@@ -11,6 +11,9 @@ export default async function CatalogPage() {
     db.query.products.findMany({
       with: {
         tones: true,
+        productImages: {
+          orderBy: (productImages, { asc }) => [asc(productImages.sortOrder)],
+        },
       },
       orderBy: (products, { desc }) => [desc(products.createdAt)],
     }),
