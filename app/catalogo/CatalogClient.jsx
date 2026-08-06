@@ -158,7 +158,7 @@ export default function CatalogClient({ initialProducts, initialCategories }) {
           }}>
             Nuestro Catálogo
           </h2>
-          <CategoryFilters categories={initialCategories} activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
+          <CategoryFilters categories={initialCategories} products={initialProducts} activeCategory={activeCategory} onCategoryChange={setActiveCategory} />
           <ProductGrid
             products={filteredProducts}
             onProductClick={handleProductCardClick}

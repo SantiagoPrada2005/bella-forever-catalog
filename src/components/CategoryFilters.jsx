@@ -1,10 +1,16 @@
 import React from 'react';
 import { CONFIG } from '../config';
 
-export default function CategoryFilters({ categories, activeCategory, onCategoryChange }) {
-  const catList = categories && categories.length > 0
-    ? [{ id: 'todos', name: 'Todos' }, ...categories.map(c => ({ id: c.slug, name: c.name }))]
-    : CONFIG.categories;
+export default function CategoryFilters({ categories, products = [], activeCategory, onCategoryChange }) {
+  const baseCategories = categories && categories.length > 0
+    ? categories.map(c => ({ id: c.slug, name: c.name }))
+    : CONFIG.categories.filter(c => c.id !== 'todos');
+
+  const validCategories = products && products.length > 0
+    ? baseCategories.filter(cat => products.some(p => p.category === cat.id))
+    : baseCategories;
+
+  const catList = [{ id: 'todos', name: 'Todos' }, ...validCategories];
 
   return (
     <div style={{
