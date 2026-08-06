@@ -1,5 +1,6 @@
 import React from 'react';
 import { CONFIG } from '../config';
+import { getProductImage } from '../utils/image-helpers';
 
 export default function FeaturedCarousel({ products, onProductClick, onAddToCart }) {
   // Filtrar productos destacados o nuevos
@@ -61,7 +62,7 @@ export default function FeaturedCarousel({ products, onProductClick, onAddToCart
       >
         {featured.map((product) => {
           const defaultTone = product.tones && product.tones.length > 0 ? product.tones[0] : null;
-          const cardImage = defaultTone?.image || product.mainImage;
+          const cardImage = getProductImage(product, defaultTone);
 
           return (
             <div 

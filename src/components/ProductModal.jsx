@@ -2,6 +2,7 @@ import React, { useRef, useState, useEffect } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { CONFIG } from '../config';
+import ProductGallery from './ProductGallery';
 
 export default function ProductModal({ product, initialTone, onClose, onAddToCart }) {
   const modalOverlay = useRef();
@@ -110,12 +111,12 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
               }
             `}</style>
 
-            {/* Imagen */}
-            <div className="modal-img-container" style={{ position: 'relative', width: '100%', height: '280px', backgroundColor: '#1a0f12', flexShrink: 0 }}>
-              <img 
-                src={selectedTone?.image || product.mainImage} 
-                alt={product.name} 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            {/* Imagen — ProductGallery replaces single <img> */}
+            <div className="modal-img-container" style={{ position: 'relative', width: '100%', backgroundColor: '#1a0f12', flexShrink: 0 }}>
+              <ProductGallery
+                images={product.productImages || []}
+                selectedToneImage={selectedTone?.image}
+                productName={product.name}
               />
               <button 
                 onClick={handleClose}

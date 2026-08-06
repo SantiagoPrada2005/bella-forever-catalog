@@ -8,6 +8,7 @@ import ProductGrid from '../../src/components/ProductGrid';
 import ProductModal from '../../src/components/ProductModal';
 import CartDrawer from '../../src/components/CartDrawer';
 import { CONFIG } from '../../src/config';
+import { getProductImage } from '../../src/utils/image-helpers';
 
 export default function CatalogClient({ initialProducts, initialCategories }) {
   const [cart, setCart] = useState([]);
@@ -52,7 +53,7 @@ export default function CatalogClient({ initialProducts, initialCategories }) {
         toneName: selectedTone?.name || '',
         price: product.price,
         quantity: 1,
-        image: selectedTone?.image || product.mainImage
+        image: getProductImage(product, selectedTone)
       }];
     });
   };
@@ -83,6 +84,30 @@ export default function CatalogClient({ initialProducts, initialCategories }) {
       const toneStr = item.toneName ? ` (${item.toneName})` : '';
       message += `• ${item.quantity} x ${item.productName}${toneStr} — ${itemTotal}\n`;
     });
+
+    // Append product image URLs (carousel-style: up to 4 images per item)
+    const allImageUrls = [];
+    cart.forEach((item) => {
+      const product = initialProducts.find(p => p.id === item.productId);
+      if (product) {
+        const galleryUrls = (product.productImages || []).map(img => img.url);
+        const imageUrl = getProductImage(product, null);
+        if (galleryUrls.length > 0) {
+          allImageUrls.push(...galleryUrls.slice(0, 4));
+        } else if (imageUrl) {
+          allImageUrls.push(imageUrl);
+        }
+      }
+    });
+
+    if (allImageUrls.length > 0) {
+      message += `\n📸 *Imágenes de referencia:*\n`;
+      allImageUrls.forEach((url, i) => {
+        // Ensure URL is absolute for WhatsApp preview
+        const absoluteUrl = url.startsWith('http') ? url : `https://bellaforeverbeauty.com${url}`;
+        message += `${i + 1}. ${absoluteUrl}\n`;
+      });
+    }
 
     const totalValue = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     message += `\n💵 *Total a pagar:* ${numberFormatter.format(totalValue)} ${CONFIG.currency.code}\n`;

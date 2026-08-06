@@ -22,7 +22,8 @@ function getR2Bucket() {
 
 export async function GET(request, { params }) {
   try {
-    const path = params.path.join('/');
+    const resolvedParams = await params;
+    const path = resolvedParams.path.join('/');
     const bucket = getR2Bucket();
     const object = await bucket.get(path);
 

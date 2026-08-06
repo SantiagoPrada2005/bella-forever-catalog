@@ -37,6 +37,7 @@ export default function NewProduct() {
   }, []);
 
   const [tones, setTones] = useState([]);
+  const [images, setImages] = useState([]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -60,14 +61,33 @@ export default function NewProduct() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.price || !formData.mainImage) {
-      alert("Por favor completa los campos requeridos (Nombre, Precio e Imagen Principal)");
+    if (!formData.name || !formData.price) {
+      alert("Por favor completa los campos requeridos (Nombre y Precio)");
       return;
     }
 
+    // Image validation: must have either mainImage or gallery images
+    if (!formData.mainImage && images.length === 0) {
+      alert("Debes proporcionar al menos una imagen (Imagen Principal o subir imágenes a la galería)");
+      return;
+    }
+
+    // Gallery validation: max 10 images
+    if (images.length > 10) {
+      alert("Máximo 10 imágenes por producto");
+      return;
+    }
+
+    // Build imagesData from gallery state
+    const imagesData = images.map((url, index) => ({
+      url,
+      sortOrder: index,
+      altText: formData.name,
+    }));
+
     setLoading(true);
     try {
-      await createProduct(formData, tones);
+      await createProduct(formData, tones, imagesData);
       router.push('/admin');
       router.refresh();
     } catch (err) {
@@ -172,6 +192,27 @@ export default function NewProduct() {
               onChange={handleChange}
               rows="4"
               style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(215,176,106,0.2)', backgroundColor: 'rgba(0,0,0,0.3)', color: '#fff', resize: 'vertical' }}
+            />
+          </div>
+
+          {/* Galería de imágenes */}
+          <div style={{ marginBottom: '30px', borderBottom: '1px solid rgba(215,176,106,0.1)', paddingBottom: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.4rem', fontWeight: '300', color: 'var(--color-gold)' }}>
+                Galería de imágenes
+              </h3>
+              <span style={{ color: 'var(--color-text-muted)', fontSize: '0.78rem' }}>
+                {images.length}/10
+              </span>
+            </div>
+            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', marginBottom: '10px' }}>
+              Sube múltiples imágenes del producto. La primera imagen será la principal.
+            </p>
+            <ImageUpload
+              label="Imágenes de galería"
+              value={images}
+              onChange={(urls) => setImages(Array.isArray(urls) ? urls : [urls])}
+              multiple
             />
           </div>
 

@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { CONFIG } from '../config';
 import gsap from 'gsap';
+import { getProductImage } from '../utils/image-helpers';
 
 export default function ProductCard({ product, onProductClick, onAddToCart }) {
   const [selectedTone, setSelectedTone] = useState(product.tones && product.tones.length > 0 ? product.tones[0] : null);
@@ -12,7 +13,7 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
     maximumFractionDigits: CONFIG.currency.precision
   }).format(product.price);
 
-  const currentImage = selectedTone?.image || product.mainImage;
+  const currentImage = getProductImage(product, selectedTone);
 
   const handleAdd = (e) => {
     e.stopPropagation();
@@ -130,6 +131,26 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
             letterSpacing: '0.5px'
           }}>
             Nuevo
+          </span>
+        )}
+        {product.productImages && product.productImages.length > 1 && (
+          <span style={{
+            position: 'absolute',
+            bottom: '10px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            gap: '4px',
+          }}>
+            {product.productImages.slice(0, 5).map((_, i) => (
+              <span key={i} style={{
+                width: '6px',
+                height: '6px',
+                borderRadius: '50%',
+                backgroundColor: i === 0 ? 'var(--color-gold)' : 'rgba(255,255,255,0.35)',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.5)',
+              }} />
+            ))}
           </span>
         )}
       </div>

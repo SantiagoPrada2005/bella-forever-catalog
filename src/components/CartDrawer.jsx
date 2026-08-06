@@ -4,6 +4,10 @@ import gsap from 'gsap';
 import { CONFIG } from '../config';
 
 export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout }) {
+  // NOTE: item.image is set upstream in CatalogClient.handleAddToCart using
+  // getProductImage(product, selectedTone) which already applies the full
+  // fallback chain: selectedTone?.image → productImages[0]?.url → mainImage.
+  // No change needed here — the CartDrawer simply renders whatever image it receives.
   const drawerOverlay = useRef();
   const drawerContent = useRef();
 

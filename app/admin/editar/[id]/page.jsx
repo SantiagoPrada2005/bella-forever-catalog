@@ -28,6 +28,7 @@ export default function EditProduct({ params }) {
   });
 
   const [tones, setTones] = useState([]);
+  const [images, setImages] = useState([]);
 
   useEffect(() => {
     const loadProductAndCats = async () => {
@@ -53,6 +54,11 @@ export default function EditProduct({ params }) {
           inStock: prod.inStock
         });
         setTones(prod.tones || []);
+        // Pre-populate gallery from existing productImages (sorted by sortOrder)
+        const existingImages = (prod.productImages || [])
+          .sort((a, b) => a.sortOrder - b.sortOrder)
+          .map(img => img.url);
+        setImages(existingImages);
       } catch (err) {
         console.error("Error al cargar producto", err);
         alert("Ocurrió un error al cargar el producto");
@@ -86,14 +92,33 @@ export default function EditProduct({ params }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.name || !formData.price || !formData.mainImage) {
-      alert("Por favor completa los campos requeridos (Nombre, Precio e Imagen Principal)");
+    if (!formData.name || !formData.price) {
+      alert("Por favor completa los campos requeridos (Nombre y Precio)");
       return;
     }
 
+    // Image validation: must have either mainImage or gallery images
+    if (!formData.mainImage && images.length === 0) {
+      alert("Debes tener al menos una imagen (Imagen Principal o galería)");
+      return;
+    }
+
+    // Gallery validation: max 10 images
+    if (images.length > 10) {
+      alert("Máximo 10 imágenes por producto");
+      return;
+    }
+
+    // Build imagesData from gallery state
+    const imagesData = images.map((url, index) => ({
+      url,
+      sortOrder: index,
+      altText: formData.name,
+    }));
+
     setSaving(true);
     try {
-      await updateProduct(id, formData, tones);
+      await updateProduct(id, formData, tones, imagesData);
       router.push('/admin');
       router.refresh();
     } catch (err) {
@@ -206,6 +231,27 @@ export default function EditProduct({ params }) {
               onChange={handleChange}
               rows="4"
               style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(215,176,106,0.2)', backgroundColor: 'rgba(0,0,0,0.3)', color: '#fff', resize: 'vertical' }}
+            />
+          </div>
+
+          {/* Galería de imágenes */}
+          <div style={{ marginBottom: '30px', borderBottom: '1px solid rgba(215,176,106,0.1)', paddingBottom: '20px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.4rem', fontWeight: '300', color: 'var(--color-gold)' }}>
+                Galería de imágenes
+              </h3>
+              <span style={{ color: 'var(--color-text-muted)', fontSize: '0.78rem' }}>
+                {images.length}/10
+              </span>
+            </div>
+            <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', marginBottom: '10px' }}>
+              La primera imagen será la principal. Puedes agregar, reordenar o eliminar imágenes.
+            </p>
+            <ImageUpload
+              label="Imágenes de galería"
+              value={images}
+              onChange={(urls) => setImages(Array.isArray(urls) ? urls : [urls])}
+              multiple
             />
           </div>
 

@@ -24,6 +24,16 @@ export const tones = sqliteTable('Tone', {
   productId: text('productId').notNull().references(() => products.id, { onDelete: 'cascade' }),
 });
 
+export const productImages = sqliteTable('ProductImage', {
+  id: text('id').primaryKey(),
+  productId: text('productId').notNull().references(() => products.id, { onDelete: 'cascade' }),
+  url: text('url').notNull(),
+  sortOrder: integer('sortOrder').notNull().default(0),
+  altText: text('altText'),
+  createdAt: text('createdAt').notNull(),
+  updatedAt: text('updatedAt').notNull(),
+});
+
 export const categories = sqliteTable('Category', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
@@ -34,11 +44,19 @@ export const categories = sqliteTable('Category', {
 
 export const productsRelations = relations(products, ({ many }) => ({
   tones: many(tones),
+  productImages: many(productImages),
 }));
 
 export const tonesRelations = relations(tones, ({ one }) => ({
   product: one(products, {
     fields: [tones.productId],
+    references: [products.id],
+  }),
+}));
+
+export const productImagesRelations = relations(productImages, ({ one }) => ({
+  product: one(products, {
+    fields: [productImages.productId],
     references: [products.id],
   }),
 }));

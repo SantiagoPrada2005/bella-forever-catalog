@@ -1,7 +1,7 @@
 'use server';
 
 import { getDb } from '../../src/lib/db';
-import { products, tones, categories } from '../../src/db/schema';
+import { products, tones, categories, productImages } from '../../src/db/schema';
 import { eq } from 'drizzle-orm';
 import { revalidatePath } from 'next/cache';
 
@@ -99,6 +99,9 @@ export async function getProducts() {
   return await db.query.products.findMany({
     with: {
       tones: true,
+      productImages: {
+        orderBy: (productImages, { asc }) => [asc(productImages.sortOrder)],
+      },
     },
     orderBy: (products, { desc }) => [desc(products.createdAt)],
   });
@@ -110,6 +113,9 @@ export async function getProductById(id) {
     where: eq(products.id, id),
     with: {
       tones: true,
+      productImages: {
+        orderBy: (productImages, { asc }) => [asc(productImages.sortOrder)],
+      },
     },
   });
 }
@@ -143,10 +149,13 @@ export async function deleteProduct(id) {
   revalidatePath('/admin');
 }
 
-export async function createProduct(data, tonesData) {
+export async function createProduct(data, tonesData, imagesData = []) {
   const db = getDb();
   const now = new Date().toISOString();
   const productId = crypto.randomUUID();
+
+  // Derive mainImage from first gallery image, fall back to explicit data.mainImage
+  const derivedMainImage = imagesData.length > 0 ? imagesData[0].url : data.mainImage;
 
   await db.insert(products).values({
     id: productId,
@@ -154,7 +163,7 @@ export async function createProduct(data, tonesData) {
     price: parseFloat(data.price),
     description: data.description,
     category: data.category,
-    mainImage: data.mainImage,
+    mainImage: derivedMainImage,
     isNew: data.isNew || false,
     isFeatured: data.isFeatured || false,
     inStock: data.inStock !== undefined ? data.inStock : true,
@@ -175,17 +184,39 @@ export async function createProduct(data, tonesData) {
     ).run();
   }
 
+  if (imagesData.length > 0) {
+    await db.insert(productImages).values(
+      imagesData.map((img, i) => ({
+        id: crypto.randomUUID(),
+        productId,
+        url: img.url,
+        sortOrder: img.sortOrder !== undefined ? img.sortOrder : i,
+        altText: img.altText || null,
+        createdAt: now,
+        updatedAt: now,
+      }))
+    ).run();
+  }
+
   revalidatePath('/catalogo');
   revalidatePath('/admin');
   return { id: productId };
 }
 
-export async function updateProduct(id, data, tonesData) {
+export async function updateProduct(id, data, tonesData, imagesData = []) {
   const db = getDb();
   const now = new Date().toISOString();
 
+  // Derive mainImage from first gallery image, fall back to explicit data.mainImage
+  const derivedMainImage = imagesData.length > 0 ? imagesData[0].url : data.mainImage;
+
   await db.delete(tones)
     .where(eq(tones.productId, id))
+    .run();
+
+  // Delete existing productImages (replace-all strategy)
+  await db.delete(productImages)
+    .where(eq(productImages.productId, id))
     .run();
 
   await db.update(products)
@@ -194,7 +225,7 @@ export async function updateProduct(id, data, tonesData) {
       price: parseFloat(data.price),
       description: data.description,
       category: data.category,
-      mainImage: data.mainImage,
+      mainImage: derivedMainImage,
       isNew: data.isNew || false,
       isFeatured: data.isFeatured || false,
       inStock: data.inStock !== undefined ? data.inStock : true,
@@ -212,6 +243,20 @@ export async function updateProduct(id, data, tonesData) {
         image: t.image,
         inStock: t.inStock !== undefined ? t.inStock : true,
         productId: id,
+      }))
+    ).run();
+  }
+
+  if (imagesData.length > 0) {
+    await db.insert(productImages).values(
+      imagesData.map((img, i) => ({
+        id: crypto.randomUUID(),
+        productId: id,
+        url: img.url,
+        sortOrder: img.sortOrder !== undefined ? img.sortOrder : i,
+        altText: img.altText || null,
+        createdAt: now,
+        updatedAt: now,
       }))
     ).run();
   }
