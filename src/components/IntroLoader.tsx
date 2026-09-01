@@ -2,13 +2,17 @@ import React, { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 
-export default function IntroLoader({ onComplete }) {
-  const containerRef = useRef();
-  const logoRef = useRef();
+export interface IntroLoaderProps {
+  onComplete?: () => void;
+}
+
+export default function IntroLoader({ onComplete }: IntroLoaderProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const logoRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
     const tl = gsap.timeline({
-      onComplete: onComplete
+      onComplete: onComplete,
     });
 
     // Revelado suave del logo
@@ -24,7 +28,7 @@ export default function IntroLoader({ onComplete }) {
     tl.to(containerRef.current, {
       yPercent: -100,
       duration: 1,
-      ease: 'power4.inOut'
+      ease: 'power4.inOut',
     });
   }, { scope: containerRef });
 
@@ -42,7 +46,7 @@ export default function IntroLoader({ onComplete }) {
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 9999,
-        overflow: 'hidden'
+        overflow: 'hidden',
       }}
     >
       <div 
@@ -52,7 +56,7 @@ export default function IntroLoader({ onComplete }) {
           flexDirection: 'column',
           alignItems: 'center',
           gap: '16px',
-          textAlign: 'center'
+          textAlign: 'center',
         }}
       >
         <img 
@@ -66,7 +70,7 @@ export default function IntroLoader({ onComplete }) {
           fontWeight: '300',
           color: 'var(--color-gold)',
           letterSpacing: '4px',
-          textTransform: 'uppercase'
+          textTransform: 'uppercase',
         }}>
           Bella Forever
         </h1>

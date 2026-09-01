@@ -4,44 +4,52 @@ import FeaturedCarousel from './FeaturedCarousel';
 import CategoryFilters from './CategoryFilters';
 import ProductGrid from './ProductGrid';
 import ProductModal from './ProductModal';
-import CartDrawer from './CartDrawer';
+import CartDrawer, { type CartItem } from './CartDrawer';
 import { CONFIG } from '../config';
 import { getProductImage } from '../utils/image-helpers';
+import type { ProductWithRelations, Category, Tone } from '../db/schema';
 
-export default function CatalogClient({ initialProducts = [], initialCategories = [] }) {
-  const [cart, setCart] = useState([]);
+export interface CatalogClientProps {
+  initialProducts?: ProductWithRelations[];
+  initialCategories?: Category[];
+}
+
+export default function CatalogClient({
+  initialProducts = [],
+  initialCategories = [],
+}: CatalogClientProps) {
+  const [cart, setCart] = useState<CartItem[]>([]);
+  const [isCartLoaded, setIsCartLoaded] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [activeCategory, setActiveCategory] = useState('todos');
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [selectedProductTone, setSelectedProductTone] = useState(null);
-  const [mounted, setMounted] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState<ProductWithRelations | null>(null);
+  const [selectedProductTone, setSelectedProductTone] = useState<Tone | null>(null);
 
-  // Cargar carrito desde localStorage en cliente tras hidratación
+  // Cargar carrito desde localStorage en cliente
   useEffect(() => {
     try {
       const saved = localStorage.getItem('bella_cart');
       if (saved) {
-        setCart(JSON.parse(saved));
+        setCart(JSON.parse(saved) as CartItem[]);
       }
-    } catch (e) {
-      console.error("Error al cargar el carrito", e);
+    } catch (e: unknown) {
+      console.error("Error al cargar el carrito inicial", e);
     }
-    setMounted(true);
+    setIsCartLoaded(true);
   }, []);
 
-  // Sincronizar carrito con localStorage sólo cuando el cliente ya montó
+  // Sincronizar carrito con localStorage tras la carga inicial
   useEffect(() => {
-    if (mounted) {
-      try {
-        localStorage.setItem('bella_cart', JSON.stringify(cart));
-      } catch (e) {
-        console.error("Error al guardar el carrito", e);
-      }
+    if (!isCartLoaded) return;
+    try {
+      localStorage.setItem('bella_cart', JSON.stringify(cart));
+    } catch (e: unknown) {
+      console.error("Error al guardar el carrito", e);
     }
-  }, [cart, mounted]);
+  }, [cart, isCartLoaded]);
 
 
-  const handleAddToCart = (product, selectedTone) => {
+  const handleAddToCart = (product: ProductWithRelations, selectedTone: Tone | null) => {
     setCart((prev) => {
       const itemKey = `${product.id}_${selectedTone?.id || 'default'}`;
       const existing = prev.find(item => item.key === itemKey);
@@ -56,20 +64,25 @@ export default function CatalogClient({ initialProducts = [], initialCategories 
         toneName: selectedTone?.name || '',
         price: product.price,
         quantity: 1,
-        image: getProductImage(product, selectedTone)
+        image: getProductImage(product, selectedTone),
       }];
     });
   };
 
-  const handleUpdateQuantity = (key, delta) => {
+  const handleUpdateQuantity = (key: string, delta: number) => {
     setCart((prev) => {
-      return prev.map(item => {
+      const updated: CartItem[] = [];
+      for (const item of prev) {
         if (item.key === key) {
           const nextQty = item.quantity + delta;
-          return nextQty > 0 ? { ...item, quantity: nextQty } : null;
+          if (nextQty > 0) {
+            updated.push({ ...item, quantity: nextQty });
+          }
+        } else {
+          updated.push(item);
         }
-        return item;
-      }).filter(Boolean);
+      }
+      return updated;
     });
   };
 
@@ -77,7 +90,7 @@ export default function CatalogClient({ initialProducts = [], initialCategories 
     const numberFormatter = new Intl.NumberFormat(CONFIG.currency.locale, {
       style: 'currency',
       currency: CONFIG.currency.code,
-      maximumFractionDigits: CONFIG.currency.precision
+      maximumFractionDigits: CONFIG.currency.precision,
     });
 
     let message = `¡Hola, ${CONFIG.brandName}! 💄✨ Me gustaría realizar el siguiente pedido:\n\n🛍️ *Detalle de mi compra:*\n`;
@@ -88,8 +101,8 @@ export default function CatalogClient({ initialProducts = [], initialCategories 
       message += `• ${item.quantity} x ${item.productName}${toneStr} — ${itemTotal}\n`;
     });
 
-    // Append product image URLs (carousel-style: up to 4 images per item)
-    const allImageUrls = [];
+    // Append product image URLs
+    const allImageUrls: string[] = [];
     cart.forEach((item) => {
       const product = initialProducts.find(p => p.id === item.productId);
       if (product) {
@@ -125,9 +138,9 @@ export default function CatalogClient({ initialProducts = [], initialCategories 
 
   const featuredProducts = initialProducts.filter(p => p.isFeatured);
 
-  const handleOpenProductModal = (product, defaultTone = null) => {
+  const handleOpenProductModal = (product: ProductWithRelations, defaultTone: Tone | null = null) => {
     setSelectedProduct(product);
-    setSelectedProductTone(defaultTone || (product.tones && product.tones.length > 0 ? product.tones[0] : null));
+    setSelectedProductTone(defaultTone || (product.tones && product.tones.length > 0 ? product.tones[0] ?? null : null));
   };
 
   const handleCloseProductModal = () => {
@@ -143,7 +156,7 @@ export default function CatalogClient({ initialProducts = [], initialCategories 
       <Header 
         cartCount={totalCartCount} 
         onCartClick={() => setIsCartOpen(true)} 
-        isCatalog={true}
+        isCatalog
       />
 
       <main style={{ flex: '1 0 auto', paddingBottom: '60px' }}>
@@ -154,7 +167,7 @@ export default function CatalogClient({ initialProducts = [], initialCategories 
             fontWeight: '300',
             color: 'var(--color-white)',
             letterSpacing: '1px',
-            marginBottom: '8px'
+            marginBottom: '8px',
           }}>
             Catálogo <span style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Exclusivo</span>
           </h1>
@@ -163,7 +176,7 @@ export default function CatalogClient({ initialProducts = [], initialCategories 
             fontSize: '0.95rem',
             maxWidth: '560px',
             margin: '0 auto',
-            lineHeight: '1.5'
+            lineHeight: '1.5',
           }}>
             Maquillaje de alta gama para realzar tu belleza. Selecciona tus productos y tonos favoritos y coordina tu pedido directo por WhatsApp.
           </p>
@@ -172,7 +185,8 @@ export default function CatalogClient({ initialProducts = [], initialCategories 
         {featuredProducts.length > 0 && (
           <FeaturedCarousel 
             products={featuredProducts} 
-            onProductClick={(product) => handleOpenProductModal(product)} 
+            onProductClick={(product, tone) => handleOpenProductModal(product, tone)} 
+            onAddToCart={handleAddToCart}
           />
         )}
 
@@ -186,6 +200,7 @@ export default function CatalogClient({ initialProducts = [], initialCategories 
         <ProductGrid 
           products={filteredProducts} 
           onProductClick={(product, tone) => handleOpenProductModal(product, tone)} 
+          onAddToCart={handleAddToCart}
         />
       </main>
 
@@ -214,7 +229,7 @@ export default function CatalogClient({ initialProducts = [], initialCategories 
         color: 'var(--color-text-muted)',
         fontSize: '0.85rem',
         backgroundColor: 'rgba(18, 9, 11, 0.4)',
-        backdropFilter: 'blur(10px)'
+        backdropFilter: 'blur(10px)',
       }}>
         <p style={{ fontFamily: 'var(--font-serif)', fontSize: '1.4rem', color: 'var(--color-gold)', marginBottom: '8px', letterSpacing: '2px' }}>
           BELLA FOREVER

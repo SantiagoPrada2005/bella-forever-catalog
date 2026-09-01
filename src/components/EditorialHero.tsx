@@ -8,13 +8,14 @@ if (typeof window !== 'undefined') {
 }
 
 export default function EditorialHero() {
-  const containerRef = useRef();
+  const containerRef = useRef<HTMLElement>(null);
 
   const handleNavigate = () => {
     window.location.href = '/catalogo';
   };
 
   useGSAP(() => {
+    if (!containerRef.current) return;
     // Animación de textos
     gsap.fromTo('.hero-fade-up', 
       { opacity: 0, y: 30 }, 
@@ -44,8 +45,8 @@ export default function EditorialHero() {
         trigger: containerRef.current,
         start: 'top top',
         end: 'bottom top',
-        scrub: true
-      }
+        scrub: true,
+      },
     });
 
     gsap.to('.hero-img-right', {
@@ -54,12 +55,10 @@ export default function EditorialHero() {
         trigger: containerRef.current,
         start: 'top top',
         end: 'bottom top',
-        scrub: true
-      }
+        scrub: true,
+      },
     });
   }, { scope: containerRef });
-
-
 
   return (
     <section 
@@ -70,14 +69,14 @@ export default function EditorialHero() {
         position: 'relative',
         overflow: 'hidden',
         maxWidth: '1200px',
-        margin: '0 auto'
+        margin: '0 auto',
       }}
     >
       <div style={{
         display: 'grid',
         gridTemplateColumns: '1fr',
         gap: '40px',
-        alignItems: 'center'
+        alignItems: 'center',
       }} className="editorial-hero-grid">
         <style>{`
           @media (min-width: 768px) {
@@ -95,7 +94,7 @@ export default function EditorialHero() {
             letterSpacing: '3px',
             textTransform: 'uppercase',
             display: 'block',
-            marginBottom: '12px'
+            marginBottom: '12px',
           }}>
             Boutique de Belleza
           </span>
@@ -105,7 +104,7 @@ export default function EditorialHero() {
             lineHeight: '1.05',
             color: 'var(--color-white)',
             marginBottom: '20px',
-            fontWeight: '300'
+            fontWeight: '300',
           }}>
             <span style={{ display: 'block', overflow: 'hidden' }}>
               <span className="hero-text-mask-span" style={{ display: 'inline-block' }}>Revela tu</span>
@@ -119,7 +118,7 @@ export default function EditorialHero() {
             fontSize: '1.05rem',
             lineHeight: '1.6',
             marginBottom: '32px',
-            maxWidth: '520px'
+            maxWidth: '520px',
           }}>
             Cosméticos seleccionados para una belleza elegante, femenina y de alta tendencia. Encuentra tu dosis diaria de color e inspírate.
           </p>
@@ -137,10 +136,10 @@ export default function EditorialHero() {
                 fontWeight: '600',
                 letterSpacing: '1px',
                 boxShadow: 'var(--shadow-gold)',
-                transition: 'all 0.3s ease'
+                transition: 'all 0.3s ease',
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-burgundy-light)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--color-burgundy)'}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-burgundy-light)')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-burgundy)')}
             >
               EXPLORAR CATÁLOGO
             </button>
@@ -154,7 +153,7 @@ export default function EditorialHero() {
           width: '100%',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center'
+          justifyContent: 'center',
         }}>
           {/* Imagen izquierda (atrás) */}
           <div className="hero-img-left" style={{
@@ -167,7 +166,7 @@ export default function EditorialHero() {
             overflow: 'hidden',
             border: 'var(--border-glass)',
             boxShadow: '0 15px 35px rgba(0,0,0,0.6)',
-            zIndex: 1
+            zIndex: 1,
           }}>
             <img 
               src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=600&auto=format&fit=crop" 
@@ -187,7 +186,7 @@ export default function EditorialHero() {
             overflow: 'hidden',
             border: '1px solid var(--color-gold)',
             boxShadow: '0 25px 45px rgba(0,0,0,0.7)',
-            zIndex: 2
+            zIndex: 2,
           }}>
             <img 
               src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=600&auto=format&fit=crop" 

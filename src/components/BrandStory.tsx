@@ -8,15 +8,16 @@ if (typeof window !== 'undefined') {
 }
 
 export default function BrandStory() {
-  const containerRef = useRef();
-  const textRef = useRef();
+  const containerRef = useRef<HTMLElement>(null);
+  const textRef = useRef<HTMLParagraphElement>(null);
 
   useGSAP(() => {
     const textElement = textRef.current;
-    if (!textElement) return;
+    if (!textElement || !containerRef.current) return;
 
     // Dividir el texto en palabras envueltas en spans
-    const words = textElement.textContent.split(' ');
+    const text = textElement.textContent || '';
+    const words = text.split(' ');
     textElement.innerHTML = words.map(word => `<span class="brand-word" style="opacity: 0.2; display: inline-block; margin-right: 8px;">${word}</span>`).join('');
 
     gsap.to('.brand-word', {
@@ -26,8 +27,8 @@ export default function BrandStory() {
         trigger: containerRef.current,
         start: 'top 80%',
         end: 'bottom 60%',
-        scrub: 0.5
-      }
+        scrub: 0.5,
+      },
     });
   }, { scope: containerRef });
 
@@ -40,7 +41,7 @@ export default function BrandStory() {
         position: 'relative',
         overflow: 'hidden',
         borderTop: 'var(--border-glass)',
-        borderBottom: 'var(--border-glass)'
+        borderBottom: 'var(--border-glass)',
       }}
     >
       <div style={{
@@ -48,7 +49,7 @@ export default function BrandStory() {
         margin: '0 auto',
         textAlign: 'center',
         zIndex: 2,
-        position: 'relative'
+        position: 'relative',
       }}>
         <span style={{
           color: 'var(--color-gold)',
@@ -57,7 +58,7 @@ export default function BrandStory() {
           letterSpacing: '2px',
           textTransform: 'uppercase',
           display: 'block',
-          marginBottom: '16px'
+          marginBottom: '16px',
         }}>
           Nuestra Filosofía
         </span>
@@ -70,7 +71,7 @@ export default function BrandStory() {
             lineHeight: '1.35',
             color: 'var(--color-white)',
             marginBottom: '16px',
-            fontWeight: '300'
+            fontWeight: '300',
           }}
         >
           Tu dosis diaria de brillo y color
@@ -80,7 +81,7 @@ export default function BrandStory() {
           color: 'var(--color-text-muted)',
           letterSpacing: '1.5px',
           textTransform: 'uppercase',
-          fontWeight: '600'
+          fontWeight: '600',
         }}>
           By Silvy Loaiza
         </p>

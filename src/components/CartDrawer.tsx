@@ -3,15 +3,30 @@ import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { CONFIG } from '../config';
 
-export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout }) {
-  // NOTE: item.image is set upstream in CatalogClient.handleAddToCart using
-  // getProductImage(product, selectedTone) which already applies the full
-  // fallback chain: selectedTone?.image → productImages[0]?.url → mainImage.
-  // No change needed here — the CartDrawer simply renders whatever image it receives.
-  const drawerOverlay = useRef();
-  const drawerContent = useRef();
+export interface CartItem {
+  key: string;
+  productId: string;
+  toneId?: string | null;
+  productName: string;
+  toneName?: string;
+  price: number;
+  quantity: number;
+  image: string;
+}
+
+export interface CartDrawerProps {
+  cart: CartItem[];
+  onClose: () => void;
+  onUpdateQuantity: (key: string, delta: number) => void;
+  onCheckout: () => void;
+}
+
+export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout }: CartDrawerProps) {
+  const drawerOverlay = useRef<HTMLDivElement>(null);
+  const drawerContent = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
+    if (!drawerOverlay.current || !drawerContent.current) return;
     const tl = gsap.timeline();
     tl.fromTo(drawerOverlay.current, { opacity: 0 }, { opacity: 1, duration: 0.3 });
     tl.fromTo(drawerContent.current, { x: '100%' }, { x: '0%', duration: 0.5, ease: 'power3.out' }, '-=0.2');
@@ -27,6 +42,10 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
   }, { scope: drawerOverlay });
 
   const handleClose = () => {
+    if (!drawerOverlay.current || !drawerContent.current) {
+      onClose();
+      return;
+    }
     gsap.to(drawerContent.current, { x: '100%', duration: 0.3, ease: 'power3.in' });
     gsap.to(drawerOverlay.current, { opacity: 0, duration: 0.3, onComplete: onClose });
   };
@@ -35,7 +54,7 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
   const formattedTotal = new Intl.NumberFormat(CONFIG.currency.locale, {
     style: 'currency',
     currency: CONFIG.currency.code,
-    maximumFractionDigits: CONFIG.currency.precision
+    maximumFractionDigits: CONFIG.currency.precision,
   }).format(cartTotal);
 
   return (
@@ -52,7 +71,7 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
         backdropFilter: 'blur(8px)',
         display: 'flex',
         justifyContent: 'flex-end',
-        zIndex: 2000
+        zIndex: 2000,
       }}
     >
       <div 
@@ -66,7 +85,7 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
           display: 'flex',
           flexDirection: 'column',
           boxShadow: '-10px 0 35px rgba(0, 0, 0, 0.5)',
-          borderLeft: 'var(--border-glass)'
+          borderLeft: 'var(--border-glass)',
         }}
       >
         {/* Header */}
@@ -75,7 +94,7 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
           borderBottom: 'var(--border-glass)',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'center'
+          alignItems: 'center',
         }}>
           <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.5rem', fontWeight: '400', color: 'var(--color-gold)' }}>
             Tu Pedido
@@ -88,7 +107,7 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
               fontSize: '1.3rem', 
               cursor: 'pointer',
               color: 'var(--color-gold)',
-              padding: '4px'
+              padding: '4px',
             }}
           >
             ✕
@@ -107,7 +126,7 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
               const formattedItemPrice = new Intl.NumberFormat(CONFIG.currency.locale, {
                 style: 'currency',
                 currency: CONFIG.currency.code,
-                maximumFractionDigits: CONFIG.currency.precision
+                maximumFractionDigits: CONFIG.currency.precision,
               }).format(item.price * item.quantity);
 
               return (
@@ -119,7 +138,7 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
                     gap: '16px', 
                     marginBottom: '20px', 
                     borderBottom: '1px solid rgba(255, 255, 255, 0.05)', 
-                    paddingBottom: '16px' 
+                    paddingBottom: '16px',
                   }}
                 >
                   <img 
@@ -128,7 +147,7 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
                     style={{ width: '70px', height: '70px', objectFit: 'cover', borderRadius: '8px', border: 'var(--border-glass)' }} 
                   />
                   
-                  <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justify: 'space-between' }}>
+                  <div style={{ flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div>
                       <h4 style={{ fontSize: '0.95rem', fontWeight: '400', color: 'var(--color-text-light)' }}>
                         {item.productName}
@@ -140,7 +159,7 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
                       )}
                     </div>
                     
-                    <div style={{ display: 'flex', justify: 'space-between', alignItems: 'center', marginTop: '8px' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '8px' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <button 
                           onClick={() => onUpdateQuantity(item.key, -1)}
@@ -156,10 +175,10 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            transition: 'all 0.2s'
+                            transition: 'all 0.2s',
                           }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'}
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)')}
+                          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                         >-</button>
                         <span style={{ fontWeight: '500', fontSize: '0.85rem' }}>{item.quantity}</span>
                         <button 
@@ -176,10 +195,10 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            transition: 'all 0.2s'
+                            transition: 'all 0.2s',
                           }}
-                          onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)'}
-                          onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                          onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.05)')}
+                          onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                         >+</button>
                       </div>
                       
@@ -199,7 +218,7 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
           <div style={{ 
             padding: '24px', 
             borderTop: 'var(--border-glass)', 
-            backgroundColor: 'rgba(0, 0, 0, 0.2)' 
+            backgroundColor: 'rgba(0, 0, 0, 0.2)',
           }}>
             <div style={{ 
               display: 'flex', 
@@ -207,7 +226,7 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
               marginBottom: '20px', 
               fontSize: '1.2rem', 
               fontWeight: '400',
-              fontFamily: 'var(--font-serif)'
+              fontFamily: 'var(--font-serif)',
             }}>
               <span>Total:</span>
               <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>{formattedTotal}</span>
@@ -227,10 +246,10 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
                 fontSize: '0.95rem',
                 letterSpacing: '1px',
                 boxShadow: 'var(--shadow-gold)',
-                transition: 'background-color 0.3s'
+                transition: 'background-color 0.3s',
               }}
-              onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'var(--color-burgundy-light)'}
-              onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'var(--color-burgundy)'}
+              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-burgundy-light)')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-burgundy)')}
             >
               Confirmar pedido por WhatsApp 📱
             </button>

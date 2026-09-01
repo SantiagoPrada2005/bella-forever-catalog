@@ -1,4 +1,5 @@
 import { eq } from 'drizzle-orm';
+import type { BatchItem } from 'drizzle-orm/batch';
 import {
   products,
   tones,
@@ -8,6 +9,7 @@ import {
   type Category,
 } from '../db/schema';
 import type { AppDb } from './db';
+
 
 export interface ProductInput {
   name: string;
@@ -91,7 +93,7 @@ export async function updateCategory(db: AppDb, id: string, name: string): Promi
     throw new Error('Categoría no encontrada');
   }
 
-  const statements: any[] = [
+  const statements: BatchItem<'sqlite'>[] = [
     db.update(categories)
       .set({ name, slug, updatedAt: now })
       .where(eq(categories.id, id)),
@@ -105,10 +107,10 @@ export async function updateCategory(db: AppDb, id: string, name: string): Promi
     );
   }
 
-  if (statements.length === 1) {
-    await statements[0].run();
+  if (statements.length === 1 && statements[0]) {
+    await statements[0];
   } else {
-    await db.batch(statements as [any, ...any[]]);
+    await db.batch(statements as [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]]);
   }
 
   return { id, name, slug };
@@ -188,9 +190,9 @@ export async function createProduct(
   const now = new Date().toISOString();
   const productId = crypto.randomUUID();
   const parsedPrice = typeof data.price === 'number' ? data.price : (parseFloat(String(data.price)) || 0);
-  const derivedMainImage = imagesData.length > 0 ? imagesData[0].url : (data.mainImage || '');
+  const derivedMainImage = imagesData.length > 0 ? imagesData[0]?.url || '' : (data.mainImage || '');
 
-  const statements: any[] = [
+  const statements: BatchItem<'sqlite'>[] = [
     db.insert(products).values({
       id: productId,
       name: data.name,
@@ -237,10 +239,10 @@ export async function createProduct(
     );
   }
 
-  if (statements.length === 1) {
-    await statements[0].run();
+  if (statements.length === 1 && statements[0]) {
+    await statements[0];
   } else {
-    await db.batch(statements as [any, ...any[]]);
+    await db.batch(statements as [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]]);
   }
 
   return { id: productId };
@@ -253,7 +255,7 @@ export async function updateProduct(
   tonesData: ToneInput[] = [],
   imagesData: ProductImageInput[] = []
 ): Promise<{ id: string }> {
-  const derivedMainImage = imagesData.length > 0 ? imagesData[0].url : (data.mainImage || '');
+  const derivedMainImage = imagesData.length > 0 ? imagesData[0]?.url || '' : (data.mainImage || '');
   if (!derivedMainImage) {
     throw new Error('Debe haber al menos una imagen principal o en galería');
   }
@@ -261,7 +263,7 @@ export async function updateProduct(
   const now = new Date().toISOString();
   const parsedPrice = typeof data.price === 'number' ? data.price : (parseFloat(String(data.price)) || 0);
 
-  const statements: any[] = [
+  const statements: BatchItem<'sqlite'>[] = [
     db.delete(tones).where(eq(tones.productId, id)),
     db.delete(productImages).where(eq(productImages.productId, id)),
     db.update(products)
@@ -310,7 +312,8 @@ export async function updateProduct(
     );
   }
 
-  await db.batch(statements as [any, ...any[]]);
+  await db.batch(statements as [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]]);
 
   return { id };
 }
+

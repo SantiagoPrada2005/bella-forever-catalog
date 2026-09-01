@@ -2,13 +2,14 @@
 import Layout from '../../layouts/Layout.astro';
 import CatalogClient from '../../components/CatalogClient';
 import JsonLdProductList from '../../components/seo/JsonLdProductList.astro';
+import type { ProductWithRelations, Category } from '../../db/schema';
 import { getDb } from '../../lib/db';
 import { getProducts, getCategories } from '../../lib/services';
 
 export const prerender = false;
 
-let productsList: any[] = [];
-let categoriesList: any[] = [];
+let productsList: ProductWithRelations[] = [];
+let categoriesList: Category[] = [];
 
 try {
   const db = getDb();
@@ -18,9 +19,10 @@ try {
   ]);
   productsList = prods;
   categoriesList = cats;
-} catch (e) {
+} catch (e: unknown) {
   console.error('Error al cargar datos del catálogo en SSR:', e);
 }
+
 ---
 
 <Layout

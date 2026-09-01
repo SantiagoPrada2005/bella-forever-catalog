@@ -1,7 +1,9 @@
 import type { APIRoute } from 'astro';
 import { env } from 'cloudflare:workers';
+import { getErrorMessage } from '../../lib/errors';
 
 export const prerender = false;
+
 
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
@@ -82,9 +84,9 @@ export const POST: APIRoute = async ({ request }) => {
       try {
         const url = await uploadSingleFile(file, bucket);
         urls.push(url);
-      } catch (uploadError: any) {
+      } catch (uploadError: unknown) {
         console.error(`Error al subir ${file.name}:`, uploadError);
-        errors.push(`Error al subir ${file.name}: ${uploadError.message}`);
+        errors.push(`Error al subir ${file.name}: ${getErrorMessage(uploadError)}`);
       }
     }
 

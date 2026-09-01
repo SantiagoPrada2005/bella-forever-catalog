@@ -1,14 +1,35 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, type ChangeEvent } from 'react';
 
-export default function ImageUpload({ label, value, onChange, required = false, compact = false, multiple = false }) {
+interface SingleImageUploadProps {
+  label?: string;
+  value?: string;
+  onChange: (val: string) => void;
+  required?: boolean;
+  compact?: boolean;
+  multiple?: false;
+}
+
+interface MultiImageUploadProps {
+  label?: string;
+  value?: string[];
+  onChange: (val: string[]) => void;
+  required?: boolean;
+  compact?: boolean;
+  multiple: true;
+}
+
+export type ImageUploadProps = SingleImageUploadProps | MultiImageUploadProps;
+
+export default function ImageUpload(props: ImageUploadProps) {
+  const { label, required = false, compact = false, multiple = false } = props;
   const [uploading, setUploading] = useState(false);
-  const [uploadErrors, setUploadErrors] = useState([]);
-  const fileInputRef = useRef(null);
+  const [uploadErrors, setUploadErrors] = useState<string[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // --- Single file mode (backward compat) ---
-  const handleFileChange = async (e) => {
+  // --- Single file mode ---
+  const handleFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -22,10 +43,12 @@ export default function ImageUpload({ label, value, onChange, required = false, 
         body: formData,
       });
 
-      const data = await response.json();
+      const data = (await response.json()) as { url?: string; error?: string };
 
       if (response.ok && data.url) {
-        onChange(data.url);
+        if (!props.multiple) {
+          props.onChange(data.url);
+        }
       } else {
         alert(data.error || 'Ocurrió un error al subir el archivo.');
       }
@@ -40,13 +63,13 @@ export default function ImageUpload({ label, value, onChange, required = false, 
   // --- Multi file mode ---
   const [uploadingCount, setUploadingCount] = useState(0);
 
-  const handleMultiFileChange = async (e) => {
+  const handleMultiFileChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
     const fileList = Array.from(files);
-    const urls = Array.isArray(value) ? [...value] : [];
-    const errors = [];
+    const urls = Array.isArray(props.value) ? [...props.value] : [];
+    const errors: string[] = [];
 
     setUploading(true);
     setUploadingCount(fileList.length);
@@ -61,7 +84,7 @@ export default function ImageUpload({ label, value, onChange, required = false, 
           method: 'POST',
           body: formData,
         });
-        const data = await response.json();
+        const data = (await response.json()) as { url?: string; error?: string };
 
         if (response.ok && data.url) {
           return { ok: true, url: data.url };
@@ -84,8 +107,8 @@ export default function ImageUpload({ label, value, onChange, required = false, 
     }
 
     setUploadErrors(errors);
-    if (multiple && onChange) {
-      onChange(urls);
+    if (props.multiple && props.onChange) {
+      props.onChange(urls);
     }
     setUploading(false);
     setUploadingCount(0);
@@ -94,17 +117,19 @@ export default function ImageUpload({ label, value, onChange, required = false, 
     }
   };
 
-  const handleRemoveImage = (index) => {
-    if (!multiple || !Array.isArray(value)) return;
-    const newUrls = value.filter((_, i) => i !== index);
-    onChange(newUrls);
+  const handleRemoveImage = (index: number) => {
+    if (!props.multiple || !Array.isArray(props.value)) return;
+    const newUrls = props.value.filter((_, i) => i !== index);
+    props.onChange(newUrls);
   };
 
   const handleButtonClick = () => {
     fileInputRef.current?.click();
   };
 
-  const urlArray = multiple ? (Array.isArray(value) ? value : []) : [value];
+  const urlArray: string[] = props.multiple
+    ? (Array.isArray(props.value) ? props.value : [])
+    : (props.value ? [props.value] : []);
 
   // --- Multi-image render ---
   if (multiple) {
@@ -225,7 +250,9 @@ export default function ImageUpload({ label, value, onChange, required = false, 
     );
   }
 
-  // --- Single-file render (unchanged) ---
+  // --- Single-file render ---
+  const singleValue = typeof props.value === 'string' ? props.value : '';
+
   return (
     <div style={compact ? {} : { marginBottom: '16px' }}>
       {!compact && (
@@ -237,8 +264,12 @@ export default function ImageUpload({ label, value, onChange, required = false, 
       <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
         <input
           type="text"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
+          value={singleValue}
+          onChange={(e) => {
+            if (!props.multiple) {
+              props.onChange(e.target.value);
+            }
+          }}
           placeholder="URL de la imagen o sube un archivo"
           required={required}
           style={{
@@ -248,7 +279,7 @@ export default function ImageUpload({ label, value, onChange, required = false, 
             border: '1px solid rgba(215,176,106,0.2)',
             backgroundColor: 'rgba(0,0,0,0.3)',
             color: '#fff',
-            fontSize: '0.9rem'
+            fontSize: '0.9rem',
           }}
         />
 
@@ -275,7 +306,7 @@ export default function ImageUpload({ label, value, onChange, required = false, 
             fontSize: '0.85rem',
             whiteSpace: 'nowrap',
             transition: 'all 0.2s',
-            opacity: uploading ? 0.6 : 1
+            opacity: uploading ? 0.6 : 1,
           }}
           onMouseEnter={(e) => {
             if (!uploading) {
@@ -294,17 +325,17 @@ export default function ImageUpload({ label, value, onChange, required = false, 
         </button>
       </div>
 
-      {value && (
+      {singleValue && (
         <div style={{ marginTop: '10px', display: 'flex', alignItems: 'center', gap: '10px' }}>
           <img
-            src={value}
+            src={singleValue}
             alt="Vista previa"
             style={{
               width: compact ? '40px' : '60px',
               height: compact ? '40px' : '60px',
               objectFit: 'cover',
               borderRadius: '8px',
-              border: '1px solid rgba(215,176,106,0.2)'
+              border: '1px solid rgba(215,176,106,0.2)',
             }}
             onError={(e) => {
               e.currentTarget.style.display = 'none';

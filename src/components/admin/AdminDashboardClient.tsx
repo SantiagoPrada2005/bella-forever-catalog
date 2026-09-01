@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, type FormEvent } from 'react';
 import Header from '../Header';
 import { 
   getProducts, 
@@ -10,16 +10,17 @@ import {
   deleteCategory 
 } from '../../lib/api-client';
 import { CONFIG } from '../../config';
+import type { ProductWithRelations, Category } from '../../db/schema';
 
 export default function AdminDashboardClient() {
-  const [activeTab, setActiveTab] = useState('products');
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
+  const [activeTab, setActiveTab] = useState<'products' | 'categories'>('products');
+  const [products, setProducts] = useState<ProductWithRelations[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   
   // State for category management
   const [newCatName, setNewCatName] = useState('');
-  const [editingCat, setEditingCat] = useState(null);
+  const [editingCat, setEditingCat] = useState<{ id: string; name: string } | null>(null);
   const [catSubmitting, setCatSubmitting] = useState(false);
 
   useEffect(() => {
@@ -35,7 +36,7 @@ export default function AdminDashboardClient() {
           setProducts(prods);
           setCategories(cats);
         }
-      } catch (err) {
+      } catch (err: unknown) {
         console.error("Error al cargar datos iniciales", err);
       } finally {
         if (isMounted) {
@@ -55,7 +56,7 @@ export default function AdminDashboardClient() {
     try {
       const data = await getProducts();
       setProducts(data);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error al obtener productos", err);
     } finally {
       setLoading(false);
@@ -66,18 +67,18 @@ export default function AdminDashboardClient() {
     try {
       const data = await getCategories();
       setCategories(data);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error al obtener categorías", err);
     }
   };
 
-  const handleDelete = async (id, name) => {
+  const handleDelete = async (id: string, name: string) => {
     if (confirm(`¿Estás seguro de que deseas eliminar el producto "${name}"?`)) {
       setLoading(true);
       try {
         await deleteProduct(id);
         await fetchProducts();
-      } catch (err) {
+      } catch (err: unknown) {
         console.error("Error al eliminar producto", err);
         alert("Error al eliminar el producto");
         setLoading(false);
@@ -85,20 +86,19 @@ export default function AdminDashboardClient() {
     }
   };
 
-  const handleToggleStock = async (id, currentStock) => {
+  const handleToggleStock = async (id: string, currentStock: boolean) => {
     try {
       const nextStock = !currentStock;
       setProducts(prev => prev.map(p => p.id === id ? { ...p, inStock: nextStock } : p));
       await toggleProductStock(id, nextStock);
-    } catch (err) {
+    } catch (err: unknown) {
       console.error("Error al actualizar stock", err);
       alert("Error al actualizar el stock");
       fetchProducts();
     }
   };
 
-
-  const handleCreateCategory = async (e) => {
+  const handleCreateCategory = async (e: FormEvent) => {
     e.preventDefault();
     if (!newCatName.trim()) return;
     setCatSubmitting(true);
@@ -106,7 +106,7 @@ export default function AdminDashboardClient() {
       await createCategory(newCatName.trim());
       setNewCatName('');
       await fetchCategories();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
       alert("Error al crear la categoría");
     } finally {
@@ -114,7 +114,7 @@ export default function AdminDashboardClient() {
     }
   };
 
-  const handleUpdateCategory = async (e) => {
+  const handleUpdateCategory = async (e: FormEvent) => {
     e.preventDefault();
     if (!editingCat || !editingCat.name.trim()) return;
     setCatSubmitting(true);
@@ -123,7 +123,7 @@ export default function AdminDashboardClient() {
       setEditingCat(null);
       await fetchCategories();
       await fetchProducts();
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
       alert("Error al actualizar la categoría");
     } finally {
@@ -131,7 +131,7 @@ export default function AdminDashboardClient() {
     }
   };
 
-  const handleDeleteCategory = async (cat) => {
+  const handleDeleteCategory = async (cat: Category) => {
     if (cat.id === 'sin-categoria') {
       alert("No se puede eliminar la categoría por defecto");
       return;
@@ -141,18 +141,18 @@ export default function AdminDashboardClient() {
         await deleteCategory(cat.id);
         await fetchCategories();
         await fetchProducts();
-      } catch (err) {
+      } catch (err: unknown) {
         console.error(err);
         alert("Error al eliminar la categoría");
       }
     }
   };
 
-  const formatPrice = (value) => {
+  const formatPrice = (value: number) => {
     return new Intl.NumberFormat(CONFIG.currency.locale, {
       style: 'currency',
       currency: CONFIG.currency.code,
-      maximumFractionDigits: CONFIG.currency.precision
+      maximumFractionDigits: CONFIG.currency.precision,
     }).format(value);
   };
 
@@ -161,7 +161,7 @@ export default function AdminDashboardClient() {
       <div className="bg-makeup-blur bg-makeup-blur-1" />
       <div className="bg-makeup-blur bg-makeup-blur-2" />
 
-      <Header cartCount={0} onCartClick={() => {}} />
+      <Header />
 
       <main style={{ flex: '1 0 auto', padding: '20px 24px', maxWidth: '1200px', width: '100%', margin: '0 auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
@@ -184,7 +184,7 @@ export default function AdminDashboardClient() {
               cursor: 'pointer',
               fontWeight: '600',
               boxShadow: 'var(--shadow-gold)',
-              transition: 'all 0.3s ease'
+              transition: 'all 0.3s ease',
             }}>
               + NUEVO PRODUCTO
             </button>
@@ -203,7 +203,7 @@ export default function AdminDashboardClient() {
               fontWeight: '600',
               padding: '8px 16px',
               cursor: 'pointer',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
             }}
           >
             Productos ({products.length})
@@ -219,7 +219,7 @@ export default function AdminDashboardClient() {
               fontWeight: '600',
               padding: '8px 16px',
               cursor: 'pointer',
-              transition: 'all 0.2s'
+              transition: 'all 0.2s',
             }}
           >
             Categorías ({categories.length})
@@ -248,7 +248,7 @@ export default function AdminDashboardClient() {
                 border: 'var(--border-glass)',
                 borderRadius: '16px',
                 boxShadow: 'var(--shadow-premium)',
-                padding: '10px'
+                padding: '10px',
               }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '800px' }}>
                   <thead>
@@ -274,7 +274,7 @@ export default function AdminDashboardClient() {
                         </td>
                         <td style={{ padding: '12px', color: '#fff', fontWeight: '500' }}>
                           {product.name}
-                          {product.tones?.length > 0 && (
+                          {product.tones && product.tones.length > 0 && (
                             <div style={{ display: 'flex', gap: '4px', marginTop: '6px' }}>
                               {product.tones.map(t => (
                                 <span 
@@ -329,7 +329,7 @@ export default function AdminDashboardClient() {
                                 padding: '6px 12px',
                                 borderRadius: '6px',
                                 cursor: 'pointer',
-                                transition: 'all 0.2s'
+                                transition: 'all 0.2s',
                               }}>
                                 Editar
                               </button>
@@ -344,7 +344,7 @@ export default function AdminDashboardClient() {
                                 padding: '6px 12px',
                                 borderRadius: '6px',
                                 cursor: 'pointer',
-                                transition: 'all 0.2s'
+                                transition: 'all 0.2s',
                               }}
                             >
                               Eliminar
@@ -374,7 +374,7 @@ export default function AdminDashboardClient() {
                   borderRadius: '8px',
                   padding: '10px 16px',
                   color: '#fff',
-                  fontSize: '0.95rem'
+                  fontSize: '0.95rem',
                 }}
               />
               <button 
@@ -388,7 +388,7 @@ export default function AdminDashboardClient() {
                   borderRadius: '8px',
                   cursor: catSubmitting || !newCatName.trim() ? 'not-allowed' : 'pointer',
                   fontWeight: '600',
-                  opacity: catSubmitting || !newCatName.trim() ? 0.6 : 1
+                  opacity: catSubmitting || !newCatName.trim() ? 0.6 : 1,
                 }}
               >
                 + AGREGAR CATEGORÍA
@@ -401,7 +401,7 @@ export default function AdminDashboardClient() {
               border: 'var(--border-glass)',
               borderRadius: '16px',
               boxShadow: 'var(--shadow-premium)',
-              padding: '10px'
+              padding: '10px',
             }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', minWidth: '600px' }}>
                 <thead>
@@ -431,7 +431,7 @@ export default function AdminDashboardClient() {
                                   border: '1px solid var(--color-gold)',
                                   borderRadius: '6px',
                                   padding: '4px 8px',
-                                  color: '#fff'
+                                  color: '#fff',
                                 }}
                               />
                               <button type="submit" style={{ background: 'var(--color-gold)', color: '#000', border: 'none', borderRadius: '4px', padding: '4px 10px', cursor: 'pointer' }}>
@@ -465,7 +465,7 @@ export default function AdminDashboardClient() {
                                     color: 'var(--color-gold)',
                                     padding: '6px 12px',
                                     borderRadius: '6px',
-                                    cursor: 'pointer'
+                                    cursor: 'pointer',
                                   }}
                                 >
                                   Editar
@@ -479,7 +479,7 @@ export default function AdminDashboardClient() {
                                   color: '#ff5555',
                                   padding: '6px 12px',
                                   borderRadius: '6px',
-                                  cursor: 'pointer'
+                                  cursor: 'pointer',
                                 }}
                               >
                                 Eliminar

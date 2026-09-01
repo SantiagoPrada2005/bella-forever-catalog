@@ -1,7 +1,22 @@
 import React from 'react';
 import { CONFIG } from '../config';
+import type { Category, ProductWithRelations } from '../db/schema';
 
-export default function CategoryFilters({ categories, products = [], activeCategory, onCategoryChange, onSelectCategory }) {
+export interface CategoryFiltersProps {
+  categories?: Category[];
+  products?: ProductWithRelations[];
+  activeCategory: string;
+  onCategoryChange?: (id: string) => void;
+  onSelectCategory?: (id: string) => void;
+}
+
+export default function CategoryFilters({
+  categories,
+  products = [],
+  activeCategory,
+  onCategoryChange,
+  onSelectCategory,
+}: CategoryFiltersProps) {
   const handleChange = onCategoryChange || onSelectCategory || (() => {});
   const baseCategories = categories && categories.length > 0
     ? categories.map(c => ({ id: c.slug, name: c.name }))
@@ -22,7 +37,7 @@ export default function CategoryFilters({ categories, products = [], activeCateg
       whiteSpace: 'nowrap',
       maxWidth: '1200px',
       margin: '0 auto',
-      justifyContent: 'flex-start'
+      justifyContent: 'flex-start',
     }} className="no-scrollbar filters-container">
       <style>{`
         @media (min-width: 768px) {
@@ -48,7 +63,7 @@ export default function CategoryFilters({ categories, products = [], activeCateg
               fontWeight: '500',
               fontSize: '0.85rem',
               transition: 'all 0.3s ease',
-              boxShadow: isActive ? 'var(--shadow-gold)' : 'none'
+              boxShadow: isActive ? 'var(--shadow-gold)' : 'none',
             }}
             onMouseEnter={(e) => {
               if (!isActive) {

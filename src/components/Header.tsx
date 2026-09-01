@@ -1,19 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
-export default function Header({ cartCount = 0, onCartClick, isCatalog: propIsCatalog }) {
-  const [pathname, setPathname] = useState('');
+export interface HeaderProps {
+  cartCount?: number;
+  onCartClick?: () => void;
+  isCatalog?: boolean;
+}
 
-  useEffect(() => {
-    setPathname(window.location.pathname);
-    const handlePopState = () => setPathname(window.location.pathname);
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  const isCatalog = propIsCatalog !== undefined
-    ? propIsCatalog
-    : (Boolean(onCartClick) || pathname.startsWith('/catalogo'));
-
+export default function Header({ 
+  cartCount = 0, 
+  onCartClick, 
+  isCatalog = false 
+}: HeaderProps) {
 
   return (
     <header style={{
@@ -29,7 +26,7 @@ export default function Header({ cartCount = 0, onCartClick, isCatalog: propIsCa
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: '0 24px',
-      zIndex: 1000
+      zIndex: 1000,
     }}>
       <a 
         href="/" 
@@ -38,7 +35,7 @@ export default function Header({ cartCount = 0, onCartClick, isCatalog: propIsCa
           alignItems: 'center',
           gap: '10px',
           cursor: 'pointer',
-          textDecoration: 'none'
+          textDecoration: 'none',
         }}
       >
         <img
@@ -51,7 +48,7 @@ export default function Header({ cartCount = 0, onCartClick, isCatalog: propIsCa
           fontSize: '1.4rem',
           fontWeight: '600',
           color: 'var(--color-gold)',
-          letterSpacing: '2px'
+          letterSpacing: '2px',
         }}>
           BELLA FOREVER
         </span>
@@ -68,10 +65,10 @@ export default function Header({ cartCount = 0, onCartClick, isCatalog: propIsCa
             alignItems: 'center',
             justifyContent: 'center',
             padding: '8px',
-            transition: 'color 0.2s, transform 0.2s ease'
+            transition: 'color 0.2s, transform 0.2s ease',
           }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
+          onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
         >
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
             <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
@@ -92,10 +89,10 @@ export default function Header({ cartCount = 0, onCartClick, isCatalog: propIsCa
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              transition: 'transform 0.2s ease'
+              transition: 'transform 0.2s ease',
             }}
-            onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-            onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+            onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
+            onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
           >
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
               <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
@@ -118,7 +115,7 @@ export default function Header({ cartCount = 0, onCartClick, isCatalog: propIsCa
                 justifyContent: 'center',
                 fontSize: '0.7rem',
                 border: '1px solid var(--color-gold)',
-                boxShadow: 'var(--shadow-gold)'
+                boxShadow: 'var(--shadow-gold)',
               }}>
                 {cartCount}
               </span>

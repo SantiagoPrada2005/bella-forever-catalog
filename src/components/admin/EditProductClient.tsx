@@ -1,11 +1,18 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, type ChangeEvent, type FormEvent } from 'react';
 import Header from '../Header';
 import ImageUpload from '../ui/ImageUpload';
-import { createProduct, getCategories } from '../../lib/api-client';
+import { getProductById, updateProduct, getCategories } from '../../lib/api-client';
+import type { Category } from '../../db/schema';
+import type { ToneInput } from '../../lib/services';
 
-export default function NewProductClient() {
-  const [loading, setLoading] = useState(false);
-  const [categoriesList, setCategoriesList] = useState([]);
+export interface EditProductClientProps {
+  id: string;
+}
+
+export default function EditProductClient({ id }: EditProductClientProps) {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [categoriesList, setCategoriesList] = useState<Category[]>([]);
   const [formData, setFormData] = useState({
     name: '',
     price: '',
@@ -14,48 +21,81 @@ export default function NewProductClient() {
     mainImage: '',
     isNew: false,
     isFeatured: false,
-    inStock: true
+    inStock: true,
   });
 
+  const [tones, setTones] = useState<ToneInput[]>([]);
+  const [images, setImages] = useState<string[]>([]);
+
   useEffect(() => {
-    async function loadCats() {
+    const loadProductAndCats = async () => {
       try {
-        const cats = await getCategories();
+        const [prod, cats] = await Promise.all([
+          getProductById(id),
+          getCategories(),
+        ]);
         setCategoriesList(cats);
-        if (cats.length > 0) {
-          setFormData(prev => ({ ...prev, category: prev.category || cats[0].slug }));
+        if (!prod) {
+          alert("Producto no encontrado");
+          window.location.href = '/admin';
+          return;
         }
-      } catch (err) {
-        console.error("Error al cargar categorías", err);
+        setFormData({
+          name: prod.name,
+          price: prod.price.toString(),
+          description: prod.description || '',
+          category: prod.category,
+          mainImage: prod.mainImage,
+          isNew: prod.isNew,
+          isFeatured: prod.isFeatured,
+          inStock: prod.inStock,
+        });
+        setTones((prod.tones || []).map(t => ({
+          name: t.name,
+          hex: t.hex,
+          image: t.image || '',
+          inStock: t.inStock,
+        })));
+        const existingImages = (prod.productImages || [])
+          .sort((a, b) => a.sortOrder - b.sortOrder)
+          .map(img => img.url);
+        setImages(existingImages);
+      } catch (err: unknown) {
+        console.error("Error al cargar producto", err);
+        alert("Ocurrió un error al cargar el producto");
+      } finally {
+        setLoading(false);
       }
+    };
+
+    if (id) {
+      loadProductAndCats();
     }
-    loadCats();
-  }, []);
+  }, [id]);
 
-  const [tones, setTones] = useState([]);
-  const [images, setImages] = useState([]);
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
+  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const target = e.target;
+    const { name, value, type } = target;
+    const checked = 'checked' in target ? target.checked : false;
     setFormData(prev => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value
+      [name]: type === 'checkbox' ? checked : value,
     }));
   };
 
   const handleAddTone = () => {
-    setTones(prev => [...prev, { name: '', hex: '#DDA3A9', image: '', inStock: true }]);
+    setTones(prev => [...prev, { name: '', hex: '#DDA3A9', image: formData.mainImage, inStock: true }]);
   };
 
-  const handleRemoveTone = (index) => {
+  const handleRemoveTone = (index: number) => {
     setTones(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleToneChange = (index, field, value) => {
+  const handleToneChange = (index: number, field: keyof ToneInput, value: string | boolean) => {
     setTones(prev => prev.map((t, i) => i === index ? { ...t, [field]: value } : t));
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.price) {
       alert("Por favor completa los campos requeridos (Nombre y Precio)");
@@ -63,7 +103,7 @@ export default function NewProductClient() {
     }
 
     if (!formData.mainImage && images.length === 0) {
-      alert("Debes proporcionar al menos una imagen (Imagen Principal o subir imágenes a la galería)");
+      alert("Debes tener al menos una imagen (Imagen Principal o galería)");
       return;
     }
 
@@ -78,16 +118,24 @@ export default function NewProductClient() {
       altText: formData.name,
     }));
 
-    setLoading(true);
+    setSaving(true);
     try {
-      await createProduct(formData, tones, imagesData);
+      await updateProduct(id, formData, tones, imagesData);
       window.location.href = '/admin';
-    } catch (err) {
+    } catch (err: unknown) {
       console.error(err);
-      alert("Ocurrió un error al guardar el producto");
-      setLoading(false);
+      alert("Ocurrió un error al actualizar el producto");
+      setSaving(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg-dark)', paddingTop: '90px', alignItems: 'center', justifyContent: 'center' }}>
+        <p style={{ color: 'var(--color-text-muted)' }}>Cargando datos del producto...</p>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg-dark)', paddingTop: '90px' }}>
@@ -105,7 +153,7 @@ export default function NewProductClient() {
             ← Volver al panel
           </a>
           <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: '2.2rem', fontWeight: '300', color: 'var(--color-white)', marginTop: '12px' }}>
-            Agregar Nuevo Producto
+            Editar Producto: {formData.name}
           </h1>
         </div>
 
@@ -114,7 +162,7 @@ export default function NewProductClient() {
           border: 'var(--border-glass)',
           borderRadius: '16px',
           padding: '24px',
-          boxShadow: 'var(--shadow-premium)'
+          boxShadow: 'var(--shadow-premium)',
         }}>
           {/* Fila principal */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
@@ -125,7 +173,6 @@ export default function NewProductClient() {
               <input 
                 type="text" 
                 name="name" 
-                placeholder="Ej. Rubor Compacto Velvet Rose"
                 value={formData.name} 
                 onChange={handleChange}
                 required
@@ -139,7 +186,6 @@ export default function NewProductClient() {
               <input 
                 type="number" 
                 name="price" 
-                placeholder="Ej. 35000"
                 value={formData.price} 
                 onChange={handleChange}
                 required
@@ -168,9 +214,10 @@ export default function NewProductClient() {
             </div>
             <div>
               <ImageUpload
-                label="Imagen Principal (o sube fotos a la galería)"
+                label="Imagen Principal"
                 value={formData.mainImage}
                 onChange={(url) => setFormData(prev => ({ ...prev, mainImage: url }))}
+                required
               />
             </div>
           </div>
@@ -181,10 +228,9 @@ export default function NewProductClient() {
             </label>
             <textarea 
               name="description" 
-              placeholder="Detalles sobre acabado, textura, duración..."
               value={formData.description} 
               onChange={handleChange}
-              rows="4"
+              rows={4}
               style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(215,176,106,0.2)', backgroundColor: 'rgba(0,0,0,0.3)', color: '#fff', resize: 'vertical' }}
             />
           </div>
@@ -200,7 +246,7 @@ export default function NewProductClient() {
               </span>
             </div>
             <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', marginBottom: '10px' }}>
-              La primera imagen será la principal. Puedes arrastrar para reordenar o subir múltiples a la vez.
+              La primera imagen será la principal. Puedes agregar, reordenar o eliminar imágenes.
             </p>
             <ImageUpload
               label="Imágenes de galería"
@@ -248,7 +294,7 @@ export default function NewProductClient() {
           <div style={{ marginBottom: '30px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
               <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.4rem', fontWeight: '300', color: 'var(--color-gold)' }}>
-                Variantes de Tonos (Opcional)
+                Variantes de Tonos
               </h3>
               <button 
                 type="button" 
@@ -261,7 +307,7 @@ export default function NewProductClient() {
                   borderRadius: '6px',
                   cursor: 'pointer',
                   fontWeight: '600',
-                  fontSize: '0.85rem'
+                  fontSize: '0.85rem',
                 }}
               >
                 + Agregar Tono
@@ -270,7 +316,7 @@ export default function NewProductClient() {
 
             {tones.length === 0 ? (
               <p style={{ color: 'var(--color-text-muted)', fontSize: '0.85rem', fontStyle: 'italic' }}>
-                Si este producto no tiene tonos distintos, déjalo vacío.
+                Este producto no tiene variantes de tono (se mostrará como tono único).
               </p>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -283,7 +329,7 @@ export default function NewProductClient() {
                     backgroundColor: 'rgba(0,0,0,0.15)',
                     padding: '12px',
                     borderRadius: '8px',
-                    border: '1px solid rgba(215,176,106,0.05)'
+                    border: '1px solid rgba(215,176,106,0.05)',
                   }}>
                     <div>
                       <input 
@@ -307,6 +353,7 @@ export default function NewProductClient() {
                       <ImageUpload
                         value={tone.image}
                         onChange={(url) => handleToneChange(index, 'image', url)}
+                        required
                         compact={true}
                       />
                     </div>
@@ -339,7 +386,7 @@ export default function NewProductClient() {
             <a href="/admin" style={{ textDecoration: 'none' }}>
               <button 
                 type="button" 
-                disabled={loading}
+                disabled={saving}
                 style={{
                   background: 'none',
                   border: '1px solid rgba(215, 176, 106, 0.3)',
@@ -347,7 +394,7 @@ export default function NewProductClient() {
                   padding: '12px 24px',
                   borderRadius: '8px',
                   cursor: 'pointer',
-                  fontWeight: '600'
+                  fontWeight: '600',
                 }}
               >
                 Cancelar
@@ -355,20 +402,20 @@ export default function NewProductClient() {
             </a>
             <button 
               type="submit" 
-              disabled={loading}
+              disabled={saving}
               style={{
-                backgroundColor: 'var(--color-burgundy)',
-                color: 'var(--color-white)',
-                border: '1px solid var(--color-gold)',
+                backgroundColor: 'var(--color-gold)',
+                color: 'var(--color-bg-dark)',
+                border: 'none',
                 padding: '12px 24px',
                 borderRadius: '8px',
                 cursor: 'pointer',
                 fontWeight: '700',
                 boxShadow: 'var(--shadow-gold)',
-                opacity: loading ? 0.7 : 1
+                opacity: saving ? 0.7 : 1,
               }}
             >
-              {loading ? 'Guardando...' : 'GUARDAR PRODUCTO'}
+              {saving ? 'Guardando...' : 'GUARDAR CAMBIOS'}
             </button>
           </div>
         </form>

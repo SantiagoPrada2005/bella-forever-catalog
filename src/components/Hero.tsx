@@ -3,7 +3,7 @@ import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 
 export default function Hero() {
-  const containerRef = useRef();
+  const containerRef = useRef<HTMLElement>(null);
 
   useGSAP(() => {
     gsap.fromTo('.hero-animate', 
@@ -23,7 +23,7 @@ export default function Hero() {
         textAlign: 'center',
         position: 'relative',
         overflow: 'hidden',
-        borderBottom: '4px solid var(--color-gold)'
+        borderBottom: '4px solid var(--color-gold)',
       }}
     >
       {/* Sutil destello de fondo */}
@@ -35,7 +35,7 @@ export default function Hero() {
         width: '300px',
         height: '300px',
         background: 'radial-gradient(circle, rgba(215, 176, 106, 0.1) 0%, rgba(255,255,255,0) 70%)',
-        pointerEvents: 'none'
+        pointerEvents: 'none',
       }} />
 
       <div style={{ position: 'relative', zIndex: 2, maxWidth: '800px', margin: '0 auto' }}>
@@ -47,7 +47,7 @@ export default function Hero() {
             height: '110px', 
             objectFit: 'contain', 
             marginBottom: '16px',
-            maxWidth: '100%'
+            maxWidth: '100%',
           }} 
         />
         <p className="hero-animate" style={{
@@ -56,7 +56,7 @@ export default function Hero() {
           fontStyle: 'italic',
           marginBottom: '28px',
           opacity: 0.95,
-          fontWeight: '300'
+          fontWeight: '300',
         }}>
           ✨ Tu dosis diaria de brillo y color ✨
         </p>
@@ -64,7 +64,7 @@ export default function Hero() {
           width: '80px',
           height: '2px',
           backgroundColor: 'var(--color-gold)',
-          margin: '0 auto'
+          margin: '0 auto',
         }}></div>
       </div>
     </section>

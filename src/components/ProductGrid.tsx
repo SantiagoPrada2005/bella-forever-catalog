@@ -2,11 +2,19 @@ import React, { useRef } from 'react';
 import ProductCard from './ProductCard';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import type { ProductWithRelations, Tone } from '../db/schema';
 
-export default function ProductGrid({ products, onProductClick, onAddToCart }) {
-  const gridRef = useRef();
+export interface ProductGridProps {
+  products: ProductWithRelations[];
+  onProductClick: (product: ProductWithRelations, tone: Tone | null) => void;
+  onAddToCart?: (product: ProductWithRelations, tone: Tone | null) => void;
+}
+
+export default function ProductGrid({ products, onProductClick, onAddToCart = () => {} }: ProductGridProps) {
+  const gridRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
+    if (!gridRef.current) return;
     // Animación de entrada diagonal premium
     gsap.fromTo('.product-card-anim', 
       { opacity: 0, y: 30, scale: 0.95 },
@@ -17,10 +25,10 @@ export default function ProductGrid({ products, onProductClick, onAddToCart }) {
         stagger: {
           amount: 0.4,
           grid: 'auto',
-          from: 'start'
+          from: 'start',
         },
         duration: 0.8, 
-        ease: 'power3.out' 
+        ease: 'power3.out',
       }
     );
   }, { dependencies: [products], scope: gridRef });
@@ -31,7 +39,7 @@ export default function ProductGrid({ products, onProductClick, onAddToCart }) {
         <div style={{
           textAlign: 'center',
           padding: '80px 24px',
-          color: 'var(--color-text-muted)'
+          color: 'var(--color-text-muted)',
         }}>
           <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.8rem', marginBottom: '8px' }}>
             No se encontraron productos

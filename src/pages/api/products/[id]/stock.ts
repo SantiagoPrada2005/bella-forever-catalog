@@ -1,6 +1,7 @@
 import type { APIRoute } from 'astro';
 import { getDb } from '../../../../lib/db';
 import { toggleProductStock } from '../../../../lib/services';
+import { getErrorMessage } from '../../../../lib/errors';
 
 export const prerender = false;
 
@@ -18,11 +19,12 @@ export const PATCH: APIRoute = async ({ params, request }) => {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
-  } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
+  } catch (error: unknown) {
+    return new Response(JSON.stringify({ error: getErrorMessage(error) }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
   }
 };
+
 

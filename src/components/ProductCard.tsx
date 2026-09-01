@@ -2,20 +2,29 @@ import React, { useState, useRef, useEffect } from 'react';
 import { CONFIG } from '../config';
 import gsap from 'gsap';
 import { getProductImage } from '../utils/image-helpers';
+import type { ProductWithRelations, Tone } from '../db/schema';
 
-export default function ProductCard({ product, onProductClick, onAddToCart }) {
-  const [selectedTone, setSelectedTone] = useState(product.tones && product.tones.length > 0 ? product.tones[0] : null);
-  const buttonRef = useRef();
+export interface ProductCardProps {
+  product: ProductWithRelations;
+  onProductClick: (product: ProductWithRelations, tone: Tone | null) => void;
+  onAddToCart: (product: ProductWithRelations, tone: Tone | null) => void;
+}
+
+export default function ProductCard({ product, onProductClick, onAddToCart }: ProductCardProps) {
+  const [selectedTone, setSelectedTone] = useState<Tone | null>(
+    product.tones && product.tones.length > 0 ? product.tones[0] ?? null : null
+  );
+  const buttonRef = useRef<HTMLButtonElement>(null);
 
   const formattedPrice = new Intl.NumberFormat(CONFIG.currency.locale, {
     style: 'currency',
     currency: CONFIG.currency.code,
-    maximumFractionDigits: CONFIG.currency.precision
+    maximumFractionDigits: CONFIG.currency.precision,
   }).format(product.price);
 
   const currentImage = getProductImage(product, selectedTone);
 
-  const handleAdd = (e) => {
+  const handleAdd = (e: React.MouseEvent) => {
     e.stopPropagation();
     onAddToCart(product, selectedTone);
   };
@@ -29,7 +38,7 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
     const isHoverSupported = window.matchMedia('(hover: hover)').matches;
     if (!isHoverSupported) return;
 
-    const onMouseMove = (e) => {
+    const onMouseMove = (e: MouseEvent) => {
       const bound = btn.getBoundingClientRect();
       const btnX = bound.left + bound.width / 2;
       const btnY = bound.top + bound.height / 2;
@@ -42,14 +51,14 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
           x: distX * 0.25,
           y: distY * 0.25,
           duration: 0.3,
-          ease: 'power2.out'
+          ease: 'power2.out',
         });
       } else {
         gsap.to(btn, {
           x: 0,
           y: 0,
           duration: 0.3,
-          ease: 'power2.out'
+          ease: 'power2.out',
         });
       }
     };
@@ -59,7 +68,7 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
         x: 0,
         y: 0,
         duration: 0.5,
-        ease: 'elastic.out(1.1, 0.4)'
+        ease: 'elastic.out(1.1, 0.4)',
       });
     };
 
@@ -86,7 +95,7 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
         display: 'flex',
         flexDirection: 'column',
         position: 'relative',
-        height: '100%'
+        height: '100%',
       }}
       className="satin-shimmer-container"
       onMouseEnter={(e) => {
@@ -112,10 +121,10 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
             width: '100%',
             height: '100%',
             objectFit: 'cover',
-            transition: 'transform 0.6s ease'
+            transition: 'transform 0.6s ease',
           }}
-          onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.04)'}
-          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.04)')}
+          onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
         />
         {product.isNew && (
           <span style={{
@@ -130,7 +139,7 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
             borderRadius: 'var(--radius-pill)',
             textTransform: 'uppercase',
             boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
-            letterSpacing: '0.5px'
+            letterSpacing: '0.5px',
           }}>
             Nuevo
           </span>
@@ -166,7 +175,7 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
           textOverflow: 'ellipsis', 
           overflow: 'hidden', 
           whiteSpace: 'nowrap',
-          color: 'var(--color-text-light)'
+          color: 'var(--color-text-light)',
         }}>
           {product.name}
         </h3>
@@ -175,7 +184,7 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
           color: 'var(--color-gold)', 
           fontWeight: '700', 
           fontSize: '1.15rem', 
-          marginBottom: '14px' 
+          marginBottom: '14px',
         }}>
           {formattedPrice}
         </p>
@@ -186,7 +195,7 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
             display: 'flex', 
             flexWrap: 'wrap',
             gap: '8px', 
-            marginBottom: '16px' 
+            marginBottom: '16px',
           }} onClick={(e) => e.stopPropagation()}>
             {product.tones.map((tone) => {
               const isSelected = selectedTone?.id === tone.id;
@@ -204,7 +213,7 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
                     cursor: tone.inStock ? 'pointer' : 'not-allowed',
                     transition: 'all 0.2s ease',
                     transform: isSelected ? 'scale(1.15)' : 'scale(1)',
-                    opacity: tone.inStock ? 1 : 0.3
+                    opacity: tone.inStock ? 1 : 0.3,
                   }}
                 />
               );
@@ -216,7 +225,7 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
         <button 
           ref={buttonRef}
           onClick={handleAdd}
-          disabled={!product.inStock || (selectedTone && !selectedTone.inStock)}
+          disabled={!product.inStock || Boolean(selectedTone && !selectedTone.inStock)}
           style={{
             marginTop: 'auto',
             width: '100%',
@@ -231,7 +240,7 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
             transition: 'all 0.3s ease',
             letterSpacing: '0.5px',
             whiteSpace: 'normal',
-            wordBreak: 'break-word'
+            wordBreak: 'break-word',
           }}
           onMouseEnter={(e) => {
             if (product.inStock) {

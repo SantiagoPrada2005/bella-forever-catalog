@@ -1,18 +1,21 @@
 'use client';
 
 import React, { useState } from 'react';
+import type { ProductImage } from '../db/schema';
 
-/**
- * ProductGallery — Client Component
- *
- * Renders a main image with a thumbnail strip below. Supports:
- * - Clicking thumbnails to swap the main image
- * - Tone image override (selectedToneImage wins over gallery)
- * - Mobile: max 5 visible thumbnails with overflow scroll
- * - Desktop: show all thumbnails
- * - Lazy loading for images after the first
- */
-export default function ProductGallery({ images = [], selectedToneImage, productName, fallbackImage }) {
+export interface ProductGalleryProps {
+  images?: Array<Pick<ProductImage, 'url'> & Partial<Pick<ProductImage, 'altText'>>>;
+  selectedToneImage?: string | null;
+  productName?: string;
+  fallbackImage?: string;
+}
+
+export default function ProductGallery({
+  images = [],
+  selectedToneImage,
+  productName,
+  fallbackImage,
+}: ProductGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
 
   // Normalizar lista de imágenes con fallback a mainImage
@@ -24,7 +27,7 @@ export default function ProductGallery({ images = [], selectedToneImage, product
   const mainSrc = selectedToneImage || galleryImages[activeIndex]?.url || fallbackImage;
   const hasGallery = !selectedToneImage && galleryImages.length > 1;
 
-  const handleThumbnailClick = (index) => {
+  const handleThumbnailClick = (index: number) => {
     setActiveIndex(index);
   };
 
@@ -50,7 +53,7 @@ export default function ProductGallery({ images = [], selectedToneImage, product
         />
       </div>
 
-      {/* Thumbnail strip — only shown when there's a gallery AND no tone is selected */}
+      {/* Thumbnail strip */}
       {hasGallery && (
         <div
           style={{
@@ -61,7 +64,7 @@ export default function ProductGallery({ images = [], selectedToneImage, product
           }}
           className="product-gallery-thumbs no-scrollbar"
         >
-          {images.map((img, index) => (
+          {galleryImages.map((img, index) => (
             <button
               key={index}
               onClick={() => handleThumbnailClick(index)}

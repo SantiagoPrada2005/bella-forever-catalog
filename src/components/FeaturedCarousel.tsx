@@ -1,18 +1,29 @@
 import React from 'react';
 import { CONFIG } from '../config';
 import { getProductImage } from '../utils/image-helpers';
+import type { ProductWithRelations, Tone } from '../db/schema';
 
-export default function FeaturedCarousel({ products, onProductClick, onAddToCart }) {
+export interface FeaturedCarouselProps {
+  products: ProductWithRelations[];
+  onProductClick: (product: ProductWithRelations, tone: Tone | null) => void;
+  onAddToCart?: (product: ProductWithRelations, tone: Tone | null) => void;
+}
+
+export default function FeaturedCarousel({
+  products,
+  onProductClick,
+  onAddToCart = () => {},
+}: FeaturedCarouselProps) {
   // Filtrar productos destacados o nuevos
   const featured = products.filter(p => p.isFeatured || p.isNew);
 
   if (featured.length === 0) return null;
 
-  const formatPrice = (price) => {
+  const formatPrice = (price: number) => {
     return new Intl.NumberFormat(CONFIG.currency.locale, {
       style: 'currency',
       currency: CONFIG.currency.code,
-      maximumFractionDigits: CONFIG.currency.precision
+      maximumFractionDigits: CONFIG.currency.precision,
     }).format(price);
   };
 
@@ -21,27 +32,27 @@ export default function FeaturedCarousel({ products, onProductClick, onAddToCart
       padding: '60px 0 60px 24px',
       maxWidth: '1200px',
       margin: '0 auto',
-      overflow: 'hidden'
+      overflow: 'hidden',
     }}>
       <div style={{
         paddingRight: '24px',
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'baseline',
-        marginBottom: '24px'
+        marginBottom: '24px',
       }}>
         <h2 style={{
           fontFamily: 'var(--font-serif)',
           fontSize: '2rem',
           fontWeight: '300',
-          color: 'var(--color-white)'
+          color: 'var(--color-white)',
         }}>
           Colección <span style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Destacada</span>
         </h2>
         <span style={{
           fontSize: '0.8rem',
           color: 'var(--color-text-muted)',
-          letterSpacing: '1px'
+          letterSpacing: '1px',
         }}>
           Desliza para explorar →
         </span>
@@ -56,12 +67,12 @@ export default function FeaturedCarousel({ products, onProductClick, onAddToCart
           paddingRight: '24px',
           scrollSnapType: 'x mandatory',
           scrollBehavior: 'smooth',
-          paddingBottom: '20px'
+          paddingBottom: '20px',
         }} 
         className="no-scrollbar"
       >
         {featured.map((product) => {
-          const defaultTone = product.tones && product.tones.length > 0 ? product.tones[0] : null;
+          const defaultTone = product.tones && product.tones.length > 0 ? product.tones[0] ?? null : null;
           const cardImage = getProductImage(product, defaultTone);
 
           return (
@@ -79,7 +90,7 @@ export default function FeaturedCarousel({ products, onProductClick, onAddToCart
                 flexDirection: 'column',
                 cursor: 'pointer',
                 boxShadow: 'var(--shadow-premium)',
-                transition: 'transform 0.3s ease, border-color 0.3s ease'
+                transition: 'transform 0.3s ease, border-color 0.3s ease',
               }}
               className="satin-shimmer-container"
               onMouseEnter={(e) => {
@@ -97,7 +108,7 @@ export default function FeaturedCarousel({ products, onProductClick, onAddToCart
                 borderRadius: '8px',
                 overflow: 'hidden',
                 marginBottom: '16px',
-                background: '#180f12'
+                background: '#180f12',
               }}>
                 <img 
                   src={cardImage} 
@@ -115,7 +126,7 @@ export default function FeaturedCarousel({ products, onProductClick, onAddToCart
                     fontWeight: '700',
                     padding: '3px 8px',
                     borderRadius: 'var(--radius-pill)',
-                    textTransform: 'uppercase'
+                    textTransform: 'uppercase',
                   }}>
                     Nuevo
                   </span>
@@ -129,7 +140,7 @@ export default function FeaturedCarousel({ products, onProductClick, onAddToCart
                 marginBottom: '6px',
                 whiteSpace: 'nowrap',
                 overflow: 'hidden',
-                textOverflow: 'ellipsis'
+                textOverflow: 'ellipsis',
               }}>
                 {product.name}
               </h3>
@@ -138,7 +149,7 @@ export default function FeaturedCarousel({ products, onProductClick, onAddToCart
                 color: 'var(--color-gold)',
                 fontWeight: '700',
                 fontSize: '1.15rem',
-                marginBottom: '16px'
+                marginBottom: '16px',
               }}>
                 {formatPrice(product.price)}
               </p>
@@ -158,7 +169,7 @@ export default function FeaturedCarousel({ products, onProductClick, onAddToCart
                   cursor: 'pointer',
                   fontWeight: '600',
                   fontSize: '0.85rem',
-                  letterSpacing: '0.5px'
+                  letterSpacing: '0.5px',
                 }}
               >
                 Agregar al pedido

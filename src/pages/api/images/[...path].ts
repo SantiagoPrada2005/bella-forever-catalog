@@ -51,7 +51,7 @@ export const GET: APIRoute = async ({ params }) => {
         'CDN-Cache-Control': CACHE_LONG,
       },
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error al servir imagen:', error);
     return new Response(JSON.stringify({ error: 'Error al servir imagen' }), {
       status: 500,
@@ -59,3 +59,4 @@ export const GET: APIRoute = async ({ params }) => {
     });
   }
 };
+

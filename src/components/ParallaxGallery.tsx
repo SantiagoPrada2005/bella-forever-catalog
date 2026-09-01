@@ -7,14 +7,23 @@ if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, useGSAP);
 }
 
-const GALLERIES = [
+interface GalleryItem {
+  id: number;
+  image: string;
+  title: string;
+  speed: number;
+  width: string;
+  aspect: string;
+}
+
+const GALLERIES: GalleryItem[] = [
   {
     id: 1,
     image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop",
     title: "Labiales Satinados",
     speed: -30,
     width: '100%',
-    aspect: '1'
+    aspect: '1',
   },
   {
     id: 2,
@@ -22,7 +31,7 @@ const GALLERIES = [
     title: "Rubores Premium",
     speed: -15,
     width: '85%',
-    aspect: '0.8'
+    aspect: '0.8',
   },
   {
     id: 3,
@@ -30,7 +39,7 @@ const GALLERIES = [
     title: "Paletas de Sombras",
     speed: -45,
     width: '90%',
-    aspect: '1.2'
+    aspect: '1.2',
   },
   {
     id: 4,
@@ -38,17 +47,17 @@ const GALLERIES = [
     title: "Cejas Perfectas",
     speed: -20,
     width: '100%',
-    aspect: '0.9'
-  }
+    aspect: '0.9',
+  },
 ];
 
 export default function ParallaxGallery() {
-  const containerRef = useRef();
+  const containerRef = useRef<HTMLElement>(null);
 
   useGSAP(() => {
-    const items = gsap.utils.toArray('.parallax-item');
+    const items = gsap.utils.toArray<HTMLElement>('.parallax-item');
     items.forEach((item) => {
-      const speed = parseFloat(item.dataset.speed) || -20;
+      const speed = parseFloat(item.dataset.speed || '-20');
       gsap.to(item, {
         yPercent: speed,
         ease: 'none',
@@ -56,8 +65,8 @@ export default function ParallaxGallery() {
           trigger: item,
           start: 'top bottom',
           end: 'bottom top',
-          scrub: true
-        }
+          scrub: true,
+        },
       });
     });
 
@@ -70,8 +79,8 @@ export default function ParallaxGallery() {
         duration: 1.2,
         scrollTrigger: {
           trigger: containerRef.current,
-          start: 'top 80%'
-        }
+          start: 'top 80%',
+        },
       }
     );
   }, { scope: containerRef });
@@ -83,7 +92,7 @@ export default function ParallaxGallery() {
         padding: '80px 24px',
         maxWidth: '1100px',
         margin: '0 auto',
-        overflow: 'hidden'
+        overflow: 'hidden',
       }}
     >
       <h2
@@ -94,7 +103,7 @@ export default function ParallaxGallery() {
           textAlign: 'center',
           fontWeight: '300',
           color: 'var(--color-white)',
-          marginBottom: '60px'
+          marginBottom: '60px',
         }}
       >
         Explora la <span style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Colección</span>
@@ -104,7 +113,7 @@ export default function ParallaxGallery() {
         display: 'grid',
         gridTemplateColumns: 'repeat(2, 1fr)',
         gap: '40px 30px',
-        alignItems: 'start'
+        alignItems: 'start',
       }} className="parallax-grid">
         <style>{`
           @media (max-width: 600px) {
@@ -130,7 +139,7 @@ export default function ParallaxGallery() {
               overflow: 'hidden',
               border: 'var(--border-glass)',
               boxShadow: 'var(--shadow-premium)',
-              transition: 'border-color 0.3s ease, transform 0.3s ease'
+              transition: 'border-color 0.3s ease, transform 0.3s ease',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.borderColor = 'var(--color-gold)';
@@ -143,7 +152,7 @@ export default function ParallaxGallery() {
               position: 'relative',
               width: '100%',
               aspectRatio: item.aspect,
-              overflow: 'hidden'
+              overflow: 'hidden',
             }}>
               <img
                 src={item.image}
@@ -152,10 +161,10 @@ export default function ParallaxGallery() {
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
-                  transition: 'transform 0.6s ease'
+                  transition: 'transform 0.6s ease',
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
+                onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
               />
 
               {/* Overlay oscuro y título */}
@@ -168,7 +177,7 @@ export default function ParallaxGallery() {
                 padding: '24px 16px',
                 display: 'flex',
                 justifyContent: 'space-between',
-                alignItems: 'flex-end'
+                alignItems: 'flex-end',
               }}>
                 <div>
                   <span style={{ fontSize: '0.75rem', color: 'var(--color-gold)', letterSpacing: '1px', textTransform: 'uppercase' }}>Bella Forever</span>

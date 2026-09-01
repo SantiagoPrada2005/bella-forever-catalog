@@ -3,11 +3,21 @@ import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { CONFIG } from '../config';
 import ProductGallery from './ProductGallery';
+import type { ProductWithRelations, Tone } from '../db/schema';
 
-export default function ProductModal({ product, initialTone, onClose, onAddToCart }) {
-  const modalOverlay = useRef();
-  const modalContent = useRef();
-  const [selectedTone, setSelectedTone] = useState(initialTone || product?.tones?.[0] || null);
+export interface ProductModalProps {
+  product: ProductWithRelations | null;
+  initialTone?: Tone | null;
+  onClose: () => void;
+  onAddToCart: (product: ProductWithRelations, tone: Tone | null) => void;
+}
+
+export default function ProductModal({ product, initialTone, onClose, onAddToCart }: ProductModalProps) {
+  const modalOverlay = useRef<HTMLDivElement>(null);
+  const modalContent = useRef<HTMLDivElement>(null);
+  const [selectedTone, setSelectedTone] = useState<Tone | null>(
+    initialTone || (product?.tones && product.tones.length > 0 ? product.tones[0] ?? null : null)
+  );
 
   // Bloquear el scroll del body al abrir y desbloquear al cerrar
   useEffect(() => {
@@ -19,6 +29,7 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
   }, []);
 
   useGSAP(() => {
+    if (!modalOverlay.current || !modalContent.current) return;
     const isMobile = !window.matchMedia('(min-width: 768px)').matches;
     
     const tl = gsap.timeline();
@@ -40,6 +51,10 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
   }, { scope: modalOverlay });
 
   const handleClose = () => {
+    if (!modalOverlay.current || !modalContent.current) {
+      onClose();
+      return;
+    }
     const isMobile = !window.matchMedia('(min-width: 768px)').matches;
     
     if (isMobile) {
@@ -55,7 +70,7 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
   const formattedPrice = new Intl.NumberFormat(CONFIG.currency.locale, {
     style: 'currency',
     currency: CONFIG.currency.code,
-    maximumFractionDigits: CONFIG.currency.precision
+    maximumFractionDigits: CONFIG.currency.precision,
   }).format(product.price);
 
   return (
@@ -76,13 +91,13 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
-          flexShrink: 0
+          flexShrink: 0,
         }} onClick={handleClose}>
           <div style={{
             width: '36px',
             height: '4px',
             backgroundColor: 'rgba(255,255,255,0.2)',
-            borderRadius: '2px'
+            borderRadius: '2px',
           }} className="mobile-notch"></div>
           <style>{`
             @media (min-width: 768px) {
@@ -111,10 +126,10 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
               }
             `}</style>
 
-            {/* Imagen — ProductGallery replaces single <img> */}
+            {/* Imagen — ProductGallery */}
             <div className="modal-img-container" style={{ position: 'relative', width: '100%', backgroundColor: '#1a0f12', flexShrink: 0 }}>
               <ProductGallery
-                images={product.productImages || product.images || []}
+                images={product.productImages || []}
                 fallbackImage={product.mainImage}
                 selectedToneImage={selectedTone?.image}
                 productName={product.name}
@@ -137,10 +152,10 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
                   color: 'var(--color-gold)',
                   fontWeight: 'bold',
                   boxShadow: '0 2px 10px rgba(0,0,0,0.5)',
-                  transition: 'transform 0.2s'
+                  transition: 'transform 0.2s',
                 }}
-                onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.1)'}
-                onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
+                onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
               >
                 ✕
               </button>
@@ -170,7 +185,7 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
                     letterSpacing: '1px',
                     color: 'var(--color-text-light)', 
                     marginBottom: '8px',
-                    fontWeight: '600'
+                    fontWeight: '600',
                   }}>
                     Tono: <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>{selectedTone?.name}</span>
                   </h4>
@@ -191,7 +206,7 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
                             cursor: tone.inStock ? 'pointer' : 'not-allowed',
                             transition: 'all 0.2s',
                             transform: isSelected ? 'scale(1.1)' : 'scale(1)',
-                            opacity: tone.inStock ? 1 : 0.3
+                            opacity: tone.inStock ? 1 : 0.3,
                           }}
                         />
                       );
@@ -203,7 +218,7 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
               {/* Botón */}
               <button
                 className="modal-anim-item"
-                disabled={!product.inStock || (selectedTone && !selectedTone.inStock)}
+                disabled={!product.inStock || (selectedTone ? !selectedTone.inStock : false)}
                 onClick={() => {
                   onAddToCart(product, selectedTone);
                   handleClose();
@@ -220,7 +235,7 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
                   fontSize: '0.95rem',
                   letterSpacing: '1px',
                   boxShadow: product.inStock ? 'var(--shadow-gold)' : 'none',
-                  marginTop: '8px'
+                  marginTop: '8px',
                 }}
               >
                 {product.inStock ? 'Añadir al pedido 💄' : 'Agotado'}
