@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { env } from 'cloudflare:workers';
 
 export const prerender = false;
 
@@ -33,7 +34,7 @@ async function uploadSingleFile(file: File, bucket: any) {
   return `/api/images/${key}`;
 }
 
-export const POST: APIRoute = async ({ request, locals }) => {
+export const POST: APIRoute = async ({ request }) => {
   try {
     const formData = await request.formData();
     const singleFile = formData.get('file') as File | null;
@@ -48,7 +49,6 @@ export const POST: APIRoute = async ({ request, locals }) => {
       });
     }
 
-    const env = (locals as any).runtime?.env;
     const bucket = env?.BELLA_IMAGES;
     if (!bucket) {
       return new Response(JSON.stringify({ error: 'R2 binding BELLA_IMAGES not found in Cloudflare env' }), {

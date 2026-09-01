@@ -4,11 +4,11 @@ import { getProductById, updateProduct, deleteProduct } from '../../../lib/servi
 
 export const prerender = false;
 
-export const GET: APIRoute = async ({ params, locals }) => {
+export const GET: APIRoute = async ({ params }) => {
   try {
     const id = params.id;
     if (!id) return new Response(JSON.stringify({ error: 'ID requerido' }), { status: 400 });
-    const db = getDb((locals as any).runtime?.env);
+    const db = getDb();
     const prod = await getProductById(db, id);
     if (!prod) return new Response(JSON.stringify({ error: 'Producto no encontrado' }), { status: 404 });
     return new Response(JSON.stringify(prod), {
@@ -23,13 +23,13 @@ export const GET: APIRoute = async ({ params, locals }) => {
   }
 };
 
-export const PUT: APIRoute = async ({ params, request, locals }) => {
+export const PUT: APIRoute = async ({ params, request }) => {
   try {
     const id = params.id;
     if (!id) return new Response(JSON.stringify({ error: 'ID requerido' }), { status: 400 });
     const body = await request.json();
     const { data, tones, images } = body;
-    const db = getDb((locals as any).runtime?.env);
+    const db = getDb();
     const result = await updateProduct(db, id, data, tones, images);
     return new Response(JSON.stringify(result), {
       status: 200,
@@ -43,11 +43,11 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
   }
 };
 
-export const DELETE: APIRoute = async ({ params, locals }) => {
+export const DELETE: APIRoute = async ({ params }) => {
   try {
     const id = params.id;
     if (!id) return new Response(JSON.stringify({ error: 'ID requerido' }), { status: 400 });
-    const db = getDb((locals as any).runtime?.env);
+    const db = getDb();
     await deleteProduct(db, id);
     return new Response(JSON.stringify({ success: true }), {
       status: 200,

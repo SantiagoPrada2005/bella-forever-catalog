@@ -4,12 +4,12 @@ import { toggleToneStock } from '../../../../lib/services';
 
 export const prerender = false;
 
-export const PATCH: APIRoute = async ({ params, request, locals }) => {
+export const PATCH: APIRoute = async ({ params, request }) => {
   try {
     const id = params.id;
     if (!id) return new Response(JSON.stringify({ error: 'ID requerido' }), { status: 400 });
     const body = await request.json();
-    const db = getDb((locals as any).runtime?.env);
+    const db = getDb();
     await toggleToneStock(db, id, body.inStock);
     return new Response(JSON.stringify({ success: true }), {
       status: 200,

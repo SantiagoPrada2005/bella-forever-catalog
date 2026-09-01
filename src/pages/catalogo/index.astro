@@ -10,16 +10,13 @@ let productsList: any[] = [];
 let categoriesList: any[] = [];
 
 try {
-  const env = (Astro.locals as any).runtime?.env;
-  if (env?.bella_forever_db) {
-    const db = getDb(env);
-    const [prods, cats] = await Promise.all([
-      getProducts(db),
-      getCategories(db),
-    ]);
-    productsList = prods;
-    categoriesList = cats;
-  }
+  const db = getDb();
+  const [prods, cats] = await Promise.all([
+    getProducts(db),
+    getCategories(db),
+  ]);
+  productsList = prods;
+  categoriesList = cats;
 } catch (e) {
   console.error('Error al cargar datos del catálogo en SSR:', e);
 }

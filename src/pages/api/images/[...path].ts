@@ -1,4 +1,5 @@
 import type { APIRoute } from 'astro';
+import { env } from 'cloudflare:workers';
 
 export const prerender = false;
 
@@ -14,7 +15,7 @@ const MIME_TYPES: Record<string, string> = {
   svg: 'image/svg+xml',
 };
 
-export const GET: APIRoute = async ({ params, locals }) => {
+export const GET: APIRoute = async ({ params }) => {
   try {
     const path = params.path;
     if (!path) {
@@ -24,10 +25,9 @@ export const GET: APIRoute = async ({ params, locals }) => {
       });
     }
 
-    const env = (locals as any).runtime?.env;
     const bucket = env?.BELLA_IMAGES;
     if (!bucket) {
-      return new Response(JSON.stringify({ error: 'R2 binding BELLA_IMAGES not found' }), {
+      return new Response(JSON.stringify({ error: 'R2 binding BELLA_IMAGES not found in Cloudflare env' }), {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });

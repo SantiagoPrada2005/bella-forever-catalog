@@ -4,12 +4,12 @@ import { updateCategory, deleteCategory } from '../../../lib/services';
 
 export const prerender = false;
 
-export const PUT: APIRoute = async ({ params, request, locals }) => {
+export const PUT: APIRoute = async ({ params, request }) => {
   try {
     const id = params.id;
     if (!id) return new Response(JSON.stringify({ error: 'ID requerido' }), { status: 400 });
     const body = await request.json();
-    const db = getDb((locals as any).runtime?.env);
+    const db = getDb();
     const result = await updateCategory(db, id, body.name);
     return new Response(JSON.stringify(result), {
       status: 200,
@@ -23,11 +23,11 @@ export const PUT: APIRoute = async ({ params, request, locals }) => {
   }
 };
 
-export const DELETE: APIRoute = async ({ params, locals }) => {
+export const DELETE: APIRoute = async ({ params }) => {
   try {
     const id = params.id;
     if (!id) return new Response(JSON.stringify({ error: 'ID requerido' }), { status: 400 });
-    const db = getDb((locals as any).runtime?.env);
+    const db = getDb();
     await deleteCategory(db, id);
     return new Response(JSON.stringify({ success: true }), {
       status: 200,
