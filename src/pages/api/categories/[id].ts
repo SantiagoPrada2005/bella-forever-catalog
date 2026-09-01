@@ -8,9 +8,12 @@ export const PUT: APIRoute = async ({ params, request }) => {
   try {
     const id = params.id;
     if (!id) return new Response(JSON.stringify({ error: 'ID requerido' }), { status: 400 });
-    const body = await request.json();
+    const body = (await request.json()) as { name?: string };
+    if (!body || !body.name || !body.name.trim()) {
+      return new Response(JSON.stringify({ error: 'El nombre es requerido' }), { status: 400 });
+    }
     const db = getDb();
-    const result = await updateCategory(db, id, body.name);
+    const result = await updateCategory(db, id, body.name.trim());
     return new Response(JSON.stringify(result), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
@@ -40,3 +43,4 @@ export const DELETE: APIRoute = async ({ params }) => {
     });
   }
 };
+

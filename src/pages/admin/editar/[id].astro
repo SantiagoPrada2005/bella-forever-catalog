@@ -10,6 +10,7 @@ const { id } = Astro.params;
 <Layout
   title="Editar Producto | Bella Forever Admin"
   description="Editar producto y variantes en el catálogo de Bella Forever."
+  noindex={true}
 >
   <EditProductClient client:load id={id} />
 </Layout>

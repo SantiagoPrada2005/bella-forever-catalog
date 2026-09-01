@@ -1,6 +1,7 @@
 ---
 import Layout from '../../layouts/Layout.astro';
 import CatalogClient from '../../components/CatalogClient';
+import JsonLdProductList from '../../components/seo/JsonLdProductList.astro';
 import { getDb } from '../../lib/db';
 import { getProducts, getCategories } from '../../lib/services';
 
@@ -24,11 +25,13 @@ try {
 
 <Layout
   title="Catálogo de Productos | Bella Forever"
-  description="Explora nuestra colección completa de maquillaje de alta gama: rubores, labiales, correctores, cejas y pestañas."
+  description="Explora nuestra colección completa de maquillaje de alta gama: rubores, labiales, correctores, cejas y pestañas en Roldanillo."
 >
+  <JsonLdProductList slot="head" products={productsList} />
   <CatalogClient
     client:load
     initialProducts={productsList}
     initialCategories={categoriesList}
   />
 </Layout>
+

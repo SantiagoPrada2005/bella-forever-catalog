@@ -22,12 +22,12 @@ export const GET: APIRoute = async () => {
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const body = await request.json();
-    if (!body.name) {
+    const body = (await request.json()) as { name?: string };
+    if (!body || !body.name || !body.name.trim()) {
       return new Response(JSON.stringify({ error: 'El nombre es requerido' }), { status: 400 });
     }
     const db = getDb();
-    const result = await createCategory(db, body.name);
+    const result = await createCategory(db, body.name.trim());
     return new Response(JSON.stringify(result), {
       status: 201,
       headers: { 'Content-Type': 'application/json' },
@@ -39,3 +39,4 @@ export const POST: APIRoute = async ({ request }) => {
     });
   }
 };
+

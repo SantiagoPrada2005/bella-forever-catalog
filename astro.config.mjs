@@ -1,14 +1,32 @@
 import { defineConfig } from 'astro/config';
 import cloudflare from '@astrojs/cloudflare';
 import react from '@astrojs/react';
+import sitemap from '@astrojs/sitemap';
+import robotsTxt from 'astro-robots-txt';
 
 // https://astro.build/config
 export default defineConfig({
+  site: 'https://bella-forever-catalog.pages.dev',
   output: 'server',
   adapter: cloudflare({
     imageService: 'passthrough',
   }),
-  integrations: [react()],
+  integrations: [
+    react(),
+    sitemap({
+      filter: (page) => !page.includes('/admin') && !page.includes('/api'),
+    }),
+    robotsTxt({
+      policy: [
+        {
+          userAgent: '*',
+          allow: '/',
+          disallow: ['/admin', '/admin/*', '/api', '/api/*'],
+        },
+      ],
+      sitemap: true,
+    }),
+  ],
   vite: {
     resolve: {
       dedupe: ['react', 'react-dom'],

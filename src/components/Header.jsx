@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from 'react';
 
-export default function Header({ cartCount, onCartClick }) {
+export default function Header({ cartCount = 0, onCartClick, isCatalog: propIsCatalog }) {
   const [pathname, setPathname] = useState('');
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setPathname(window.location.pathname);
-    }
+    setPathname(window.location.pathname);
+    const handlePopState = () => setPathname(window.location.pathname);
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  const isCatalog = pathname.startsWith('/catalogo');
+  const isCatalog = propIsCatalog !== undefined
+    ? propIsCatalog
+    : (Boolean(onCartClick) || pathname.startsWith('/catalogo'));
+
 
   return (
     <header style={{

@@ -1,0 +1,44 @@
+---
+import { CONFIG } from '../../config';
+
+interface Props {
+  siteUrl?: string;
+}
+
+const { siteUrl = 'https://bella-forever-catalog.pages.dev' } = Astro.props;
+
+const schemaData = {
+  "@context": "https://schema.org",
+  "@type": "BeautySalon",
+  "name": CONFIG.brandName,
+  "description": "Catálogo digital y tienda de cosméticos y maquillaje en Roldanillo, Valle del Cauca. Rubores, labiales, correctores, pestañas y productos de belleza de alta gama.",
+  "url": siteUrl,
+  "logo": `${siteUrl}/logo.webp`,
+  "image": `${siteUrl}/isotipo.png`,
+  "telephone": CONFIG.whatsappNumber,
+  "priceRange": "$$",
+  "currenciesAccepted": "COP",
+  "paymentAccepted": "Cash, Credit Card, Bank Transfer",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": CONFIG.defaultCity,
+    "addressRegion": "Valle del Cauca",
+    "addressCountry": "CO"
+  },
+  "geo": {
+    "@type": "GeoCoordinates",
+    "latitude": 4.4147,
+    "longitude": -76.1558
+  },
+  "sameAs": [
+    `https://instagram.com/${CONFIG.instagramUser}`
+  ],
+  "potentialAction": {
+    "@type": "ViewAction",
+    "target": `${siteUrl}/catalogo`,
+    "name": "Ver Catálogo de Productos"
+  }
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schemaData)} />

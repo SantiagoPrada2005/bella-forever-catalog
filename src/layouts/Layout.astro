@@ -1,16 +1,27 @@
 ---
 import '../index.css';
 import GSAPRegister from '../components/GSAPRegister';
+import JsonLdLocalBusiness from '../components/seo/JsonLdLocalBusiness.astro';
 
 interface Props {
   title?: string;
   description?: string;
+  image?: string;
+  type?: string;
+  noindex?: boolean;
 }
 
 const {
   title = 'Bella Forever | Catálogo Premium de Maquillaje',
   description = 'Explora el catálogo digital premium de Bella Forever en Roldanillo. Encuentra maquillaje de alta calidad: rubores, labiales, correctores, cejas y pestañas. Haz tu pedido fácil por WhatsApp.',
+  image = '/isotipo.png',
+  type = 'website',
+  noindex = false,
 } = Astro.props;
+
+const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://bella-forever-catalog.pages.dev';
+const canonicalURL = new URL(Astro.url.pathname, siteUrl);
+const socialImageURL = new URL(image, siteUrl);
 ---
 
 <!doctype html>
@@ -21,13 +32,25 @@ const {
     <title>{title}</title>
     <meta name="description" content={description} />
     <meta name="keywords" content="Bella Forever, maquillaje Roldanillo, cosméticos, catálogo de maquillaje, labiales, rubor, pestañas, cejas, correctores, belleza, Valle del Cauca" />
-    <meta name="robots" content="index, follow" />
+    <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow"} />
+    <link rel="canonical" href={canonicalURL.href} />
+    <meta name="theme-color" content="#12090b" />
     
-    <!-- Open Graph -->
-    <meta property="og:type" content="website" />
+    <!-- Open Graph / Facebook -->
+    <meta property="og:site_name" content="Bella Forever" />
+    <meta property="og:type" content={type} />
+    <meta property="og:url" content={canonicalURL.href} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
+    <meta property="og:image" content={socialImageURL.href} />
     <meta property="og:locale" content="es_CO" />
+    
+    <!-- Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:url" content={canonicalURL.href} />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImageURL.href} />
     
     <!-- Google Fonts: Cormorant Garamond & Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -35,6 +58,10 @@ const {
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     
     <link rel="icon" type="image/png" href="/isotipo.png" />
+
+    <!-- Datos Estructurados (Schema.org) -->
+    <JsonLdLocalBusiness siteUrl={siteUrl} />
+    <slot name="head" />
   </head>
   <body>
     <GSAPRegister client:load />

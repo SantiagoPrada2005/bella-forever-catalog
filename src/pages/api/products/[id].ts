@@ -1,6 +1,13 @@
 import type { APIRoute } from 'astro';
 import { getDb } from '../../../lib/db';
-import { getProductById, updateProduct, deleteProduct } from '../../../lib/services';
+import {
+  getProductById,
+  updateProduct,
+  deleteProduct,
+  type ProductInput,
+  type ToneInput,
+  type ProductImageInput,
+} from '../../../lib/services';
 
 export const prerender = false;
 
@@ -27,8 +34,20 @@ export const PUT: APIRoute = async ({ params, request }) => {
   try {
     const id = params.id;
     if (!id) return new Response(JSON.stringify({ error: 'ID requerido' }), { status: 400 });
-    const body = await request.json();
-    const { data, tones, images } = body;
+    const body = (await request.json()) as {
+      data?: ProductInput;
+      tones?: ToneInput[];
+      images?: ProductImageInput[];
+    };
+
+    if (!body || !body.data || !body.data.name || body.data.price === undefined) {
+      return new Response(JSON.stringify({ error: 'Datos de producto inválidos (nombre y precio requeridos)' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      });
+    }
+
+    const { data, tones = [], images = [] } = body;
     const db = getDb();
     const result = await updateProduct(db, id, data, tones, images);
     return new Response(JSON.stringify(result), {
@@ -60,3 +79,4 @@ export const DELETE: APIRoute = async ({ params }) => {
     });
   }
 };
+

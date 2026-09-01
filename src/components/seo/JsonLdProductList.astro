@@ -1,0 +1,53 @@
+---
+import { CONFIG } from '../../config';
+
+interface ProductItem {
+  id: string;
+  name: string;
+  price: number;
+  description?: string;
+  category?: string;
+  mainImage?: string;
+  inStock?: boolean;
+}
+
+interface Props {
+  products: ProductItem[];
+  siteUrl?: string;
+}
+
+const { products = [], siteUrl = 'https://bella-forever-catalog.pages.dev' } = Astro.props;
+
+const schemaData = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  "name": "Catálogo de Productos Bella Forever",
+  "description": "Colección de maquillaje y cosméticos de alta gama en Roldanillo, Valle del Cauca.",
+  "itemListElement": products.map((product, index) => ({
+    "@type": "ListItem",
+    "position": index + 1,
+    "item": {
+      "@type": "Product",
+      "@id": `${siteUrl}/catalogo#product-${product.id}`,
+      "name": product.name,
+      "description": product.description || `${product.name} - Bella Forever`,
+      "image": product.mainImage?.startsWith('http') 
+        ? product.mainImage 
+        : `${siteUrl}${product.mainImage?.startsWith('/') ? '' : '/'}${product.mainImage || 'isotipo.png'}`,
+      "brand": {
+        "@type": "Brand",
+        "name": CONFIG.brandName
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": product.price,
+        "priceCurrency": CONFIG.currency?.code || "COP",
+        "availability": product.inStock !== false ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
+        "url": `${siteUrl}/catalogo`
+      }
+    }
+  }))
+};
+---
+
+<script type="application/ld+json" set:html={JSON.stringify(schemaData)} />

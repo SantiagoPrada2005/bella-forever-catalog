@@ -10,15 +10,18 @@
     "preview": "wrangler pages dev dist",
     "deploy": "wrangler pages deploy dist",
     "lint": "oxlint",
+    "typecheck": "tsc --noEmit",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.2.5",
     "@astrojs/react": "^6.0.4",
+    "@astrojs/sitemap": "^3.2.1",
     "@gsap/react": "^2.1.2",
     "@react-three/drei": "^10.7.8",
     "@react-three/fiber": "^9.7.0",
     "astro": "^7.2.9",
+    "astro-robots-txt": "^1.0.0",
     "drizzle-orm": "^0.45.2",
     "gsap": "^3.15.0",
     "react": "^19.2.8",
@@ -26,6 +29,7 @@
     "three": "^0.185.1"
   },
   "devDependencies": {
+    "@types/node": "^22.13.9",
     "@types/react": "^19.2.18",
     "@types/react-dom": "^19.2.5",
     "drizzle-kit": "^0.31.10",

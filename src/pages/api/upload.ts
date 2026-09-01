@@ -21,11 +21,11 @@ function validateFile(file: File) {
   return { valid: true };
 }
 
-async function uploadSingleFile(file: File, bucket: any) {
+async function uploadSingleFile(file: File, bucket: R2Bucket) {
   const bytes = await file.arrayBuffer();
-  const timestamp = Date.now();
+  const uuid = crypto.randomUUID();
   const cleanFileName = sanitizeFileName(file.name);
-  const key = `uploads/${timestamp}-${cleanFileName}`;
+  const key = `uploads/${uuid}-${cleanFileName}`;
 
   await bucket.put(key, bytes, {
     httpMetadata: { contentType: file.type },
@@ -33,6 +33,7 @@ async function uploadSingleFile(file: File, bucket: any) {
 
   return `/api/images/${key}`;
 }
+
 
 export const POST: APIRoute = async ({ request }) => {
   try {

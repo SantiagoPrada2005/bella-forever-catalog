@@ -102,7 +102,9 @@ export default function ProductCard({ product, onProductClick, onAddToCart }) {
       <div style={{ position: 'relative', paddingTop: '100%', overflow: 'hidden' }}>
         <img 
           src={currentImage} 
-          alt={product.name} 
+          alt={`${product.name}${selectedTone?.name ? ` - Tono ${selectedTone.name}` : ''} | Bella Forever`}
+          loading="lazy"
+          decoding="async"
           style={{
             position: 'absolute',
             top: 0,

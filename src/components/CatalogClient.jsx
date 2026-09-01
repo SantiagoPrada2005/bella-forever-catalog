@@ -16,25 +16,30 @@ export default function CatalogClient({ initialProducts = [], initialCategories 
   const [selectedProductTone, setSelectedProductTone] = useState(null);
   const [mounted, setMounted] = useState(false);
 
-  // Inicializar carrito desde localStorage una vez montado el cliente
+  // Cargar carrito desde localStorage en cliente tras hidratación
   useEffect(() => {
-    const saved = localStorage.getItem('bella_cart');
-    if (saved) {
-      try {
+    try {
+      const saved = localStorage.getItem('bella_cart');
+      if (saved) {
         setCart(JSON.parse(saved));
-      } catch (e) {
-        console.error("Error al cargar el carrito", e);
       }
+    } catch (e) {
+      console.error("Error al cargar el carrito", e);
     }
     setMounted(true);
   }, []);
 
-  // Sincronizar carrito con localStorage
+  // Sincronizar carrito con localStorage sólo cuando el cliente ya montó
   useEffect(() => {
     if (mounted) {
-      localStorage.setItem('bella_cart', JSON.stringify(cart));
+      try {
+        localStorage.setItem('bella_cart', JSON.stringify(cart));
+      } catch (e) {
+        console.error("Error al guardar el carrito", e);
+      }
     }
   }, [cart, mounted]);
+
 
   const handleAddToCart = (product, selectedTone) => {
     setCart((prev) => {
@@ -138,9 +143,32 @@ export default function CatalogClient({ initialProducts = [], initialCategories 
       <Header 
         cartCount={totalCartCount} 
         onCartClick={() => setIsCartOpen(true)} 
+        isCatalog={true}
       />
 
       <main style={{ flex: '1 0 auto', paddingBottom: '60px' }}>
+        <section style={{ textAlign: 'center', padding: '36px 20px 16px 20px' }}>
+          <h1 style={{
+            fontFamily: 'var(--font-serif)',
+            fontSize: 'clamp(2rem, 5vw, 3rem)',
+            fontWeight: '300',
+            color: 'var(--color-white)',
+            letterSpacing: '1px',
+            marginBottom: '8px'
+          }}>
+            Catálogo <span style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Exclusivo</span>
+          </h1>
+          <p style={{
+            color: 'var(--color-text-muted)',
+            fontSize: '0.95rem',
+            maxWidth: '560px',
+            margin: '0 auto',
+            lineHeight: '1.5'
+          }}>
+            Maquillaje de alta gama para realzar tu belleza. Selecciona tus productos y tonos favoritos y coordina tu pedido directo por WhatsApp.
+          </p>
+        </section>
+
         {featuredProducts.length > 0 && (
           <FeaturedCarousel 
             products={featuredProducts} 

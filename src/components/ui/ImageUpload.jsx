@@ -38,17 +38,21 @@ export default function ImageUpload({ label, value, onChange, required = false, 
   };
 
   // --- Multi file mode ---
+  const [uploadingCount, setUploadingCount] = useState(0);
+
   const handleMultiFileChange = async (e) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
+    const fileList = Array.from(files);
     const urls = Array.isArray(value) ? [...value] : [];
     const errors = [];
 
     setUploading(true);
+    setUploadingCount(fileList.length);
     setUploadErrors([]);
 
-    for (const file of files) {
+    const uploadPromises = fileList.map(async (file) => {
       const formData = new FormData();
       formData.append('file', file);
 
@@ -60,13 +64,22 @@ export default function ImageUpload({ label, value, onChange, required = false, 
         const data = await response.json();
 
         if (response.ok && data.url) {
-          urls.push(data.url);
+          return { ok: true, url: data.url };
         } else {
-          errors.push(data.error || `Error al subir ${file.name}`);
+          return { ok: false, error: data.error || `Error al subir ${file.name}` };
         }
       } catch (error) {
         console.error(`Error al subir ${file.name}:`, error);
-        errors.push(`Error de conexión al subir ${file.name}`);
+        return { ok: false, error: `Error de conexión al subir ${file.name}` };
+      }
+    });
+
+    const results = await Promise.all(uploadPromises);
+    for (const res of results) {
+      if (res.ok && res.url) {
+        urls.push(res.url);
+      } else if (res.error) {
+        errors.push(res.error);
       }
     }
 
@@ -75,6 +88,10 @@ export default function ImageUpload({ label, value, onChange, required = false, 
       onChange(urls);
     }
     setUploading(false);
+    setUploadingCount(0);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const handleRemoveImage = (index) => {
@@ -143,7 +160,7 @@ export default function ImageUpload({ label, value, onChange, required = false, 
           </button>
           {uploading && (
             <span style={{ fontSize: '0.8rem', color: 'var(--color-text-muted)' }}>
-              Subiendo {urlArray.length} de {urlArray.length + (fileInputRef.current?.files?.length || 0)}...
+              Subiendo {uploadingCount} {uploadingCount === 1 ? 'imagen' : 'imágenes'}...
             </span>
           )}
         </div>

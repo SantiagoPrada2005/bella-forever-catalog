@@ -22,12 +22,41 @@ export default function AdminDashboardClient() {
   const [editingCat, setEditingCat] = useState(null);
   const [catSubmitting, setCatSubmitting] = useState(false);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadData() {
+      try {
+        const [prods, cats] = await Promise.all([
+          getProducts(),
+          getCategories(),
+        ]);
+        if (isMounted) {
+          setProducts(prods);
+          setCategories(cats);
+        }
+      } catch (err) {
+        console.error("Error al cargar datos iniciales", err);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    }
+
+    loadData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const fetchProducts = async () => {
     try {
       const data = await getProducts();
       setProducts(data);
-    } catch (e) {
-      console.error("Error al obtener productos", e);
+    } catch (err) {
+      console.error("Error al obtener productos", err);
     } finally {
       setLoading(false);
     }
@@ -37,15 +66,10 @@ export default function AdminDashboardClient() {
     try {
       const data = await getCategories();
       setCategories(data);
-    } catch (e) {
-      console.error("Error al obtener categorías", e);
+    } catch (err) {
+      console.error("Error al obtener categorías", err);
     }
   };
-
-  useEffect(() => {
-    fetchProducts();
-    fetchCategories();
-  }, []);
 
   const handleDelete = async (id, name) => {
     if (confirm(`¿Estás seguro de que deseas eliminar el producto "${name}"?`)) {
@@ -53,7 +77,8 @@ export default function AdminDashboardClient() {
       try {
         await deleteProduct(id);
         await fetchProducts();
-      } catch (e) {
+      } catch (err) {
+        console.error("Error al eliminar producto", err);
         alert("Error al eliminar el producto");
         setLoading(false);
       }
@@ -65,11 +90,13 @@ export default function AdminDashboardClient() {
       const nextStock = !currentStock;
       setProducts(prev => prev.map(p => p.id === id ? { ...p, inStock: nextStock } : p));
       await toggleProductStock(id, nextStock);
-    } catch (e) {
+    } catch (err) {
+      console.error("Error al actualizar stock", err);
       alert("Error al actualizar el stock");
       fetchProducts();
     }
   };
+
 
   const handleCreateCategory = async (e) => {
     e.preventDefault();

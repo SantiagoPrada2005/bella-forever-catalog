@@ -61,3 +61,19 @@ export const productImagesRelations = relations(productImages, ({ one }) => ({
   }),
 }));
 
+export type Product = typeof products.$inferSelect;
+export type NewProduct = typeof products.$inferInsert;
+
+export type Tone = typeof tones.$inferSelect;
+export type NewTone = typeof tones.$inferInsert;
+
+export type ProductImage = typeof productImages.$inferSelect;
+export type NewProductImage = typeof productImages.$inferInsert;
+
+export type Category = typeof categories.$inferSelect;
+export type NewCategory = typeof categories.$inferInsert;
+
+export type ProductWithRelations = Product & {
+  tones: Tone[];
+  productImages: ProductImage[];
+};
