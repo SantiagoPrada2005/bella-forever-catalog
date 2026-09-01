@@ -114,7 +114,8 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
             {/* Imagen — ProductGallery replaces single <img> */}
             <div className="modal-img-container" style={{ position: 'relative', width: '100%', backgroundColor: '#1a0f12', flexShrink: 0 }}>
               <ProductGallery
-                images={product.productImages || []}
+                images={product.productImages || product.images || []}
+                fallbackImage={product.mainImage}
                 selectedToneImage={selectedTone?.image}
                 productName={product.name}
               />

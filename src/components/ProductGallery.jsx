@@ -12,12 +12,17 @@ import React, { useState } from 'react';
  * - Desktop: show all thumbnails
  * - Lazy loading for images after the first
  */
-export default function ProductGallery({ images = [], selectedToneImage, productName }) {
+export default function ProductGallery({ images = [], selectedToneImage, productName, fallbackImage }) {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // If a tone image is selected, it overrides the gallery entirely
-  const mainSrc = selectedToneImage || images[activeIndex]?.url;
-  const hasGallery = !selectedToneImage && images.length > 1;
+  // Normalizar lista de imágenes con fallback a mainImage
+  const galleryImages = images && images.length > 0
+    ? images
+    : (fallbackImage ? [{ url: fallbackImage, altText: productName }] : []);
+
+  // Si hay imagen específica del tono, prevalece; si no, la de la galería o el fallback
+  const mainSrc = selectedToneImage || galleryImages[activeIndex]?.url || fallbackImage;
+  const hasGallery = !selectedToneImage && galleryImages.length > 1;
 
   const handleThumbnailClick = (index) => {
     setActiveIndex(index);
