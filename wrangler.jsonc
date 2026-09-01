@@ -1,35 +1,17 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"main": ".open-next/worker.js",
 	"name": "bella-forever-catalog",
 	"compatibility_date": "2026-07-17",
 	"compatibility_flags": [
-		"nodejs_compat",
-		"global_fetch_strictly_public"
+		"nodejs_compat"
 	],
-	"assets": {
-		"directory": ".open-next/assets",
-		"binding": "ASSETS"
-	},
-	"services": [
-		{
-			"binding": "WORKER_SELF_REFERENCE",
-			"service": "bella-forever-catalog"
-		}
-	],
+	"pages_build_output_dir": "dist",
 	"r2_buckets": [
-		{
-			"binding": "NEXT_INC_CACHE_R2_BUCKET",
-			"bucket_name": "bella-forever-catalog-opennext-cache"
-		},
 		{
 			"binding": "BELLA_IMAGES",
 			"bucket_name": "bella"
 		}
 	],
-	"images": {
-		"binding": "IMAGES"
-	},
 	"d1_databases": [
 		{
 			"binding": "bella_forever_db",
@@ -41,9 +23,6 @@
 		"logs": {
 			"enabled": true,
 			"invocation_logs": true
-		},
-		"traces": {
-			"enabled": true
 		}
 	}
 }

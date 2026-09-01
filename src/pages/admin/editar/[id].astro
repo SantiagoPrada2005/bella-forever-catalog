@@ -1,0 +1,15 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import EditProductClient from '../../../components/admin/EditProductClient';
+
+export const prerender = false;
+
+const { id } = Astro.params;
+---
+
+<Layout
+  title="Editar Producto | Bella Forever Admin"
+  description="Editar producto y variantes en el catálogo de Bella Forever."
+>
+  <EditProductClient client:load id={id} />
+</Layout>

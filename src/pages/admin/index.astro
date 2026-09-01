@@ -1,0 +1,13 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import AdminDashboardClient from '../../components/admin/AdminDashboardClient';
+
+export const prerender = false;
+---
+
+<Layout
+  title="Panel de Administración | Bella Forever"
+  description="Administración de catálogo, productos y categorías de Bella Forever."
+>
+  <AdminDashboardClient client:load />
+</Layout>

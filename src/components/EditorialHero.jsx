@@ -1,11 +1,13 @@
 import React, { useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 
 export default function EditorialHero() {
   const containerRef = useRef();
-  const router = useRouter();
+
+  const handleNavigate = () => {
+    window.location.href = '/catalogo';
+  };
 
   useGSAP(() => {
     // Animación de textos
@@ -118,7 +120,7 @@ export default function EditorialHero() {
           </p>
           <div className="hero-fade-up">
             <button 
-              onClick={() => router.push('/catalogo')}
+              onClick={handleNavigate}
               style={{
                 backgroundColor: 'var(--color-burgundy)',
                 color: 'var(--color-white)',

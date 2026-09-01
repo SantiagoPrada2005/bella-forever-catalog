@@ -1,11 +1,15 @@
-import React from 'react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { CONFIG } from '../config';
+import React, { useEffect, useState } from 'react';
 
 export default function Header({ cartCount, onCartClick }) {
-  const pathname = usePathname();
-  const isCatalog = pathname === '/catalogo';
+  const [pathname, setPathname] = useState('');
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      setPathname(window.location.pathname);
+    }
+  }, []);
+
+  const isCatalog = pathname.startsWith('/catalogo');
 
   return (
     <header style={{
@@ -23,7 +27,7 @@ export default function Header({ cartCount, onCartClick }) {
       padding: '0 24px',
       zIndex: 1000
     }}>
-      <Link 
+      <a 
         href="/" 
         style={{
           display: 'flex',
@@ -47,10 +51,10 @@ export default function Header({ cartCount, onCartClick }) {
         }}>
           BELLA FOREVER
         </span>
-      </Link>
+      </a>
 
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-        <Link 
+        <a 
           href="/catalogo" 
           aria-label="Catálogo"
           style={{
@@ -69,7 +73,7 @@ export default function Header({ cartCount, onCartClick }) {
             <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
             <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
           </svg>
-        </Link>
+        </a>
 
         {isCatalog && (
           <button

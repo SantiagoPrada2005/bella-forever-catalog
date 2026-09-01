@@ -1,0 +1,13 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import NewProductClient from '../../components/admin/NewProductClient';
+
+export const prerender = false;
+---
+
+<Layout
+  title="Nuevo Producto | Bella Forever Admin"
+  description="Crear un nuevo producto en el catálogo de Bella Forever."
+>
+  <NewProductClient client:load />
+</Layout>

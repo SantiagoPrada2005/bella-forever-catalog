@@ -34,3 +34,7 @@ dist-ssr
 .wrangler
 .dev.vars*
 !.dev.vars.example
+
+# Astro
+.astro
+

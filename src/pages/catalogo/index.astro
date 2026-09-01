@@ -1,0 +1,37 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CatalogClient from '../../components/CatalogClient';
+import { getDb } from '../../lib/db';
+import { getProducts, getCategories } from '../../lib/services';
+
+export const prerender = false;
+
+let productsList: any[] = [];
+let categoriesList: any[] = [];
+
+try {
+  const env = (Astro.locals as any).runtime?.env;
+  if (env?.bella_forever_db) {
+    const db = getDb(env);
+    const [prods, cats] = await Promise.all([
+      getProducts(db),
+      getCategories(db),
+    ]);
+    productsList = prods;
+    categoriesList = cats;
+  }
+} catch (e) {
+  console.error('Error al cargar datos del catálogo en SSR:', e);
+}
+---
+
+<Layout
+  title="Catálogo de Productos | Bella Forever"
+  description="Explora nuestra colección completa de maquillaje de alta gama: rubores, labiales, correctores, cejas y pestañas."
+>
+  <CatalogClient
+    client:load
+    initialProducts={productsList}
+    initialCategories={categoriesList}
+  />
+</Layout>

@@ -1,0 +1,43 @@
+---
+import '../index.css';
+import GSAPRegister from '../components/GSAPRegister';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Bella Forever | Catálogo Premium de Maquillaje',
+  description = 'Explora el catálogo digital premium de Bella Forever en Roldanillo. Encuentra maquillaje de alta calidad: rubores, labiales, correctores, cejas y pestañas. Haz tu pedido fácil por WhatsApp.',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="keywords" content="Bella Forever, maquillaje Roldanillo, cosméticos, catálogo de maquillaje, labiales, rubor, pestañas, cejas, correctores, belleza, Valle del Cauca" />
+    <meta name="robots" content="index, follow" />
+    
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:locale" content="es_CO" />
+    
+    <!-- Google Fonts: Cormorant Garamond & Outfit -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    
+    <link rel="icon" type="image/png" href="/isotipo.png" />
+  </head>
+  <body>
+    <GSAPRegister client:load />
+    <slot />
+  </body>
+</html>
