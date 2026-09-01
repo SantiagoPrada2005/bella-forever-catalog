@@ -1,7 +1,8 @@
 import React from 'react';
 import { CONFIG } from '../config';
 
-export default function CategoryFilters({ categories, products = [], activeCategory, onCategoryChange }) {
+export default function CategoryFilters({ categories, products = [], activeCategory, onCategoryChange, onSelectCategory }) {
+  const handleChange = onCategoryChange || onSelectCategory || (() => {});
   const baseCategories = categories && categories.length > 0
     ? categories.map(c => ({ id: c.slug, name: c.name }))
     : CONFIG.categories.filter(c => c.id !== 'todos');
@@ -35,7 +36,7 @@ export default function CategoryFilters({ categories, products = [], activeCateg
         return (
           <button
             key={cat.id}
-            onClick={() => onCategoryChange(cat.id)}
+            onClick={() => handleChange(cat.id)}
             style={{
               padding: '10px 20px',
               borderRadius: 'var(--radius-pill)',

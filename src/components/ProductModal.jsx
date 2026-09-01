@@ -7,7 +7,7 @@ import ProductGallery from './ProductGallery';
 export default function ProductModal({ product, initialTone, onClose, onAddToCart }) {
   const modalOverlay = useRef();
   const modalContent = useRef();
-  const [selectedTone, setSelectedTone] = useState(initialTone || (product.tones && product.tones.length > 0 ? product.tones[0] : null));
+  const [selectedTone, setSelectedTone] = useState(initialTone || product?.tones?.[0] || null);
 
   // Bloquear el scroll del body al abrir y desbloquear al cerrar
   useEffect(() => {

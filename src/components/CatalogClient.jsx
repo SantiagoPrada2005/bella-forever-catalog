@@ -150,8 +150,9 @@ export default function CatalogClient({ initialProducts = [], initialCategories 
 
         <CategoryFilters 
           categories={initialCategories} 
+          products={initialProducts}
           activeCategory={activeCategory} 
-          onSelectCategory={setActiveCategory} 
+          onCategoryChange={setActiveCategory} 
         />
 
         <ProductGrid 
@@ -160,20 +161,23 @@ export default function CatalogClient({ initialProducts = [], initialCategories 
         />
       </main>
 
-      <ProductModal 
-        product={selectedProduct} 
-        initialTone={selectedProductTone}
-        onClose={handleCloseProductModal} 
-        onAddToCart={handleAddToCart} 
-      />
+      {selectedProduct && (
+        <ProductModal 
+          product={selectedProduct} 
+          initialTone={selectedProductTone}
+          onClose={handleCloseProductModal} 
+          onAddToCart={handleAddToCart} 
+        />
+      )}
 
-      <CartDrawer 
-        isOpen={isCartOpen} 
-        onClose={() => setIsCartOpen(false)} 
-        cart={cart} 
-        onUpdateQuantity={handleUpdateQuantity} 
-        onCheckout={handleCheckout} 
-      />
+      {isCartOpen && (
+        <CartDrawer 
+          onClose={() => setIsCartOpen(false)} 
+          cart={cart} 
+          onUpdateQuantity={handleUpdateQuantity} 
+          onCheckout={handleCheckout} 
+        />
+      )}
 
       <footer style={{
         padding: '40px 24px',

@@ -16,12 +16,14 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
     tl.fromTo(drawerOverlay.current, { opacity: 0 }, { opacity: 1, duration: 0.3 });
     tl.fromTo(drawerContent.current, { x: '100%' }, { x: '0%', duration: 0.5, ease: 'power3.out' }, '-=0.2');
     
-    // Animación escalonada para los items del carrito
-    tl.fromTo('.cart-item-anim', 
-      { opacity: 0, x: 20 }, 
-      { opacity: 1, x: 0, stagger: 0.06, duration: 0.4, ease: 'power2.out' },
-      '-=0.25'
-    );
+    // Animación escalonada para los items del carrito solo si existen
+    if (cart.length > 0) {
+      tl.fromTo('.cart-item-anim', 
+        { opacity: 0, x: 20 }, 
+        { opacity: 1, x: 0, stagger: 0.06, duration: 0.4, ease: 'power2.out' },
+        '-=0.25'
+      );
+    }
   }, { scope: drawerOverlay });
 
   const handleClose = () => {
