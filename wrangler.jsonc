@@ -1,11 +1,10 @@
 {
 	"$schema": "node_modules/wrangler/config-schema.json",
-	"name": "bella-forever-catalog",
+	"name": "bella-forever",
 	"compatibility_date": "2026-07-17",
 	"compatibility_flags": [
 		"nodejs_compat"
 	],
-	"pages_build_output_dir": "dist",
 	"r2_buckets": [
 		{
 			"binding": "BELLA_IMAGES",

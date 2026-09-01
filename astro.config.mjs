@@ -6,7 +6,7 @@ import robotsTxt from 'astro-robots-txt';
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://bella-forever-catalog.pages.dev',
+  site: 'https://bella-forever.pages.dev',
   output: 'server',
   adapter: cloudflare({
     imageService: 'passthrough',
