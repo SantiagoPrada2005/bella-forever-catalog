@@ -101,6 +101,7 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
           </h3>
           <button 
             onClick={handleClose} 
+            aria-label="Cerrar carrito de compras"
             style={{ 
               background: 'none', 
               border: 'none', 
@@ -144,6 +145,8 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
                   <img 
                     src={item.image} 
                     alt={item.productName} 
+                    width="70"
+                    height="70"
                     style={{ width: '70px', height: '70px', objectFit: 'cover', borderRadius: '8px', border: 'var(--border-glass)' }} 
                   />
                   
@@ -163,6 +166,7 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
                       <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <button 
                           onClick={() => onUpdateQuantity(item.key, -1)}
+                          aria-label={`Disminuir cantidad de ${item.productName}`}
                           style={{ 
                             width: '24px', 
                             height: '24px', 
@@ -183,6 +187,7 @@ export default function CartDrawer({ cart, onClose, onUpdateQuantity, onCheckout
                         <span style={{ fontWeight: '500', fontSize: '0.85rem' }}>{item.quantity}</span>
                         <button 
                           onClick={() => onUpdateQuantity(item.key, 1)}
+                          aria-label={`Aumentar cantidad de ${item.productName}`}
                           style={{ 
                             width: '24px', 
                             height: '24px', 

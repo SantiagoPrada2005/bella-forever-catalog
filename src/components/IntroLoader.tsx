@@ -62,7 +62,9 @@ export default function IntroLoader({ onComplete }: IntroLoaderProps) {
         <img 
           src="/isotipo.png" 
           alt="Bella Forever Isotipo" 
-          style={{ height: '70px', objectFit: 'contain' }} 
+          width="70"
+          height="70"
+          style={{ height: '70px', width: '70px', objectFit: 'contain' }} 
         />
         <h1 style={{
           fontFamily: 'var(--font-serif)',

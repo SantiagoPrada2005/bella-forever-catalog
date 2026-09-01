@@ -48,6 +48,7 @@ export default function ProductGrid({ products, onProductClick, onAddToCart = ()
         </div>
       ) : (
         <div>
+          <h2 className="sr-only">Todos los productos</h2>
           <style>{`
             .catalog-grid {
               display: grid;

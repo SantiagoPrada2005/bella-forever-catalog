@@ -41,7 +41,9 @@ export default function Header({
         <img
           src="/isotipo.png"
           alt="Bella Forever Isotipo"
-          style={{ height: '36px', objectFit: 'contain' }}
+          width="36"
+          height="36"
+          style={{ height: '36px', width: '36px', objectFit: 'contain' }}
         />
         <span style={{
           fontFamily: 'var(--font-serif)',
@@ -79,6 +81,7 @@ export default function Header({
         {isCatalog && (
           <button
             onClick={onCartClick}
+            aria-label={cartCount > 0 ? `Ver carrito con ${cartCount} productos` : 'Ver carrito de compras'}
             style={{
               background: 'none',
               border: 'none',

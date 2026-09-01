@@ -113,6 +113,10 @@ export default function FeaturedCarousel({
                 <img 
                   src={cardImage} 
                   alt={product.name} 
+                  width="280"
+                  height="280"
+                  loading="lazy"
+                  decoding="async"
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
                 {product.isNew && (

@@ -136,6 +136,7 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
               />
               <button 
                 onClick={handleClose}
+                aria-label="Cerrar detalles del producto"
                 style={{
                   position: 'absolute',
                   top: '16px',
@@ -196,6 +197,7 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
                         <button
                           key={tone.id}
                           title={tone.name}
+                          aria-label={`Seleccionar tono ${tone.name}`}
                           onClick={() => setSelectedTone(tone)}
                           style={{
                             width: '30px',

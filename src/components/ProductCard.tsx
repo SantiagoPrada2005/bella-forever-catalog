@@ -112,6 +112,8 @@ export default function ProductCard({ product, onProductClick, onAddToCart }: Pr
         <img 
           src={currentImage} 
           alt={`${product.name}${selectedTone?.name ? ` - Tono ${selectedTone.name}` : ''} | Bella Forever`}
+          width="400"
+          height="400"
           loading="lazy"
           decoding="async"
           style={{
@@ -203,6 +205,7 @@ export default function ProductCard({ product, onProductClick, onAddToCart }: Pr
                 <button
                   key={tone.id}
                   title={tone.name}
+                  aria-label={`Seleccionar tono ${tone.name}`}
                   onClick={() => setSelectedTone(tone)}
                   style={{
                     width: '22px',
