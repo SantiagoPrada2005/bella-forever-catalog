@@ -5,6 +5,7 @@ import JsonLdProductList from '../../components/seo/JsonLdProductList.astro';
 import type { ProductWithRelations, Category } from '../../db/schema';
 import { getDb } from '../../lib/db';
 import { getProducts, getCategories } from '../../lib/services';
+import { getProductImage } from '../../utils/image-helpers';
 
 export const prerender = false;
 
@@ -23,6 +24,9 @@ try {
   console.error('Error al cargar datos del catálogo en SSR:', e);
 }
 
+const featured = productsList.filter(p => p.isFeatured || p.isNew);
+const lcpProduct = featured.length > 0 ? featured[0] : productsList[0];
+const lcpImageUrl = lcpProduct ? getProductImage(lcpProduct, lcpProduct.tones?.[0] ?? null) : null;
 ---
 
 <Layout
@@ -30,8 +34,11 @@ try {
   description="Explora nuestra colección completa de maquillaje de alta gama: rubores, labiales, correctores, cejas y pestañas en Roldanillo."
 >
   <JsonLdProductList slot="head" products={productsList} />
+  {lcpImageUrl && (
+    <link rel="preload" as="image" href={lcpImageUrl} fetchpriority="high" slot="head" />
+  )}
   <CatalogClient
-    client:load
+    client:idle
     initialProducts={productsList}
     initialCategories={categoriesList}
   />

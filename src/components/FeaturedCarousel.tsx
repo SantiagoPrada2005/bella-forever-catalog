@@ -71,7 +71,7 @@ export default function FeaturedCarousel({
         }} 
         className="no-scrollbar"
       >
-        {featured.map((product) => {
+        {featured.map((product, index) => {
           const defaultTone = product.tones && product.tones.length > 0 ? product.tones[0] ?? null : null;
           const cardImage = getProductImage(product, defaultTone);
 
@@ -115,8 +115,9 @@ export default function FeaturedCarousel({
                   alt={product.name} 
                   width="280"
                   height="280"
-                  loading="lazy"
-                  decoding="async"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  fetchPriority={index === 0 ? "high" : "auto"}
+                  decoding={index === 0 ? "sync" : "async"}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
                 {product.isNew && (

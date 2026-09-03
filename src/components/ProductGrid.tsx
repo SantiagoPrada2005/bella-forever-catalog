@@ -66,10 +66,11 @@ export default function ProductGrid({ products, onProductClick, onAddToCart = ()
             ref={gridRef}
             className="catalog-grid"
           >
-            {products.map((prod) => (
+            {products.map((prod, index) => (
               <div key={prod.id} className="product-card-anim" style={{ height: '100%' }}>
                 <ProductCard 
                   product={prod} 
+                  priority={index < 4}
                   onProductClick={onProductClick} 
                   onAddToCart={onAddToCart}
                 />

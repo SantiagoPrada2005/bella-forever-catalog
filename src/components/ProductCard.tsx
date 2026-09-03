@@ -6,11 +6,12 @@ import type { ProductWithRelations, Tone } from '../db/schema';
 
 export interface ProductCardProps {
   product: ProductWithRelations;
+  priority?: boolean;
   onProductClick: (product: ProductWithRelations, tone: Tone | null) => void;
   onAddToCart: (product: ProductWithRelations, tone: Tone | null) => void;
 }
 
-export default function ProductCard({ product, onProductClick, onAddToCart }: ProductCardProps) {
+export default function ProductCard({ product, priority = false, onProductClick, onAddToCart }: ProductCardProps) {
   const [selectedTone, setSelectedTone] = useState<Tone | null>(
     product.tones && product.tones.length > 0 ? product.tones[0] ?? null : null
   );
@@ -114,8 +115,9 @@ export default function ProductCard({ product, onProductClick, onAddToCart }: Pr
           alt={`${product.name}${selectedTone?.name ? ` - Tono ${selectedTone.name}` : ''} | Bella Forever`}
           width="400"
           height="400"
-          loading="lazy"
-          decoding="async"
+          loading={priority ? 'eager' : 'lazy'}
+          fetchPriority={priority ? 'high' : 'auto'}
+          decoding={priority ? 'sync' : 'async'}
           style={{
             position: 'absolute',
             top: 0,

@@ -1,6 +1,5 @@
 ---
 import '../index.css';
-import GSAPRegister from '../components/GSAPRegister';
 import JsonLdLocalBusiness from '../components/seo/JsonLdLocalBusiness.astro';
 
 interface Props {
@@ -55,7 +54,11 @@ const socialImageURL = new URL(image, siteUrl);
     <!-- Google Fonts: Cormorant Garamond & Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" media="print" onload="this.media='all'" />
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" />
+    </noscript>
     
     <link rel="icon" type="image/png" href="/isotipo.png" />
 
@@ -64,7 +67,6 @@ const socialImageURL = new URL(image, siteUrl);
     <slot name="head" />
   </head>
   <body>
-    <GSAPRegister client:load />
     <slot />
   </body>
 </html>
