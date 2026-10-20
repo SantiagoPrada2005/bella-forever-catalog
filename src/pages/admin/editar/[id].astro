@@ -5,6 +5,10 @@ import EditProductClient from '../../../components/admin/EditProductClient';
 export const prerender = false;
 
 const { id } = Astro.params;
+
+if (!id) {
+  return Astro.redirect('/admin');
+}
 ---
 
 <Layout
