@@ -73,6 +73,12 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
     maximumFractionDigits: CONFIG.currency.precision,
   }).format(product.price);
 
+  const hasTones = Boolean(product.tones && product.tones.length > 0);
+  const isToneAvailable = selectedTone ? (Boolean(selectedTone.inStock) && selectedTone.stock > 0) : true;
+  const isAvailable = Boolean(product.inStock) && (hasTones ? isToneAvailable : product.stock > 0);
+  const currentStock = selectedTone ? selectedTone.stock : product.stock;
+  const isLowStock = isAvailable && currentStock > 0 && currentStock <= 3;
+
   return (
     <div 
       ref={modalOverlay}
@@ -180,23 +186,39 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
               {/* Tonos */}
               {product.tones && product.tones.length > 0 && (
                 <div className="modal-anim-item">
-                  <h4 style={{ 
-                    fontSize: '0.75rem', 
-                    textTransform: 'uppercase', 
-                    letterSpacing: '1px',
-                    color: 'var(--color-text-light)', 
-                    marginBottom: '8px',
-                    fontWeight: '600',
-                  }}>
-                    Tono: <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>{selectedTone?.name}</span>
-                  </h4>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                    <h4 style={{ 
+                      fontSize: '0.75rem', 
+                      textTransform: 'uppercase', 
+                      letterSpacing: '1px',
+                      color: 'var(--color-text-light)', 
+                      margin: 0,
+                      fontWeight: '600',
+                    }}>
+                      Tono: <span style={{ color: 'var(--color-gold)', fontWeight: 'bold' }}>{selectedTone?.name}</span>
+                    </h4>
+                    {isLowStock && (
+                      <span style={{
+                        fontSize: '0.72rem',
+                        color: '#f59e0b',
+                        backgroundColor: 'rgba(245, 158, 11, 0.12)',
+                        border: '1px solid rgba(245, 158, 11, 0.3)',
+                        borderRadius: '4px',
+                        padding: '2px 6px',
+                        fontWeight: '600',
+                      }}>
+                        ¡Quedan {currentStock}!
+                      </span>
+                    )}
+                  </div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
                     {product.tones.map((tone) => {
                       const isSelected = selectedTone?.id === tone.id;
+                      const toneReady = Boolean(tone.inStock) && tone.stock > 0;
                       return (
                         <button
                           key={tone.id}
-                          title={tone.name}
+                          title={`${tone.name}${!toneReady ? ' (Agotado)' : ''}`}
                           aria-label={`Seleccionar tono ${tone.name}`}
                           onClick={() => setSelectedTone(tone)}
                           style={{
@@ -205,10 +227,10 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
                             borderRadius: '50%',
                             backgroundColor: tone.hex,
                             border: isSelected ? '2px solid var(--color-gold)' : '1px solid rgba(255,255,255,0.2)',
-                            cursor: tone.inStock ? 'pointer' : 'not-allowed',
+                            cursor: toneReady ? 'pointer' : 'not-allowed',
                             transition: 'all 0.2s',
                             transform: isSelected ? 'scale(1.1)' : 'scale(1)',
-                            opacity: tone.inStock ? 1 : 0.3,
+                            opacity: toneReady ? 1 : 0.3,
                           }}
                         />
                       );
@@ -220,27 +242,27 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
               {/* Botón */}
               <button
                 className="modal-anim-item"
-                disabled={!product.inStock || (selectedTone ? !selectedTone.inStock : false)}
+                disabled={!isAvailable}
                 onClick={() => {
                   onAddToCart(product, selectedTone);
                   handleClose();
                 }}
                 style={{
                   width: '100%',
-                  backgroundColor: product.inStock ? 'var(--color-burgundy)' : 'rgba(255,255,255,0.05)',
-                  color: product.inStock ? 'var(--color-white)' : 'var(--color-text-muted)',
-                  border: product.inStock ? '1px solid var(--color-gold)' : '1px solid rgba(255,255,255,0.05)',
+                  backgroundColor: isAvailable ? 'var(--color-burgundy)' : 'rgba(255,255,255,0.05)',
+                  color: isAvailable ? 'var(--color-white)' : 'var(--color-text-muted)',
+                  border: isAvailable ? '1px solid var(--color-gold)' : '1px solid rgba(255,255,255,0.05)',
                   padding: '12px 0',
                   borderRadius: '8px',
-                  cursor: product.inStock ? 'pointer' : 'default',
+                  cursor: isAvailable ? 'pointer' : 'default',
                   fontWeight: '600',
                   fontSize: '0.95rem',
                   letterSpacing: '1px',
-                  boxShadow: product.inStock ? 'var(--shadow-gold)' : 'none',
+                  boxShadow: isAvailable ? 'var(--shadow-gold)' : 'none',
                   marginTop: '8px',
                 }}
               >
-                {product.inStock ? 'Añadir al pedido 💄' : 'Agotado'}
+                {isAvailable ? 'Añadir al pedido 💄' : 'Agotado'}
               </button>
             </div>
           </div>

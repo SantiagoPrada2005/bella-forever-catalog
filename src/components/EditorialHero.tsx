@@ -169,9 +169,12 @@ export default function EditorialHero() {
             zIndex: 1,
           }}>
             <img 
-              src="https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=600&auto=format&fit=crop" 
-              alt="Bella Makeup" 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              src="/images/gallery-collection-flatlay.webp" 
+              alt="Colección Cosmética Bella Forever" 
+              width="600"
+              height="400"
+              loading="eager"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 45%' }}
             />
           </div>
 
@@ -189,9 +192,13 @@ export default function EditorialHero() {
             zIndex: 2,
           }}>
             <img 
-              src="https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=600&auto=format&fit=crop" 
-              alt="Bella Eyelash Kit" 
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              src="/images/hero-silvy-blush.webp" 
+              alt="Silvy Loaiza - Bella Forever Boutique" 
+              width="600"
+              height="600"
+              loading="eager"
+              fetchPriority="high"
+              style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center 20%' }}
             />
           </div>
         </div>

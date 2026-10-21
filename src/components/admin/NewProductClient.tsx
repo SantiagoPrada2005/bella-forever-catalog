@@ -11,6 +11,7 @@ export default function NewProductClient() {
   const [formData, setFormData] = useState({
     name: '',
     price: '',
+    stock: '10',
     description: '',
     category: '',
     mainImage: '',
@@ -48,14 +49,14 @@ export default function NewProductClient() {
   };
 
   const handleAddTone = () => {
-    setTones(prev => [...prev, { name: '', hex: '#DDA3A9', image: '', inStock: true }]);
+    setTones(prev => [...prev, { name: '', hex: '#DDA3A9', image: '', inStock: true, stock: 10 }]);
   };
 
   const handleRemoveTone = (index: number) => {
     setTones(prev => prev.filter((_, i) => i !== index));
   };
 
-  const handleToneChange = (index: number, field: keyof ToneInput, value: string | boolean) => {
+  const handleToneChange = (index: number, field: keyof ToneInput, value: string | boolean | number) => {
     setTones(prev => prev.map((t, i) => i === index ? { ...t, [field]: value } : t));
   };
 
@@ -121,7 +122,7 @@ export default function NewProductClient() {
           boxShadow: 'var(--shadow-premium)',
         }}>
           {/* Fila principal */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', marginBottom: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '16px', marginBottom: '20px' }}>
             <div>
               <label style={{ display: 'block', color: 'var(--color-gold)', fontSize: '0.85rem', marginBottom: '6px', fontWeight: '600' }}>
                 Nombre del Producto *
@@ -145,6 +146,21 @@ export default function NewProductClient() {
                 name="price" 
                 placeholder="Ej. 35000"
                 value={formData.price} 
+                onChange={handleChange}
+                required
+                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(215,176,106,0.2)', backgroundColor: 'rgba(0,0,0,0.3)', color: '#fff' }}
+              />
+            </div>
+            <div>
+              <label style={{ display: 'block', color: 'var(--color-gold)', fontSize: '0.85rem', marginBottom: '6px', fontWeight: '600' }}>
+                Stock Inicial *
+              </label>
+              <input 
+                type="number" 
+                name="stock" 
+                placeholder="Ej. 10"
+                min="0"
+                value={formData.stock} 
                 onChange={handleChange}
                 required
                 style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(215,176,106,0.2)', backgroundColor: 'rgba(0,0,0,0.3)', color: '#fff' }}
@@ -281,7 +297,7 @@ export default function NewProductClient() {
                 {tones.map((tone, index) => (
                   <div key={index} style={{
                     display: 'grid',
-                    gridTemplateColumns: '2fr 1fr 3fr 1fr auto',
+                    gridTemplateColumns: '2fr 1fr 2.5fr 1fr 1fr auto',
                     gap: '12px',
                     alignItems: 'center',
                     backgroundColor: 'rgba(0,0,0,0.15)',
@@ -315,6 +331,17 @@ export default function NewProductClient() {
                       />
                     </div>
                     <div>
+                      <input 
+                        type="number" 
+                        placeholder="Stock"
+                        min="0"
+                        value={tone.stock ?? 10} 
+                        onChange={(e) => handleToneChange(index, 'stock', parseInt(e.target.value, 10) || 0)}
+                        style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid rgba(215,176,106,0.1)', backgroundColor: 'rgba(0,0,0,0.2)', color: '#fff', fontSize: '0.85rem' }}
+                        title="Stock numérico para este tono"
+                      />
+                    </div>
+                    <div>
                       <label style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', cursor: 'pointer', color: '#fff', fontSize: '0.8rem' }}>
                         <input 
                           type="checkbox" 
@@ -322,7 +349,7 @@ export default function NewProductClient() {
                           onChange={(e) => handleToneChange(index, 'inStock', e.target.checked)}
                           style={{ accentColor: 'var(--color-gold)' }}
                         />
-                        Stock
+                        Disp.
                       </label>
                     </div>
                     <button 

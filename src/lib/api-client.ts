@@ -1,5 +1,5 @@
-import type { Category, ProductWithRelations } from '../db/schema';
-import type { ProductInput, ToneInput, ProductImageInput } from './services';
+import type { Category, ProductWithRelations, OrderWithItems } from '../db/schema';
+import type { ProductInput, ToneInput, ProductImageInput, CreateOrderInput } from './services';
 
 export async function getCategories(): Promise<Category[]> {
   const res = await fetch('/api/categories');
@@ -94,6 +94,16 @@ export async function toggleProductStock(id: string, inStock: boolean): Promise<
   return res.json();
 }
 
+export async function updateProductStockQuantity(id: string, stock: number, inStock?: boolean): Promise<{ success: boolean }> {
+  const res = await fetch(`/api/products/${id}/stock`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ stock, inStock }),
+  });
+  if (!res.ok) throw new Error('Error al actualizar cantidad de stock');
+  return res.json();
+}
+
 export async function toggleToneStock(id: string, inStock: boolean): Promise<{ success: boolean }> {
   const res = await fetch(`/api/tones/${id}/stock`, {
     method: 'PATCH',
@@ -103,4 +113,56 @@ export async function toggleToneStock(id: string, inStock: boolean): Promise<{ s
   if (!res.ok) throw new Error('Error al actualizar stock de tono');
   return res.json();
 }
+
+export async function updateToneStockQuantity(id: string, stock: number, inStock?: boolean): Promise<{ success: boolean }> {
+  const res = await fetch(`/api/tones/${id}/stock`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ stock, inStock }),
+  });
+  if (!res.ok) throw new Error('Error al actualizar cantidad de stock del tono');
+  return res.json();
+}
+
+export async function createOrder(data: CreateOrderInput): Promise<OrderWithItems> {
+  const res = await fetch('/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  const json = (await res.json()) as { error?: string } & OrderWithItems;
+  if (!res.ok) {
+    throw new Error(json.error || 'Error al procesar el pedido');
+  }
+  return json as OrderWithItems;
+}
+
+export async function getOrders(status?: string): Promise<OrderWithItems[]> {
+  const query = status && status !== 'todos' ? `?status=${encodeURIComponent(status)}` : '';
+  const res = await fetch(`/api/orders${query}`);
+  if (!res.ok) throw new Error('Error al cargar pedidos');
+  return res.json();
+}
+
+export async function getOrderById(id: string): Promise<OrderWithItems> {
+  const res = await fetch(`/api/orders/${id}`);
+  if (!res.ok) throw new Error('Error al cargar pedido');
+  return res.json();
+}
+
+export async function updateOrderStatus(
+  id: string,
+  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled',
+  restock: boolean = false
+): Promise<{ success: boolean; status: string }> {
+  const res = await fetch(`/api/orders/${id}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status, restock }),
+  });
+  const json = (await res.json()) as { success: boolean; status: string; error?: string };
+  if (!res.ok) throw new Error(json.error || 'Error al actualizar estado del pedido');
+  return json;
+}
+
 

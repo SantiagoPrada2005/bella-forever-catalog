@@ -8,8 +8,9 @@
     "start": "astro dev",
     "build": "astro build",
     "check": "astro check",
-    "preview": "wrangler dev",
+    "db:migrate:local": "wrangler d1 execute bella-forever-db --local",
     "deploy": "wrangler pages deploy dist",
+    "images:optimize": "node scripts/optimize-images.mjs",
     "lint": "oxlint",
     "typecheck": "tsc --noEmit",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts"

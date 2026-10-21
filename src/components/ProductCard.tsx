@@ -82,6 +82,12 @@ export default function ProductCard({ product, priority = false, onProductClick,
     };
   }, [product]);
 
+  const hasTones = Boolean(product.tones && product.tones.length > 0);
+  const isToneAvailable = selectedTone ? (Boolean(selectedTone.inStock) && selectedTone.stock > 0) : true;
+  const isAvailable = Boolean(product.inStock) && (hasTones ? isToneAvailable : product.stock > 0);
+  const currentStock = selectedTone ? selectedTone.stock : product.stock;
+  const isLowStock = isAvailable && currentStock > 0 && currentStock <= 3;
+
   return (
     <div 
       onClick={() => onProductClick(product, selectedTone)}
@@ -184,14 +190,29 @@ export default function ProductCard({ product, priority = false, onProductClick,
           {product.name}
         </h3>
         
-        <p style={{ 
-          color: 'var(--color-gold)', 
-          fontWeight: '700', 
-          fontSize: '1.15rem', 
-          marginBottom: '14px',
-        }}>
-          {formattedPrice}
-        </p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+          <p style={{ 
+            color: 'var(--color-gold)', 
+            fontWeight: '700', 
+            fontSize: '1.15rem', 
+            margin: 0,
+          }}>
+            {formattedPrice}
+          </p>
+          {isLowStock && (
+            <span style={{
+              fontSize: '0.72rem',
+              color: '#f59e0b',
+              backgroundColor: 'rgba(245, 158, 11, 0.12)',
+              border: '1px solid rgba(245, 158, 11, 0.3)',
+              borderRadius: '4px',
+              padding: '2px 6px',
+              fontWeight: '600',
+            }}>
+              ¡Quedan {currentStock}!
+            </span>
+          )}
+        </div>
 
         {/* Tonos */}
         {product.tones && product.tones.length > 0 && (
@@ -203,10 +224,11 @@ export default function ProductCard({ product, priority = false, onProductClick,
           }} onClick={(e) => e.stopPropagation()}>
             {product.tones.map((tone) => {
               const isSelected = selectedTone?.id === tone.id;
+              const toneReady = Boolean(tone.inStock) && tone.stock > 0;
               return (
                 <button
                   key={tone.id}
-                  title={tone.name}
+                  title={`${tone.name}${!toneReady ? ' (Agotado)' : ''}`}
                   aria-label={`Seleccionar tono ${tone.name}`}
                   onClick={() => setSelectedTone(tone)}
                   style={{
@@ -215,10 +237,10 @@ export default function ProductCard({ product, priority = false, onProductClick,
                     borderRadius: '50%',
                     backgroundColor: tone.hex,
                     border: isSelected ? '2px solid var(--color-gold)' : '1px solid rgba(255,255,255,0.2)',
-                    cursor: tone.inStock ? 'pointer' : 'not-allowed',
+                    cursor: toneReady ? 'pointer' : 'not-allowed',
                     transition: 'all 0.2s ease',
                     transform: isSelected ? 'scale(1.15)' : 'scale(1)',
-                    opacity: tone.inStock ? 1 : 0.3,
+                    opacity: toneReady ? 1 : 0.3,
                   }}
                 />
               );
@@ -230,16 +252,16 @@ export default function ProductCard({ product, priority = false, onProductClick,
         <button 
           ref={buttonRef}
           onClick={handleAdd}
-          disabled={!product.inStock || Boolean(selectedTone && !selectedTone.inStock)}
+          disabled={!isAvailable}
           style={{
             marginTop: 'auto',
             width: '100%',
-            backgroundColor: product.inStock ? 'var(--color-burgundy)' : 'rgba(255, 255, 255, 0.05)',
-            color: product.inStock ? 'var(--color-white)' : 'var(--color-text-muted)',
-            border: product.inStock ? '1px solid var(--color-gold)' : '1px solid rgba(255,255,255,0.05)',
+            backgroundColor: isAvailable ? 'var(--color-burgundy)' : 'rgba(255, 255, 255, 0.05)',
+            color: isAvailable ? 'var(--color-white)' : 'var(--color-text-muted)',
+            border: isAvailable ? '1px solid var(--color-gold)' : '1px solid rgba(255,255,255,0.05)',
             padding: '11px 0',
             borderRadius: '8px',
-            cursor: product.inStock ? 'pointer' : 'default',
+            cursor: isAvailable ? 'pointer' : 'default',
             fontWeight: '600',
             fontSize: '0.85rem',
             transition: 'all 0.3s ease',
@@ -248,17 +270,17 @@ export default function ProductCard({ product, priority = false, onProductClick,
             wordBreak: 'break-word',
           }}
           onMouseEnter={(e) => {
-            if (product.inStock) {
+            if (isAvailable) {
               e.currentTarget.style.backgroundColor = 'var(--color-burgundy-light)';
             }
           }}
           onMouseLeave={(e) => {
-            if (product.inStock) {
+            if (isAvailable) {
               e.currentTarget.style.backgroundColor = 'var(--color-burgundy)';
             }
           }}
         >
-          {product.inStock ? 'Agregar' : 'Agotado'}
+          {isAvailable ? 'Agregar' : 'Agotado'}
         </button>
       </div>
     </div>

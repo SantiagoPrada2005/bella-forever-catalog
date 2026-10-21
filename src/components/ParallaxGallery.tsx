@@ -19,32 +19,32 @@ interface GalleryItem {
 const GALLERIES: GalleryItem[] = [
   {
     id: 1,
-    image: "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?q=80&w=800&auto=format&fit=crop",
-    title: "Labiales Satinados",
+    image: "/images/gallery-mirror.webp",
+    title: "Labiales & Brillo",
     speed: -30,
     width: '100%',
     aspect: '1',
   },
   {
     id: 2,
-    image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=800&auto=format&fit=crop",
-    title: "Rubores Premium",
+    image: "/images/hero-silvy-mascara.webp",
+    title: "Mirada & Pestañas",
     speed: -15,
     width: '85%',
-    aspect: '0.8',
+    aspect: '0.85',
   },
   {
     id: 3,
-    image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?q=80&w=800&auto=format&fit=crop",
-    title: "Paletas de Sombras",
+    image: "/images/gallery-gold-eyes.webp",
+    title: "Kits de Belleza",
     speed: -45,
     width: '90%',
-    aspect: '1.2',
+    aspect: '1.1',
   },
   {
     id: 4,
-    image: "https://images.unsplash.com/photo-1596462502278-27bfdc403348?q=80&w=600&auto=format&fit=crop",
-    title: "Cejas Perfectas",
+    image: "/images/gallery-lip-plump.webp",
+    title: "Volumen & Definición",
     speed: -20,
     width: '100%',
     aspect: '0.9',
@@ -157,10 +157,13 @@ export default function ParallaxGallery() {
               <img
                 src={item.image}
                 alt={item.title}
+                loading="lazy"
+                decoding="async"
                 style={{
                   width: '100%',
                   height: '100%',
                   objectFit: 'cover',
+                  objectPosition: 'center 20%',
                   transition: 'transform 0.6s ease',
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}

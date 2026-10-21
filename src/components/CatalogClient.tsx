@@ -86,48 +86,13 @@ export default function CatalogClient({
     });
   };
 
-  const handleCheckout = () => {
-    const numberFormatter = new Intl.NumberFormat(CONFIG.currency.locale, {
-      style: 'currency',
-      currency: CONFIG.currency.code,
-      maximumFractionDigits: CONFIG.currency.precision,
-    });
-
-    let message = `¡Hola, ${CONFIG.brandName}! 💄✨ Me gustaría realizar el siguiente pedido:\n\n🛍️ *Detalle de mi compra:*\n`;
-
-    cart.forEach((item) => {
-      const itemTotal = numberFormatter.format(item.price * item.quantity);
-      const toneStr = item.toneName ? ` (${item.toneName})` : '';
-      message += `• ${item.quantity} x ${item.productName}${toneStr} — ${itemTotal}\n`;
-    });
-
-    // Append product image URLs
-    const allImageUrls: string[] = [];
-    cart.forEach((item) => {
-      const product = initialProducts.find(p => p.id === item.productId);
-      if (product) {
-        const galleryUrls = (product.productImages || []).map(img => img.url);
-        const imageUrl = getProductImage(product, null);
-        if (galleryUrls.length > 0) {
-          allImageUrls.push(...galleryUrls.slice(0, 4));
-        } else if (imageUrl) {
-          allImageUrls.push(imageUrl);
-        }
-      }
-    });
-
-    const totalAmount = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
-    message += `\n💰 *Total Estimado:* ${numberFormatter.format(totalAmount)}\n`;
-    message += `📍 *Ciudad de entrega:* ${CONFIG.defaultCity}\n\n¿Me confirmas disponibilidad para coordinar el pago y envío? ¡Gracias! 💕`;
-
-    if (allImageUrls.length > 0) {
-      const origin = typeof window !== 'undefined' ? window.location.origin : '';
-      const formattedUrls = allImageUrls.map(url => url.startsWith('http') ? url : `${origin}${url}`);
-      message += `\n\n🖼️ *Imágenes de referencia:*\n${formattedUrls.join('\n')}`;
+  const handleOrderCompleted = () => {
+    setCart([]);
+    try {
+      localStorage.removeItem('bella_cart');
+    } catch (e: unknown) {
+      console.error("Error al limpiar carrito", e);
     }
-
-    const whatsappUrl = `https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(message)}`;
-    window.open(whatsappUrl, '_blank');
   };
 
   const totalCartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -218,7 +183,8 @@ export default function CatalogClient({
           onClose={() => setIsCartOpen(false)} 
           cart={cart} 
           onUpdateQuantity={handleUpdateQuantity} 
-          onCheckout={handleCheckout} 
+          onOrderCompleted={handleOrderCompleted}
+          initialProducts={initialProducts}
         />
       )}
 
