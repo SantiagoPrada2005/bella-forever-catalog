@@ -2,196 +2,393 @@ import { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import {
+  LiquidGlossDrops,
+  BotanicalCherryAccent,
+  EditorialCornerFrame,
+  BellaSunburstSeal,
+} from './svg/BellaEditorialSvgs';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, useGSAP);
 }
 
-interface GalleryItem {
-  id: number;
-  image: string;
-  title: string;
-  speed: number;
-  width: string;
-  aspect: string;
-}
-
-const GALLERIES: GalleryItem[] = [
-  {
-    id: 1,
-    image: "/images/gallery-mirror.webp",
-    title: "Labiales & Brillo",
-    speed: -30,
-    width: '100%',
-    aspect: '1',
-  },
-  {
-    id: 2,
-    image: "/images/hero-silvy-mascara.webp",
-    title: "Mirada & Pestañas",
-    speed: -15,
-    width: '85%',
-    aspect: '0.85',
-  },
-  {
-    id: 3,
-    image: "/images/gallery-gold-eyes.webp",
-    title: "Kits de Belleza",
-    speed: -45,
-    width: '90%',
-    aspect: '1.1',
-  },
-  {
-    id: 4,
-    image: "/images/gallery-lip-plump.webp",
-    title: "Volumen & Definición",
-    speed: -20,
-    width: '100%',
-    aspect: '0.9',
-  },
-];
-
 export default function ParallaxGallery() {
   const containerRef = useRef<HTMLElement>(null);
 
   useGSAP(() => {
-    const items = gsap.utils.toArray<HTMLElement>('.parallax-item');
-    items.forEach((item) => {
-      const speed = parseFloat(item.dataset.speed || '-20');
-      gsap.to(item, {
-        yPercent: speed,
+    if (!containerRef.current) return;
+
+    const mm = gsap.matchMedia();
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      const blocks = gsap.utils.toArray<HTMLElement>('.editorial-campaign-block');
+      blocks.forEach((block) => {
+        gsap.fromTo(
+          block,
+          { opacity: 0, y: 32 },
+          {
+            opacity: 1,
+            y: 0,
+            duration: 0.9,
+            ease: 'power3.out',
+            scrollTrigger: {
+              trigger: block,
+              start: 'top 86%',
+              once: true,
+            },
+          }
+        );
+      });
+
+      gsap.to('.poster-gloss__svg-drops', {
+        y: -18,
+        rotation: 4,
         ease: 'none',
         scrollTrigger: {
-          trigger: item,
+          trigger: '.poster-gloss-split',
           start: 'top bottom',
           end: 'bottom top',
           scrub: true,
         },
       });
     });
-
-    // Animación de entrada inicial
-    gsap.fromTo('.gallery-title',
-      { opacity: 0, y: 30 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 1.2,
-        scrollTrigger: {
-          trigger: containerRef.current,
-          start: 'top 80%',
-        },
-      }
-    );
   }, { scope: containerRef });
 
   return (
     <section
       ref={containerRef}
-      style={{
-        padding: '80px 24px',
-        maxWidth: '1100px',
-        margin: '0 auto',
-        overflow: 'hidden',
-      }}
+      className="editorial-section-shell"
+      style={{ display: 'flex', flexDirection: 'column', gap: '28px' }}
     >
-      <h2
-        className="gallery-title"
-        style={{
-          fontFamily: 'var(--font-serif)',
-          fontSize: '2.5rem',
-          textAlign: 'center',
-          fontWeight: '300',
-          color: 'var(--color-white)',
-          marginBottom: '60px',
-        }}
-      >
-        Explora la <span style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Colección</span>
-      </h2>
+      {/* Póster 2: Split Editorial "VELVET GLOSS" (Inspirado en CHOCOLATE GLOSS de SOLEIL) */}
+      <article className="editorial-poster-card poster-gloss-split editorial-campaign-block">
+        {/* Panel A: Producto con Micro-Tipografía en las 4 Esquinas */}
+        <div className="poster-gloss__product-panel">
+          <div className="editorial-corner-row" style={{ color: 'var(--surface-editorial-alabaster)' }}>
+            <span>SODA POP KIT</span>
+            <span>BELLA GLOSS</span>
+          </div>
 
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(2, 1fr)',
-        gap: '40px 30px',
-        alignItems: 'start',
-      }} className="parallax-grid">
-        <style>{`
-          @media (max-width: 600px) {
-            .parallax-grid {
-              grid-template-columns: 1fr !important;
-              gap: 50px 0 !important;
-            }
-          }
-        `}</style>
+          <div className="poster-gloss__product-frame">
+            <img
+              src="/images/studio-soda-pop-kit.webp"
+              alt="Kit Soda Pop de brillo y mascarilla labial Bella Forever"
+              width="768"
+              height="768"
+              loading="lazy"
+              decoding="async"
+            />
+          </div>
 
-        {GALLERIES.map((item, idx) => (
-          <div
-            key={item.id}
-            className="parallax-item"
-            data-speed={item.speed}
-            onClick={() => { window.location.href = '/catalogo'; }}
-            style={{
-              width: item.width,
-              margin: idx % 2 === 0 ? '0 auto 0 0' : '80px 0 0 auto',
-              cursor: 'pointer',
-              position: 'relative',
-              borderRadius: 'var(--radius-premium)',
-              overflow: 'hidden',
-              border: 'var(--border-glass)',
-              boxShadow: 'var(--shadow-premium)',
-              transition: 'border-color 0.3s ease, transform 0.3s ease',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.borderColor = 'var(--color-gold)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.borderColor = 'rgba(215, 176, 106, 0.12)';
-            }}
-          >
-            <div style={{
-              position: 'relative',
-              width: '100%',
-              aspectRatio: item.aspect,
-              overflow: 'hidden',
-            }}>
-              <img
-                src={item.image}
-                alt={item.title}
-                loading="lazy"
-                decoding="async"
+          <div className="editorial-corner-row" style={{ color: 'var(--surface-editorial-alabaster)' }}>
+            <span>ALTO BRILLO</span>
+            <span>LABIOS SEDOSOS</span>
+          </div>
+        </div>
+
+        {/* Panel B: Retrato Editorial + Gotas SVG de Gloss Orgánicas */}
+        <div className="poster-gloss__model-panel">
+          <img
+            src="/images/studio-velvet-gloss.webp"
+            alt="Aplicación de labial líquido y gloss Bella Forever"
+            width="860"
+            height="768"
+            loading="lazy"
+            decoding="async"
+            className="poster-gloss__model-img"
+          />
+          <div className="poster-gloss__scrim" />
+
+          {/* SVG Orgánico generado en pen.dev: Gotas líquidas de gloss y crema */}
+          <div className="poster-gloss__svg-drops">
+            <LiquidGlossDrops size={136} />
+          </div>
+
+          <div className="poster-gloss__overlay-content">
+            <h2
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 'clamp(1.85rem, 5vw, 2.85rem)',
+                fontWeight: 300,
+                letterSpacing: '0.06em',
+                color: 'var(--surface-editorial-alabaster)',
+                lineHeight: 1.02,
+                margin: 0,
+                textTransform: 'uppercase',
+              }}
+            >
+              VELVET
+            </h2>
+            <div className="poster-gloss__bottom-bar">
+              <span
                 style={{
-                  width: '100%',
-                  height: '100%',
-                  objectFit: 'cover',
-                  objectPosition: 'center 20%',
-                  transition: 'transform 0.6s ease',
+                  fontFamily: 'var(--font-serif)',
+                  fontStyle: 'italic',
+                  fontSize: 'clamp(2.25rem, 6vw, 3.5rem)',
+                  lineHeight: 1.1,
+                  paddingBottom: '4px',
+                  color: 'var(--color-gold)',
                 }}
-                onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.05)')}
-                onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
-              />
-
-              {/* Overlay oscuro y título */}
-              <div style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                width: '100%',
-                background: 'linear-gradient(to top, rgba(10, 4, 5, 0.9) 0%, rgba(10, 4, 5, 0) 100%)',
-                padding: '24px 16px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-end',
-              }}>
-                <div>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--color-gold)', letterSpacing: '1px', textTransform: 'uppercase' }}>Bella Forever</span>
-                  <h4 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.4rem', color: '#fff', fontWeight: '400', marginTop: '4px' }}>{item.title}</h4>
-                </div>
-                <span style={{ fontSize: '0.85rem', color: 'var(--color-gold)' }}>Explorar →</span>
-              </div>
+              >
+                GLOSS
+              </span>
+              <a href="/catalogo" className="editorial-pill-btn editorial-pill-btn--alabaster">
+                EXPLORAR CATÁLOGO
+              </a>
             </div>
           </div>
-        ))}
+        </div>
+      </article>
+
+      {/* Bento Asimétrico de 2 Celdas: Mirada & Labios (100% ancho en móvil, sin márgenes desalineados) */}
+      <div className="editorial-bento-duo editorial-campaign-block">
+        <a
+          href="/catalogo"
+          className="editorial-bento-card"
+          style={{ textDecoration: 'none', backgroundColor: '#29060A' }}
+        >
+          <img
+            src="/images/studio-gold-eyes-pose.webp"
+            alt="Kit de Pestañas Gold Eyes Bella Forever"
+            width="920"
+            height="768"
+            loading="lazy"
+            decoding="async"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center 10%',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background:
+                'linear-gradient(180deg, rgba(10,4,5,0.28) 0%, rgba(10,4,5,0) 32%, rgba(10,4,5,0.08) 58%, rgba(10,4,5,0.88) 100%)',
+            }}
+          />
+          <EditorialCornerFrame
+            topLeft="GOLD EYES"
+            topRight="PESTAÑINA DÚO"
+            bottomLeft=""
+            bottomRight=""
+          />
+          <div
+            style={{
+              position: 'relative',
+              zIndex: 3,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-end',
+              gap: '12px',
+            }}
+          >
+            <div>
+              <h3
+                style={{
+                  fontFamily: 'var(--font-serif)',
+                  fontSize: 'clamp(1.65rem, 4vw, 2.2rem)',
+                  fontWeight: 400,
+                  color: 'var(--surface-editorial-alabaster)',
+                  lineHeight: 1.1,
+                  margin: 0,
+                }}
+              >
+                Mirada &amp; <span style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Pestañas</span>
+              </h3>
+              <p
+                style={{
+                  fontSize: '0.84rem',
+                  color: 'rgba(251, 244, 245, 0.86)',
+                  marginTop: '4px',
+                }}
+              >
+                Tratamiento fortalecedor y pestañina de precisión.
+              </p>
+            </div>
+            <BellaSunburstSeal size={34} style={{ color: 'var(--color-gold)', flexShrink: 0 }} />
+          </div>
+        </a>
+
+        <a
+          href="/catalogo"
+          className="editorial-bento-card"
+          style={{ textDecoration: 'none', backgroundColor: '#613B36' }}
+        >
+          <img
+            src="/images/studio-lip-plump-pose.webp"
+            alt="Lip Plump Voluminizador de Labios Bella Forever"
+            width="920"
+            height="768"
+            loading="lazy"
+            decoding="async"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center 10%',
+            }}
+          />
+          <div
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background:
+                'linear-gradient(180deg, rgba(10,4,5,0.28) 0%, rgba(10,4,5,0) 32%, rgba(10,4,5,0.08) 58%, rgba(10,4,5,0.88) 100%)',
+            }}
+          />
+          <EditorialCornerFrame
+            topLeft="LIP PLUMP"
+            topRight="EFECTO VOLUMEN"
+            bottomLeft=""
+            bottomRight=""
+          />
+          <div
+            style={{
+              position: 'relative',
+              zIndex: 3,
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'flex-end',
+              gap: '12px',
+            }}
+          >
+            <div>
+              <h3
+                style={{
+                  fontFamily: 'var(--font-serif)',
+                  fontSize: 'clamp(1.65rem, 4vw, 2.2rem)',
+                  fontWeight: 400,
+                  color: 'var(--surface-editorial-alabaster)',
+                  lineHeight: 1.1,
+                  margin: 0,
+                }}
+              >
+                Volumen &amp; <span style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Labios</span>
+              </h3>
+              <p
+                style={{
+                  fontSize: '0.84rem',
+                  color: 'rgba(251, 244, 245, 0.86)',
+                  marginTop: '4px',
+                }}
+              >
+                Hidratación profunda y acabado espejo al instante.
+              </p>
+            </div>
+            <BotanicalCherryAccent size={36} style={{ flexShrink: 0 }} />
+          </div>
+        </a>
       </div>
+
+      {/* Póster 3: Campaña "BELLA" con Superposición Serif y Panel Alabastro (Inspirado en SOLEIL SALE) */}
+      <article className="editorial-poster-card poster-collection-split editorial-campaign-block">
+        <div className="poster-collection__visual">
+          <img
+            src="/images/studio-collection-silk.webp"
+            alt="Colección completa de maquillaje Bella Forever"
+            width="1140"
+            height="768"
+            loading="lazy"
+            decoding="async"
+            className="poster-collection__visual-img"
+          />
+          <div className="poster-collection__visual-scrim" />
+
+          <div
+            style={{
+              position: 'relative',
+              zIndex: 3,
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <span className="poster-micro-tag" style={{ color: 'var(--color-pastel-pink)' }}>
+              EDICIÓN SELECTA
+            </span>
+            <BotanicalCherryAccent size={42} />
+          </div>
+
+          <h2 className="poster-collection__giant-word">BELLA</h2>
+
+          <div
+            style={{
+              position: 'relative',
+              zIndex: 3,
+              width: '100%',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+            }}
+          >
+            <span className="poster-micro-tag" style={{ color: 'var(--color-gold)' }}>
+              #BELLAFOREVER
+            </span>
+            <span className="poster-micro-tag" style={{ color: 'var(--surface-editorial-alabaster)' }}>
+              #BELLACOLECCION
+            </span>
+          </div>
+        </div>
+
+        <div className="poster-collection__callout">
+          <p
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: '0.72rem',
+              fontWeight: 700,
+              letterSpacing: '0.16em',
+              textTransform: 'uppercase',
+              lineHeight: 1.5,
+              color: 'var(--color-burgundy)',
+              margin: 0,
+            }}
+          >
+            TODO LO QUE NECESITAS PARA BRILLAR
+            <br />
+            DISPONIBLE AHORA
+          </p>
+
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '16px' }}>
+            <h3
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 'clamp(2rem, 5vw, 2.75rem)',
+                fontWeight: 400,
+                letterSpacing: '0.08em',
+                color: 'var(--color-ink-burgundy)',
+                margin: 0,
+                lineHeight: 1,
+              }}
+            >
+              CATÁLOGO
+            </h3>
+            <a href="/catalogo" className="editorial-pill-btn editorial-pill-btn--pink">
+              EXPLORAR CATÁLOGO
+            </a>
+          </div>
+
+          <span
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: '0.68rem',
+              fontWeight: 700,
+              letterSpacing: '0.18em',
+              textTransform: 'uppercase',
+              color: 'var(--color-burgundy)',
+            }}
+          >
+            BELLAFOREVER · ROLDANILLO
+          </span>
+        </div>
+      </article>
     </section>
   );
 }

@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { BotanicalCherryAccent } from './svg/BellaEditorialSvgs';
 
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger, useGSAP);
@@ -15,75 +16,78 @@ export default function BrandStory() {
     const textElement = textRef.current;
     if (!textElement || !containerRef.current) return;
 
-    // Dividir el texto en palabras envueltas en spans
-    const text = textElement.textContent || '';
-    const words = text.split(' ');
-    textElement.innerHTML = words.map(word => `<span class="brand-word" style="opacity: 0.2; display: inline-block; margin-right: 8px;">${word}</span>`).join('');
+    const mm = gsap.matchMedia();
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      const text = textElement.textContent || '';
+      const words = text.trim().split(/\s+/);
+      textElement.innerHTML = words
+        .map(
+          (word) =>
+            `<span class="brand-word" style="opacity: 0.25; display: inline-block; margin-right: 0.28em;">${word}</span>`
+        )
+        .join('');
 
-    gsap.to('.brand-word', {
-      opacity: 1,
-      stagger: 0.05,
-      scrollTrigger: {
-        trigger: containerRef.current,
-        start: 'top 80%',
-        end: 'bottom 60%',
-        scrub: 0.5,
-      },
+      gsap.to('.brand-word', {
+        opacity: 1,
+        stagger: 0.06,
+        scrollTrigger: {
+          trigger: containerRef.current,
+          start: 'top 82%',
+          end: 'bottom 58%',
+          scrub: 0.5,
+        },
+      });
     });
   }, { scope: containerRef });
 
   return (
-    <section 
+    <section
       ref={containerRef}
       style={{
-        padding: '60px 24px',
-        background: 'linear-gradient(180deg, transparent 0%, rgba(90, 22, 35, 0.15) 50%, transparent 100%)',
+        padding: '36px 24px',
+        background: 'linear-gradient(180deg, transparent 0%, rgba(90, 22, 35, 0.14) 50%, transparent 100%)',
         position: 'relative',
         overflow: 'hidden',
-        borderTop: 'var(--border-glass)',
-        borderBottom: 'var(--border-glass)',
       }}
     >
-      <div style={{
-        maxWidth: '700px',
-        margin: '0 auto',
-        textAlign: 'center',
-        zIndex: 2,
-        position: 'relative',
-      }}>
-        <span style={{
-          color: 'var(--color-gold)',
-          fontSize: '0.75rem',
-          fontWeight: '600',
-          letterSpacing: '2px',
-          textTransform: 'uppercase',
-          display: 'block',
-          marginBottom: '16px',
-        }}>
-          Nuestra Filosofía
-        </span>
-        <p 
+      <div
+        style={{
+          maxWidth: '680px',
+          margin: '0 auto',
+          textAlign: 'center',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: '10px',
+        }}
+      >
+        <BotanicalCherryAccent size={44} />
+        <p
           ref={textRef}
           style={{
             fontFamily: 'var(--font-serif)',
-            fontSize: 'clamp(1.6rem, 4vw, 2.5rem)',
+            fontSize: 'clamp(1.75rem, 4.5vw, 2.65rem)',
             fontStyle: 'italic',
-            lineHeight: '1.35',
+            lineHeight: '1.25',
+            paddingBottom: '4px',
             color: 'var(--color-white)',
-            marginBottom: '16px',
+            margin: 0,
             fontWeight: '300',
           }}
         >
           Tu dosis diaria de brillo y color
         </p>
-        <p style={{
-          fontSize: '0.85rem',
-          color: 'var(--color-text-muted)',
-          letterSpacing: '1.5px',
-          textTransform: 'uppercase',
-          fontWeight: '600',
-        }}>
-          By Silvy Loaiza
+        <p
+          style={{
+            fontSize: '0.75rem',
+            color: 'var(--color-gold)',
+            letterSpacing: '0.2em',
+            textTransform: 'uppercase',
+            fontWeight: '600',
+            margin: 0,
+          }}
+        >
+          By Silvy Loaiza · Boutique de Maquillaje
         </p>
       </div>
     </section>

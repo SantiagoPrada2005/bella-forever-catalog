@@ -6,6 +6,7 @@ import ProductGrid from './ProductGrid';
 import ProductModal from './ProductModal';
 import CartDrawer, { type CartItem } from './CartDrawer';
 import CartToast, { type CartToastItem } from './ui/CartToast';
+import { BellaSunburstSeal } from './svg/BellaEditorialSvgs';
 import { CONFIG } from '../config';
 import { getProductImage } from '../utils/image-helpers';
 import type { ProductWithRelations, Category, Tone } from '../db/schema';
@@ -140,7 +141,7 @@ export default function CatalogClient({
   };
 
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg-dark)', paddingTop: '70px' }}>
+    <div style={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column', backgroundColor: 'var(--color-bg-dark)', paddingTop: '70px' }}>
       <div className="bg-makeup-blur bg-makeup-blur-1" />
       <div className="bg-makeup-blur bg-makeup-blur-2" />
 
@@ -152,26 +153,70 @@ export default function CatalogClient({
       />
 
       <main style={{ flex: '1 0 auto', paddingBottom: '60px' }}>
-        <section style={{ textAlign: 'center', padding: '36px 20px 16px 20px' }}>
-          <h1 style={{
-            fontFamily: 'var(--font-serif)',
-            fontSize: 'clamp(2rem, 5vw, 3rem)',
-            fontWeight: '300',
-            color: 'var(--color-white)',
-            letterSpacing: '1px',
-            marginBottom: '8px',
+        <section style={{ maxWidth: '1200px', margin: '0 auto', padding: '20px 16px 8px 16px' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(90, 22, 35, 0.55) 0%, rgba(38, 8, 16, 0.85) 100%)',
+            border: 'var(--border-glass)',
+            borderRadius: 'var(--radius-editorial)',
+            padding: '24px 20px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            textAlign: 'center',
+            gap: '10px',
+            position: 'relative',
+            overflow: 'hidden',
           }}>
-            Catálogo <span style={{ fontStyle: 'italic', color: 'var(--color-gold)' }}>Exclusivo</span>
-          </h1>
-          <p style={{
-            color: 'var(--color-text-muted)',
-            fontSize: '0.95rem',
-            maxWidth: '560px',
-            margin: '0 auto',
-            lineHeight: '1.5',
-          }}>
-            Maquillaje de alta gama para realzar tu belleza. Selecciona tus productos y tonos favoritos y coordina tu pedido directo por WhatsApp.
-          </p>
+            <BellaSunburstSeal
+              size={38}
+              className="bella-sunburst-seal--spin"
+              style={{ color: 'var(--color-gold)' }}
+            />
+            <h1 style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: 'clamp(1.7rem, 4.5vw, 2.6rem)',
+              fontWeight: '300',
+              color: 'var(--color-white)',
+              letterSpacing: '0.06em',
+              textTransform: 'uppercase',
+              lineHeight: '1.1',
+              margin: 0,
+            }}>
+              Catálogo{' '}
+              <span style={{
+                fontFamily: 'var(--font-serif)',
+                fontStyle: 'italic',
+                textTransform: 'none',
+                color: 'var(--color-gold)',
+                fontSize: '1.15em',
+              }}>
+                Exclusivo
+              </span>
+            </h1>
+            <p style={{
+              color: 'var(--color-text-muted)',
+              fontSize: '0.9rem',
+              maxWidth: '50ch',
+              margin: 0,
+              lineHeight: '1.5',
+            }}>
+              Selecciona tus cosméticos y tonos favoritos para coordinar tu pedido directo por WhatsApp.
+            </p>
+            <div style={{
+              display: 'flex',
+              flexWrap: 'wrap',
+              justifyContent: 'center',
+              gap: '16px',
+              marginTop: '4px',
+            }}>
+              <span className="poster-micro-tag" style={{ color: 'var(--color-pastel-pink)' }}>
+                CURADURÍA PREMIUM
+              </span>
+              <span className="poster-micro-tag" style={{ color: 'var(--color-gold)' }}>
+                ROLDANILLO &amp; ENVÍOS
+              </span>
+            </div>
+          </div>
         </section>
 
         {featuredProducts.length > 0 && (
@@ -225,20 +270,22 @@ export default function CatalogClient({
       />
 
       <footer style={{
-        padding: '40px 24px',
+        padding: '36px 24px',
         borderTop: 'var(--border-glass)',
         textAlign: 'center',
         color: 'var(--color-text-muted)',
-        fontSize: '0.85rem',
-        backgroundColor: 'rgba(18, 9, 11, 0.4)',
-        backdropFilter: 'blur(10px)',
+        fontSize: '0.82rem',
+        backgroundColor: 'rgba(18, 9, 11, 0.55)',
+        backdropFilter: 'blur(12px)',
       }}>
-        <p style={{ fontFamily: 'var(--font-serif)', fontSize: '1.4rem', color: 'var(--color-gold)', marginBottom: '8px', letterSpacing: '2px' }}>
+        <p style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', color: 'var(--color-gold)', marginBottom: '6px', letterSpacing: '0.16em' }}>
           BELLA FOREVER
         </p>
-        <p style={{ marginBottom: '6px' }}>📍 {CONFIG.defaultCity} (Valle del Cauca)</p>
-        <p>
-          By: <a href={`https://instagram.com/${CONFIG.instagramUser}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-gold)', fontWeight: '600', textDecoration: 'none' }}>@{CONFIG.instagramUser}</a>
+        <p style={{ marginBottom: '6px', letterSpacing: '0.08em', textTransform: 'uppercase', fontSize: '0.72rem' }}>
+          {CONFIG.defaultCity} · Valle del Cauca
+        </p>
+        <p style={{ fontSize: '0.78rem' }}>
+          Curaduría por <a href={`https://instagram.com/${CONFIG.instagramUser}`} target="_blank" rel="noopener noreferrer" style={{ color: 'var(--color-gold)', fontWeight: '600', textDecoration: 'none' }}>@{CONFIG.instagramUser}</a>
         </p>
       </footer>
     </div>

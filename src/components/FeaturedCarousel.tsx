@@ -111,22 +111,22 @@ export default function FeaturedCarousel({
                 boxShadow: 'var(--shadow-premium)',
                 transition: 'transform 0.3s ease, border-color 0.3s ease',
               }}
-              className="satin-shimmer-container"
+              className="satin-shimmer-container product-card-cq"
               onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-4px)';
                 e.currentTarget.style.borderColor = 'var(--color-gold)';
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.borderColor = 'rgba(215, 176, 106, 0.12)';
+                e.currentTarget.style.borderColor = 'rgba(215, 176, 106, 0.16)';
               }}
             >
               <div style={{
                 position: 'relative',
                 aspectRatio: '1',
-                borderRadius: '8px',
+                borderRadius: 'var(--radius-inner)',
                 overflow: 'hidden',
-                marginBottom: '16px',
+                marginBottom: '14px',
                 background: '#180f12',
               }}>
                 <img 
@@ -135,20 +135,21 @@ export default function FeaturedCarousel({
                   width="280"
                   height="280"
                   loading={index === 0 ? "eager" : "lazy"}
-                  fetchPriority={index === 0 ? "high" : "auto"}
+                  {...(index === 0 ? { fetchPriority: "high" as const } : {})}
                   decoding={index === 0 ? "sync" : "async"}
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
                 {product.isNew && (
                   <span style={{
                     position: 'absolute',
-                    top: '8px',
-                    left: '8px',
-                    backgroundColor: 'var(--color-gold)',
-                    color: 'var(--color-burgundy)',
-                    fontSize: '0.65rem',
+                    top: '10px',
+                    left: '10px',
+                    backgroundColor: 'var(--surface-editorial-alabaster)',
+                    color: 'var(--color-ink-burgundy)',
+                    fontSize: '0.62rem',
                     fontWeight: '700',
-                    padding: '3px 8px',
+                    letterSpacing: '0.12em',
+                    padding: '4px 10px',
                     borderRadius: 'var(--radius-pill)',
                     textTransform: 'uppercase',
                   }}>
@@ -157,23 +158,15 @@ export default function FeaturedCarousel({
                 )}
               </div>
 
-              <h3 style={{
-                fontSize: '1.1rem',
-                fontWeight: '400',
-                color: 'var(--color-text-light)',
-                marginBottom: '6px',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis',
-              }}>
+              <h3 className="product-card__title">
                 {product.name}
               </h3>
 
               <p style={{
                 color: 'var(--color-gold)',
                 fontWeight: '700',
-                fontSize: '1.15rem',
-                marginBottom: '16px',
+                fontSize: '1.12rem',
+                marginBottom: '14px',
               }}>
                 {formatPrice(product.price)}
               </p>
@@ -189,13 +182,14 @@ export default function FeaturedCarousel({
                       marginTop: 'auto',
                       backgroundColor: isJustAdded ? 'var(--color-burgundy-light)' : 'var(--color-burgundy)',
                       color: isJustAdded ? 'var(--color-gold)' : 'var(--color-white)',
-                      border: isJustAdded ? '1px solid var(--color-gold)' : '1px solid rgba(215, 176, 106, 0.25)',
-                      padding: '10px 0',
-                      borderRadius: '8px',
+                      border: isJustAdded ? '1px solid var(--color-gold)' : '1px solid rgba(215, 176, 106, 0.35)',
+                      padding: '10px 14px',
+                      borderRadius: 'var(--radius-pill)',
                       cursor: 'pointer',
-                      fontWeight: '600',
-                      fontSize: '0.85rem',
-                      letterSpacing: '0.5px',
+                      fontWeight: '700',
+                      fontSize: '0.76rem',
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -212,7 +206,7 @@ export default function FeaturedCarousel({
                         <span>¡Agregado!</span>
                       </>
                     ) : (
-                      'Agregar al pedido'
+                      'Agregar'
                     )}
                   </button>
                 );

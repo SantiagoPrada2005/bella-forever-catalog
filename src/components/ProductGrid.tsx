@@ -70,7 +70,7 @@ export default function ProductGrid({ products, onProductClick, onAddToCart = ()
               <div key={prod.id} className="product-card-anim" style={{ height: '100%' }}>
                 <ProductCard 
                   product={prod} 
-                  priority={index < 4}
+                  priority={index === 0}
                   onProductClick={onProductClick} 
                   onAddToCart={onAddToCart}
                 />

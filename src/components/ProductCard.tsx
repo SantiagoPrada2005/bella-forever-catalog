@@ -117,14 +117,14 @@ export default function ProductCard({ product, priority = false, onProductClick,
         position: 'relative',
         height: '100%',
       }}
-      className="satin-shimmer-container"
+      className="satin-shimmer-container product-card-cq"
       onMouseEnter={(e) => {
         e.currentTarget.style.transform = 'translateY(-5px)';
         e.currentTarget.style.borderColor = 'var(--color-gold)';
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.transform = 'translateY(0)';
-        e.currentTarget.style.borderColor = 'rgba(215, 176, 106, 0.12)';
+        e.currentTarget.style.borderColor = 'rgba(215, 176, 106, 0.16)';
       }}
     >
       {/* Imagen del Producto */}
@@ -135,7 +135,7 @@ export default function ProductCard({ product, priority = false, onProductClick,
           width="400"
           height="400"
           loading={priority ? 'eager' : 'lazy'}
-          fetchPriority={priority ? 'high' : 'auto'}
+          {...(priority ? { fetchPriority: 'high' as const } : {})}
           decoding={priority ? 'sync' : 'async'}
           style={{
             position: 'absolute',
@@ -152,17 +152,17 @@ export default function ProductCard({ product, priority = false, onProductClick,
         {product.isNew && (
           <span style={{
             position: 'absolute',
-            top: '12px',
-            left: '12px',
-            backgroundColor: 'var(--color-gold)',
-            color: 'var(--color-burgundy)',
-            fontSize: '0.65rem',
+            top: '10px',
+            left: '10px',
+            backgroundColor: 'var(--surface-editorial-alabaster)',
+            color: 'var(--color-ink-burgundy)',
+            fontSize: '0.62rem',
             fontWeight: '700',
             padding: '4px 10px',
             borderRadius: 'var(--radius-pill)',
             textTransform: 'uppercase',
             boxShadow: '0 2px 6px rgba(0,0,0,0.3)',
-            letterSpacing: '0.5px',
+            letterSpacing: '0.12em',
           }}>
             Nuevo
           </span>
@@ -190,36 +190,28 @@ export default function ProductCard({ product, priority = false, onProductClick,
       </div>
 
       {/* Info */}
-      <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
-        <h3 style={{ 
-          fontSize: '1.05rem', 
-          fontWeight: '400', 
-          marginBottom: '6px',
-          textOverflow: 'ellipsis', 
-          overflow: 'hidden', 
-          whiteSpace: 'nowrap',
-          color: 'var(--color-text-light)',
-        }}>
+      <div style={{ padding: '14px', display: 'flex', flexDirection: 'column', flexGrow: 1 }}>
+        <h3 className="product-card__title">
           {product.name}
         </h3>
         
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
           <p style={{ 
             color: 'var(--color-gold)', 
             fontWeight: '700', 
-            fontSize: '1.15rem', 
+            fontSize: '1.1rem', 
             margin: 0,
           }}>
             {formattedPrice}
           </p>
           {isLowStock && (
             <span style={{
-              fontSize: '0.72rem',
+              fontSize: '0.68rem',
               color: '#f59e0b',
               backgroundColor: 'rgba(245, 158, 11, 0.12)',
               border: '1px solid rgba(245, 158, 11, 0.3)',
-              borderRadius: '4px',
-              padding: '2px 6px',
+              borderRadius: 'var(--radius-pill)',
+              padding: '2px 7px',
               fontWeight: '600',
             }}>
               ¡Quedan {currentStock}!
@@ -229,35 +221,46 @@ export default function ProductCard({ product, priority = false, onProductClick,
 
         {/* Tonos */}
         {product.tones && product.tones.length > 0 && (
-          <div style={{ 
-            display: 'flex', 
-            flexWrap: 'wrap',
-            gap: '8px', 
-            marginBottom: '16px',
-          }} onClick={(e) => e.stopPropagation()}>
-            {product.tones.map((tone) => {
-              const isSelected = selectedTone?.id === tone.id;
-              const toneReady = Boolean(tone.inStock) && tone.stock > 0;
-              return (
-                <button
-                  key={tone.id}
-                  title={`${tone.name}${!toneReady ? ' (Agotado)' : ''}`}
-                  aria-label={`Seleccionar tono ${tone.name}`}
-                  onClick={() => setSelectedTone(tone)}
-                  style={{
-                    width: '22px',
-                    height: '22px',
-                    borderRadius: '50%',
-                    backgroundColor: tone.hex,
-                    border: isSelected ? '2px solid var(--color-gold)' : '1px solid rgba(255,255,255,0.2)',
-                    cursor: toneReady ? 'pointer' : 'not-allowed',
-                    transition: 'all 0.2s ease',
-                    transform: isSelected ? 'scale(1.15)' : 'scale(1)',
-                    opacity: toneReady ? 1 : 0.3,
-                  }}
-                />
-              );
-            })}
+          <div style={{ marginBottom: '14px' }} onClick={(e) => e.stopPropagation()}>
+            {selectedTone?.name && (
+              <p style={{
+                fontSize: '0.68rem',
+                color: 'var(--color-text-muted)',
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                marginBottom: '6px',
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+              }}>
+                Tono: <span style={{ color: 'var(--color-pastel-pink)', fontWeight: 600 }}>{selectedTone.name}</span>
+              </p>
+            )}
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '7px' }}>
+              {product.tones.map((tone) => {
+                const isSelected = selectedTone?.id === tone.id;
+                const toneReady = Boolean(tone.inStock) && tone.stock > 0;
+                return (
+                  <button
+                    key={tone.id}
+                    title={`${tone.name}${!toneReady ? ' (Agotado)' : ''}`}
+                    aria-label={`Seleccionar tono ${tone.name}`}
+                    onClick={() => setSelectedTone(tone)}
+                    style={{
+                      width: '22px',
+                      height: '22px',
+                      borderRadius: '50%',
+                      backgroundColor: tone.hex,
+                      border: isSelected ? '2px solid var(--color-gold)' : '1px solid rgba(255,255,255,0.22)',
+                      cursor: toneReady ? 'pointer' : 'not-allowed',
+                      transition: 'all 0.2s ease',
+                      transform: isSelected ? 'scale(1.14)' : 'scale(1)',
+                      opacity: toneReady ? 1 : 0.3,
+                    }}
+                  />
+                );
+              })}
+            </div>
           </div>
         )}
 
@@ -284,17 +287,17 @@ export default function ProductCard({ product, priority = false, onProductClick,
             border: isJustAdded 
               ? '1px solid var(--color-gold)' 
               : isAvailable 
-                ? '1px solid var(--color-gold)' 
+                ? '1px solid rgba(215, 176, 106, 0.45)' 
                 : '1px solid rgba(255,255,255,0.05)',
-            padding: '11px 0',
-            borderRadius: '8px',
+            padding: '10px 12px',
+            borderRadius: 'var(--radius-pill)',
             cursor: isAvailable ? 'pointer' : 'default',
-            fontWeight: '600',
-            fontSize: '0.85rem',
+            fontWeight: '700',
+            fontSize: '0.76rem',
             transition: 'all 0.25s ease',
-            letterSpacing: '0.5px',
-            whiteSpace: 'normal',
-            wordBreak: 'break-word',
+            letterSpacing: '0.1em',
+            textTransform: 'uppercase',
+            whiteSpace: 'nowrap',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

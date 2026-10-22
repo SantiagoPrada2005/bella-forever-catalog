@@ -10,7 +10,7 @@ html, body {
 }
 
 :root {
-  /* Paleta Bella Forever Luxury Dark Mode */
+  /* Paleta Bella Forever Luxury Dark Mode & Editorial Campaign Surfaces */
   --color-bg-dark: #0A0405;
   --color-panel-dark: #12090B;
   --color-burgundy: #5A1623;
@@ -20,22 +20,32 @@ html, body {
   --color-gold-hover: #E8C17F;
   --color-pastel-pink: #F6D6D9;
   --color-makeup-pink: #DDA3A9;
-  --color-white: #FFFFFF;
-  
+  --color-white: #FCF9F9;
+
+  /* Superficies Editoriales de Campaña (Inspiración SOLEIL + ADN Bella Forever) */
+  --surface-editorial-rose: #C4838C;
+  --surface-editorial-rose-deep: #8A4A55;
+  --surface-editorial-cocoa: #7E4B55;
+  --surface-editorial-burgundy: #4A121D;
+  --surface-editorial-alabaster: #FBF4F5;
+  --color-ink-burgundy: #260810;
+
   /* Tonos de texto */
   --color-text-light: #FCF9F9;
-  --color-text-muted: #A39092;
-  
+  --color-text-muted: #B89FA3;
+
   /* Fuentes */
   --font-serif: 'Cormorant Garamond', serif;
   --font-sans: 'Outfit', sans-serif;
-  
+
   /* Acabados y Sombras */
-  --shadow-premium: 0 15px 45px rgba(0, 0, 0, 0.4);
-  --shadow-hover: 0 20px 55px rgba(90, 22, 35, 0.2);
-  --shadow-gold: 0 4px 20px rgba(215, 176, 106, 0.15);
-  --border-glass: 1px solid rgba(215, 176, 106, 0.12);
+  --shadow-premium: 0 18px 48px rgba(10, 4, 5, 0.55);
+  --shadow-hover: 0 22px 58px rgba(90, 22, 35, 0.28);
+  --shadow-gold: 0 4px 20px rgba(215, 176, 106, 0.18);
+  --border-glass: 1px solid rgba(215, 176, 106, 0.16);
+  --radius-editorial: 22px;
   --radius-premium: 16px;
+  --radius-inner: 14px;
   --radius-pill: 9999px;
 }
 
@@ -320,13 +330,568 @@ body {
   animation-play-state: paused;
 }
 
+/* ==========================================================================
+   Sistema Editorial de Pósters de Campaña (Inspiración SOLEIL + Bella Forever)
+   Mobile-First + Container Queries (fluid-scaling)
+   ========================================================================== */
+
+.editorial-section-shell {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 16px 24px 16px;
+}
+
+@media (min-width: 768px) {
+  .editorial-section-shell {
+    padding: 28px 32px 40px 32px;
+  }
+}
+
+.editorial-poster-card {
+  container-type: inline-size;
+  container-name: editorial-poster;
+  position: relative;
+  border-radius: var(--radius-editorial);
+  overflow: hidden;
+  box-shadow: var(--shadow-premium);
+}
+
+/* Póster 1: Hero Editorial Blush ("NUEVO POCKET BLUSH") */
+.poster-blush {
+  background: linear-gradient(145deg, #BA706D 0%, #9E5857 52%, #5A1623 100%);
+  border: 1px solid rgba(251, 244, 245, 0.22);
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+@media (min-width: 768px) {
+  .poster-blush {
+    grid-template-columns: 1.25fr 1fr;
+    padding: 26px;
+    gap: 32px;
+    min-height: 520px;
+    align-items: stretch;
+  }
+}
+
+.poster-blush__photo-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 4.2;
+  border-radius: var(--radius-inner);
+  overflow: hidden;
+  background-color: #B66C69;
+  box-shadow: 0 14px 36px rgba(38, 8, 16, 0.32);
+}
+
+@media (min-width: 768px) {
+  .poster-blush__photo-frame {
+    aspect-ratio: auto;
+    height: 100%;
+    min-height: 460px;
+  }
+}
+
+.poster-blush__photo-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 12%;
+  display: block;
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (hover: hover) {
+  .poster-blush:hover .poster-blush__photo-frame img {
+    transform: scale(1.03);
+  }
+}
+
+.poster-blush__photo-scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(18, 9, 11, 0) 58%,
+    rgba(38, 8, 16, 0.78) 100%
+  );
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 14px 16px;
+  gap: 8px;
+}
+
+.poster-micro-tag {
+  font-family: var(--font-sans);
+  font-size: 0.64rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--surface-editorial-alabaster);
+  opacity: 0.94;
+}
+
+@media (min-width: 768px) {
+  .poster-micro-tag {
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+  }
+}
+
+.poster-blush__content {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 18px;
+  padding: 4px 4px 6px 4px;
+}
+
+@media (min-width: 768px) {
+  .poster-blush__content {
+    padding: 12px 14px 12px 4px;
+  }
+}
+
+.poster-blush__meta-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.poster-blush__headline {
+  font-family: var(--font-sans);
+  font-weight: 300;
+  color: var(--surface-editorial-alabaster);
+  font-size: clamp(2rem, 7vw, 3.35rem);
+  line-height: 1.02;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+@supports (font-size: 1cqi) {
+  .poster-blush__headline {
+    font-size: clamp(2rem, 6.2cqi, 3.35rem);
+  }
+}
+
+.poster-blush__headline-serif {
+  display: block;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 400;
+  font-size: clamp(2.55rem, 8.8vw, 4.35rem);
+  line-height: 1.1;
+  padding-bottom: 4px;
+  letter-spacing: 0.01em;
+  color: var(--surface-editorial-alabaster);
+}
+
+@supports (font-size: 1cqi) {
+  .poster-blush__headline-serif {
+    font-size: clamp(2.55rem, 8cqi, 4.35rem);
+  }
+}
+
+.poster-blush__subtext {
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: rgba(251, 244, 245, 0.9);
+  max-width: 38ch;
+  margin: 8px 0 0 0;
+}
+
+/* Botones Píldora Editoriales (Shape Consistency Lock + WCAG AA Contrast) */
+.editorial-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-radius: var(--radius-pill);
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+.editorial-pill-btn:active {
+  transform: scale(0.98);
+}
+
+.editorial-pill-btn--alabaster {
+  background-color: var(--surface-editorial-alabaster);
+  color: var(--color-ink-burgundy);
+  box-shadow: 0 8px 24px rgba(38, 8, 16, 0.22);
+}
+
+@media (hover: hover) {
+  .editorial-pill-btn--alabaster:hover {
+    background-color: #FFFFFF;
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(38, 8, 16, 0.3);
+  }
+}
+
+.editorial-pill-btn--pink {
+  background-color: var(--color-pastel-pink);
+  color: var(--color-ink-burgundy);
+  border: 1px solid rgba(90, 22, 35, 0.18);
+  box-shadow: 0 6px 20px rgba(90, 22, 35, 0.12);
+}
+
+@media (hover: hover) {
+  .editorial-pill-btn--pink:hover {
+    background-color: #F2C4C9;
+    transform: translateY(-2px);
+  }
+}
+
+.editorial-pill-btn--burgundy {
+  background-color: var(--color-burgundy);
+  color: var(--surface-editorial-alabaster);
+  border: 1px solid var(--color-gold);
+  box-shadow: var(--shadow-gold);
+}
+
+@media (hover: hover) {
+  .editorial-pill-btn--burgundy:hover {
+    background-color: var(--color-burgundy-light);
+    transform: translateY(-2px);
+  }
+}
+
+/* Marco de 4 esquinas (Estilo SOLEIL GLOSS) */
+.editorial-corner-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  font-family: var(--font-sans);
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  z-index: 3;
+}
+
+/* Póster 2: Split Editorial "VELVET GLOSS" */
+.poster-gloss-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  background-color: var(--surface-editorial-cocoa);
+  border: 1px solid rgba(215, 176, 106, 0.2);
+}
+
+@media (min-width: 768px) {
+  .poster-gloss-split {
+    grid-template-columns: 0.85fr 1.15fr;
+    min-height: 490px;
+  }
+}
+
+.poster-gloss__product-panel {
+  position: relative;
+  background-color: #8A575C;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  min-height: 320px;
+}
+
+@media (min-width: 768px) {
+  .poster-gloss__product-panel {
+    padding: 26px 28px;
+  }
+}
+
+.poster-gloss__product-frame {
+  position: relative;
+  width: 88%;
+  max-width: 280px;
+  aspect-ratio: 1 / 1;
+  border-radius: var(--radius-inner);
+  overflow: hidden;
+  background-color: #8A575C;
+}
+
+.poster-gloss__product-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
+  display: block;
+}
+
+.poster-gloss__model-panel {
+  position: relative;
+  min-height: 380px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 22px 20px;
+  background-color: #F4EAE8;
+}
+
+@media (min-width: 768px) {
+  .poster-gloss__model-panel {
+    padding: 32px 36px;
+  }
+}
+
+.poster-gloss__model-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center 12%;
+  z-index: 1;
+  transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@media (hover: hover) {
+  .poster-gloss-split:hover .poster-gloss__model-img {
+    transform: scale(1.03);
+  }
+}
+
+.poster-gloss__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(244, 234, 232, 0) 40%,
+    rgba(38, 8, 16, 0.86) 100%
+  );
+  z-index: 2;
+}
+
+.poster-gloss__svg-drops {
+  position: absolute;
+  top: -18px;
+  right: 10px;
+  z-index: 3;
+  pointer-events: none;
+  filter: drop-shadow(0 10px 22px rgba(10, 4, 5, 0.38));
+}
+
+@media (min-width: 768px) {
+  .poster-gloss__svg-drops {
+    top: 16px;
+    left: -28px;
+    right: auto;
+  }
+}
+
+.poster-gloss__overlay-content {
+  position: relative;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.poster-gloss__bottom-bar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Póster 3: Campaña "BELLA COLECCIÓN" (Estilo SOLEIL SALE) */
+.poster-collection-split {
+  display: grid;
+  grid-template-columns: 1fr;
+  background-color: var(--surface-editorial-alabaster);
+  border: 1px solid rgba(215, 176, 106, 0.25);
+}
+
+@media (min-width: 768px) {
+  .poster-collection-split {
+    grid-template-columns: 1.3fr 0.7fr;
+    min-height: 450px;
+  }
+}
+
+.poster-collection__visual {
+  position: relative;
+  min-height: 290px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
+  background-color: #2A0B12;
+}
+
+@media (min-width: 768px) {
+  .poster-collection__visual {
+    padding: 28px 32px;
+  }
+}
+
+.poster-collection__visual-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  z-index: 1;
+}
+
+.poster-collection__visual-scrim {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    circle at center,
+    rgba(38, 8, 16, 0.32) 0%,
+    rgba(18, 5, 9, 0.74) 100%
+  );
+  z-index: 2;
+}
+
+.poster-collection__giant-word {
+  position: relative;
+  z-index: 3;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  font-size: clamp(4.2rem, 18vw, 7.6rem);
+  line-height: 0.88;
+  letter-spacing: 0.08em;
+  color: var(--surface-editorial-alabaster);
+  text-shadow: 0 12px 34px rgba(10, 4, 5, 0.65);
+  margin: 12px 0;
+  user-select: none;
+}
+
+@supports (font-size: 1cqi) {
+  .poster-collection__giant-word {
+    font-size: clamp(4.2rem, 13.5cqi, 7.6rem);
+  }
+}
+
+.poster-collection__callout {
+  background-color: var(--surface-editorial-alabaster);
+  color: var(--color-ink-burgundy);
+  padding: 28px 24px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  gap: 20px;
+}
+
+@media (min-width: 768px) {
+  .poster-collection__callout {
+    padding: 40px 32px;
+  }
+}
+
+/* Bento Editorial 2 Celdas (Mirada & Kits) - Colapso 100% limpio en móvil */
+.editorial-bento-duo {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+@media (min-width: 768px) {
+  .editorial-bento-duo {
+    grid-template-columns: 1.12fr 0.88fr;
+    gap: 24px;
+  }
+}
+
+.editorial-bento-card {
+  position: relative;
+  border-radius: var(--radius-editorial);
+  overflow: hidden;
+  border: var(--border-glass);
+  background-color: var(--color-panel-dark);
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  cursor: pointer;
+  box-shadow: var(--shadow-premium);
+  transition: border-color 0.3s ease, transform 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .editorial-bento-card {
+    min-height: 420px;
+    padding: 24px;
+  }
+}
+
+@media (hover: hover) {
+  .editorial-bento-card:hover {
+    border-color: var(--color-gold);
+    transform: translateY(-3px);
+  }
+}
+
+/* Tarjetas de Producto en Catálogo con Container Queries */
+.product-card-cq {
+  container-type: inline-size;
+  container-name: product-card;
+}
+
+.product-card__title {
+  font-family: var(--font-sans);
+  font-size: clamp(0.92rem, 4.5cqi, 1.06rem);
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--color-text-light);
+  margin-bottom: 6px;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 2.55em;
+}
+
+/* Rotación sutil del emblema solar */
+@keyframes sunburst-slow-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .bella-sunburst-seal--spin {
+    animation: sunburst-slow-spin 28s linear infinite;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .cart-icon-bump,
   .cart-badge-pop,
   .cart-badge-ping,
   .cart-toast,
   .cart-toast.is-closing,
-  .cart-toast-progress {
+  .cart-toast-progress,
+  .bella-sunburst-seal--spin {
     animation: none !important;
     transition: none !important;
   }
