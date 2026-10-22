@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, type MouseEvent as ReactMouseEvent } from 'react';
 import { CONFIG } from '../config';
 import gsap from 'gsap';
 import { getProductImage } from '../utils/image-helpers';
@@ -15,7 +15,15 @@ export default function ProductCard({ product, priority = false, onProductClick,
   const [selectedTone, setSelectedTone] = useState<Tone | null>(
     product.tones && product.tones.length > 0 ? product.tones[0] ?? null : null
   );
+  const [isJustAdded, setIsJustAdded] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const addedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (addedTimerRef.current) clearTimeout(addedTimerRef.current);
+    };
+  }, []);
 
   const formattedPrice = new Intl.NumberFormat(CONFIG.currency.locale, {
     style: 'currency',
@@ -25,9 +33,14 @@ export default function ProductCard({ product, priority = false, onProductClick,
 
   const currentImage = getProductImage(product, selectedTone);
 
-  const handleAdd = (e: React.MouseEvent) => {
+  const handleAdd = (e: ReactMouseEvent) => {
     e.stopPropagation();
     onAddToCart(product, selectedTone);
+    setIsJustAdded(true);
+    if (addedTimerRef.current) clearTimeout(addedTimerRef.current);
+    addedTimerRef.current = setTimeout(() => {
+      setIsJustAdded(false);
+    }, 1200);
   };
 
   // Efecto Magnético para el botón - solo en dispositivos con puntero (no táctil)
@@ -253,34 +266,65 @@ export default function ProductCard({ product, priority = false, onProductClick,
           ref={buttonRef}
           onClick={handleAdd}
           disabled={!isAvailable}
+          aria-label={isJustAdded ? '¡Producto agregado al pedido!' : (isAvailable ? `Agregar ${product.name} al pedido` : 'Producto agotado')}
+          className={isJustAdded ? 'btn-added-state' : ''}
           style={{
             marginTop: 'auto',
             width: '100%',
-            backgroundColor: isAvailable ? 'var(--color-burgundy)' : 'rgba(255, 255, 255, 0.05)',
-            color: isAvailable ? 'var(--color-white)' : 'var(--color-text-muted)',
-            border: isAvailable ? '1px solid var(--color-gold)' : '1px solid rgba(255,255,255,0.05)',
+            backgroundColor: isJustAdded 
+              ? 'var(--color-burgundy-light)' 
+              : isAvailable 
+                ? 'var(--color-burgundy)' 
+                : 'rgba(255, 255, 255, 0.05)',
+            color: isJustAdded 
+              ? 'var(--color-gold)' 
+              : isAvailable 
+                ? 'var(--color-white)' 
+                : 'var(--color-text-muted)',
+            border: isJustAdded 
+              ? '1px solid var(--color-gold)' 
+              : isAvailable 
+                ? '1px solid var(--color-gold)' 
+                : '1px solid rgba(255,255,255,0.05)',
             padding: '11px 0',
             borderRadius: '8px',
             cursor: isAvailable ? 'pointer' : 'default',
             fontWeight: '600',
             fontSize: '0.85rem',
-            transition: 'all 0.3s ease',
+            transition: 'all 0.25s ease',
             letterSpacing: '0.5px',
             whiteSpace: 'normal',
             wordBreak: 'break-word',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            boxShadow: isJustAdded ? 'var(--shadow-gold)' : 'none',
           }}
           onMouseEnter={(e) => {
-            if (isAvailable) {
+            if (isAvailable && !isJustAdded) {
               e.currentTarget.style.backgroundColor = 'var(--color-burgundy-light)';
             }
           }}
           onMouseLeave={(e) => {
-            if (isAvailable) {
+            if (isAvailable && !isJustAdded) {
               e.currentTarget.style.backgroundColor = 'var(--color-burgundy)';
             }
           }}
         >
-          {isAvailable ? 'Agregar' : 'Agotado'}
+          {isAvailable ? (
+            isJustAdded ? (
+              <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                ¡Agregado!
+              </span>
+            ) : (
+              'Agregar'
+            )
+          ) : (
+            'Agotado'
+          )}
         </button>
       </div>
     </div>

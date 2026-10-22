@@ -1,4 +1,4 @@
-import React, { useState, useEffect, type ChangeEvent, type FormEvent } from 'react';
+import { useState, useEffect, type ChangeEvent, type SubmitEvent } from 'react';
 import Header from '../Header';
 import ImageUpload from '../ui/ImageUpload';
 import { getProductById, updateProduct, getCategories } from '../../lib/api-client';
@@ -98,7 +98,7 @@ export default function EditProductClient({ id }: EditProductClientProps) {
     setTones(prev => prev.map((t, i) => i === index ? { ...t, [field]: value } : t));
   };
 
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: SubmitEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.price) {
       alert("Por favor completa los campos requeridos (Nombre y Precio)");

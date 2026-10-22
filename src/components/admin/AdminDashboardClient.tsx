@@ -1,4 +1,4 @@
-import React, { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useState, type SubmitEvent } from 'react';
 import Header from '../Header';
 import { 
   getProducts, 
@@ -158,7 +158,7 @@ export default function AdminDashboardClient() {
     }
   };
 
-  const handleCreateCategory = async (e: FormEvent) => {
+  const handleCreateCategory = async (e: SubmitEvent) => {
     e.preventDefault();
     if (!newCatName.trim()) return;
     setCatSubmitting(true);
@@ -174,7 +174,7 @@ export default function AdminDashboardClient() {
     }
   };
 
-  const handleUpdateCategory = async (e: FormEvent) => {
+  const handleUpdateCategory = async (e: SubmitEvent) => {
     e.preventDefault();
     if (!editingCat || !editingCat.name.trim()) return;
     setCatSubmitting(true);

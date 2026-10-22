@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect, type SyntheticEvent } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { CONFIG } from '../config';
@@ -144,7 +144,7 @@ export default function CartDrawer({
     return `https://wa.me/${CONFIG.whatsappNumber}?text=${encodeURIComponent(message)}`;
   };
 
-  const handleConfirmOrder = async (e?: React.FormEvent) => {
+  const handleConfirmOrder = async (e?: SyntheticEvent) => {
     if (e) e.preventDefault();
     setErrorMessage(null);
 

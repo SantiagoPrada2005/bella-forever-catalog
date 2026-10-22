@@ -3,8 +3,8 @@ import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 
-const require = createRequire(import.meta.url);
-const sharp = require('../node_modules/.pnpm/sharp@0.35.5_@types+node@22.20.5/node_modules/sharp');
+const nodeRequire = createRequire(import.meta.url);
+const sharp = nodeRequire('../node_modules/.pnpm/sharp@0.35.5_@types+node@22.20.5/node_modules/sharp');
 
 const IMAGES_DIR = path.resolve('public/images');
 const TEMP_DIR = path.resolve('/tmp/bella_convert');

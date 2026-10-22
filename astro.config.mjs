@@ -33,7 +33,7 @@ export default defineConfig({
     },
     optimizeDeps: {
       include: ['react', 'react-dom', 'react-dom/server', 'react/jsx-runtime'],
-      exclude: ['astro/assets/services/noop', '@astrojs/cloudflare', 'drizzle-orm'],
+      exclude: ['astro/assets/services/noop', '@astrojs/cloudflare', 'drizzle-orm', '@gsap/react'],
     },
     ssr: {
       noExternal: ['react', 'react-dom', '@gsap/react', '@astrojs/react'],

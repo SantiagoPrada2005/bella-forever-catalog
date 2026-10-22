@@ -1,4 +1,4 @@
-import React from 'react';
+import { useState, useEffect, useRef, type MouseEvent } from 'react';
 import { CONFIG } from '../config';
 import { getProductImage } from '../utils/image-helpers';
 import type { ProductWithRelations, Tone } from '../db/schema';
@@ -14,6 +14,25 @@ export default function FeaturedCarousel({
   onProductClick,
   onAddToCart = () => {},
 }: FeaturedCarouselProps) {
+  const [addedProductId, setAddedProductId] = useState<string | null>(null);
+  const addedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (addedTimerRef.current) clearTimeout(addedTimerRef.current);
+    };
+  }, []);
+
+  const handleAdd = (e: MouseEvent, product: ProductWithRelations, defaultTone: Tone | null) => {
+    e.stopPropagation();
+    onAddToCart(product, defaultTone);
+    setAddedProductId(product.id);
+    if (addedTimerRef.current) clearTimeout(addedTimerRef.current);
+    addedTimerRef.current = setTimeout(() => {
+      setAddedProductId(null);
+    }, 1200);
+  };
+
   // Filtrar productos destacados o nuevos
   const featured = products.filter(p => p.isFeatured || p.isNew);
 
@@ -159,26 +178,45 @@ export default function FeaturedCarousel({
                 {formatPrice(product.price)}
               </p>
 
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAddToCart(product, defaultTone);
-                }}
-                style={{
-                  marginTop: 'auto',
-                  backgroundColor: 'var(--color-burgundy)',
-                  color: 'var(--color-white)',
-                  border: 'none',
-                  padding: '10px 0',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  fontWeight: '600',
-                  fontSize: '0.85rem',
-                  letterSpacing: '0.5px',
-                }}
-              >
-                Agregar al pedido
-              </button>
+              {(() => {
+                const isJustAdded = addedProductId === product.id;
+                return (
+                  <button
+                    onClick={(e) => handleAdd(e, product, defaultTone)}
+                    className={isJustAdded ? 'btn-added-state' : ''}
+                    aria-label={isJustAdded ? `¡${product.name} agregado al pedido!` : `Agregar ${product.name} al pedido`}
+                    style={{
+                      marginTop: 'auto',
+                      backgroundColor: isJustAdded ? 'var(--color-burgundy-light)' : 'var(--color-burgundy)',
+                      color: isJustAdded ? 'var(--color-gold)' : 'var(--color-white)',
+                      border: isJustAdded ? '1px solid var(--color-gold)' : '1px solid rgba(215, 176, 106, 0.25)',
+                      padding: '10px 0',
+                      borderRadius: '8px',
+                      cursor: 'pointer',
+                      fontWeight: '600',
+                      fontSize: '0.85rem',
+                      letterSpacing: '0.5px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px',
+                      transition: 'all 0.25s ease',
+                      boxShadow: isJustAdded ? 'var(--shadow-gold)' : 'none',
+                    }}
+                  >
+                    {isJustAdded ? (
+                      <>
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                          <polyline points="20 6 9 17 4 12"></polyline>
+                        </svg>
+                        <span>¡Agregado!</span>
+                      </>
+                    ) : (
+                      'Agregar al pedido'
+                    )}
+                  </button>
+                );
+              })()}
             </div>
           );
         })}

@@ -1,4 +1,4 @@
-import React, { useRef, useState, useEffect } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { CONFIG } from '../config';
@@ -18,6 +18,8 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
   const [selectedTone, setSelectedTone] = useState<Tone | null>(
     initialTone || (product?.tones && product.tones.length > 0 ? product.tones[0] ?? null : null)
   );
+  const [isJustAdded, setIsJustAdded] = useState(false);
+  const closeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Bloquear el scroll del body al abrir y desbloquear al cerrar
   useEffect(() => {
@@ -25,6 +27,7 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
     document.body.style.overflow = 'hidden';
     return () => {
       document.body.style.overflow = originalOverflow;
+      if (closeTimerRef.current) clearTimeout(closeTimerRef.current);
     };
   }, []);
 
@@ -241,28 +244,63 @@ export default function ProductModal({ product, initialTone, onClose, onAddToCar
 
               {/* Botón */}
               <button
-                className="modal-anim-item"
-                disabled={!isAvailable}
+                className={`modal-anim-item ${isJustAdded ? 'btn-added-state' : ''}`}
+                disabled={!isAvailable || isJustAdded}
                 onClick={() => {
+                  if (!product || !isAvailable || isJustAdded) return;
                   onAddToCart(product, selectedTone);
-                  handleClose();
+                  setIsJustAdded(true);
+                  closeTimerRef.current = setTimeout(() => {
+                    handleClose();
+                  }, 450);
                 }}
+                aria-label={isJustAdded ? '¡Producto añadido al pedido!' : (isAvailable ? 'Añadir al pedido' : 'Agotado')}
                 style={{
                   width: '100%',
-                  backgroundColor: isAvailable ? 'var(--color-burgundy)' : 'rgba(255,255,255,0.05)',
-                  color: isAvailable ? 'var(--color-white)' : 'var(--color-text-muted)',
-                  border: isAvailable ? '1px solid var(--color-gold)' : '1px solid rgba(255,255,255,0.05)',
+                  backgroundColor: isJustAdded
+                    ? 'var(--color-burgundy-light)'
+                    : isAvailable
+                      ? 'var(--color-burgundy)'
+                      : 'rgba(255,255,255,0.05)',
+                  color: isJustAdded
+                    ? 'var(--color-gold)'
+                    : isAvailable
+                      ? 'var(--color-white)'
+                      : 'var(--color-text-muted)',
+                  border: isJustAdded
+                    ? '1px solid var(--color-gold)'
+                    : isAvailable
+                      ? '1px solid var(--color-gold)'
+                      : '1px solid rgba(255,255,255,0.05)',
                   padding: '12px 0',
                   borderRadius: '8px',
-                  cursor: isAvailable ? 'pointer' : 'default',
+                  cursor: isAvailable && !isJustAdded ? 'pointer' : 'default',
                   fontWeight: '600',
                   fontSize: '0.95rem',
                   letterSpacing: '1px',
-                  boxShadow: isAvailable ? 'var(--shadow-gold)' : 'none',
+                  boxShadow: isJustAdded || isAvailable ? 'var(--shadow-gold)' : 'none',
                   marginTop: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  transition: 'all 0.25s ease',
                 }}
               >
-                {isAvailable ? 'Añadir al pedido 💄' : 'Agotado'}
+                {isAvailable ? (
+                  isJustAdded ? (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                      </svg>
+                      ¡Agregado al pedido!
+                    </span>
+                  ) : (
+                    'Añadir al pedido 💄'
+                  )
+                ) : (
+                  'Agotado'
+                )}
               </button>
             </div>
           </div>

@@ -1,4 +1,3 @@
-import React from 'react';
 import { CONFIG } from '../config';
 import type { Category, ProductWithRelations } from '../db/schema';
 

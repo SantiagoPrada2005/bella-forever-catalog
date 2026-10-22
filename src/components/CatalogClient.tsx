@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Header from './Header';
 import FeaturedCarousel from './FeaturedCarousel';
 import CategoryFilters from './CategoryFilters';
 import ProductGrid from './ProductGrid';
 import ProductModal from './ProductModal';
 import CartDrawer, { type CartItem } from './CartDrawer';
+import CartToast, { type CartToastItem } from './ui/CartToast';
 import { CONFIG } from '../config';
 import { getProductImage } from '../utils/image-helpers';
 import type { ProductWithRelations, Category, Tone } from '../db/schema';
@@ -24,6 +25,15 @@ export default function CatalogClient({
   const [activeCategory, setActiveCategory] = useState('todos');
   const [selectedProduct, setSelectedProduct] = useState<ProductWithRelations | null>(null);
   const [selectedProductTone, setSelectedProductTone] = useState<Tone | null>(null);
+  const [cartToast, setCartToast] = useState<CartToastItem | null>(null);
+  const [isCartBumping, setIsCartBumping] = useState(false);
+  const bumpTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (bumpTimerRef.current) clearTimeout(bumpTimerRef.current);
+    };
+  }, []);
 
   // Cargar carrito desde localStorage en cliente
   useEffect(() => {
@@ -66,6 +76,22 @@ export default function CatalogClient({
         quantity: 1,
         image: getProductImage(product, selectedTone),
       }];
+    });
+
+    // Disparar animación física en el Header (bounce + ping)
+    setIsCartBumping(true);
+    if (bumpTimerRef.current) clearTimeout(bumpTimerRef.current);
+    bumpTimerRef.current = setTimeout(() => {
+      setIsCartBumping(false);
+    }, 650);
+
+    // Desplegar notificación Toast inferior
+    setCartToast({
+      id: Date.now(),
+      productName: product.name,
+      toneName: selectedTone?.name,
+      price: product.price,
+      image: getProductImage(product, selectedTone),
     });
   };
 
@@ -122,6 +148,7 @@ export default function CatalogClient({
         cartCount={totalCartCount} 
         onCartClick={() => setIsCartOpen(true)} 
         isCatalog
+        isCartBumping={isCartBumping}
       />
 
       <main style={{ flex: '1 0 auto', paddingBottom: '60px' }}>
@@ -187,6 +214,15 @@ export default function CatalogClient({
           initialProducts={initialProducts}
         />
       )}
+
+      <CartToast
+        notification={cartToast}
+        onClose={() => setCartToast(null)}
+        onOpenCart={() => {
+          setCartToast(null);
+          setIsCartOpen(true);
+        }}
+      />
 
       <footer style={{
         padding: '40px 24px',

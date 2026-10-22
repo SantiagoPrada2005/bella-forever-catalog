@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, type ChangeEvent } from 'react';
+import { useState, useRef, type ChangeEvent } from 'react';
 
 interface SingleImageUploadProps {
   label?: string;

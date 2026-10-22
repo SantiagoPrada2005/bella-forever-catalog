@@ -111,11 +111,7 @@ export async function updateCategory(db: AppDb, id: string, name: string): Promi
     );
   }
 
-  if (statements.length === 1 && statements[0]) {
-    await statements[0];
-  } else {
-    await db.batch(statements as [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]]);
-  }
+  await db.batch(statements as [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]]);
 
   return { id, name, slug };
 }
@@ -268,11 +264,7 @@ export async function createProduct(
     );
   }
 
-  if (statements.length === 1 && statements[0]) {
-    await statements[0];
-  } else {
-    await db.batch(statements as [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]]);
-  }
+  await db.batch(statements as [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]]);
 
   return { id: productId };
 }

@@ -1,15 +1,16 @@
-import React from 'react';
 
 export interface HeaderProps {
   cartCount?: number;
   onCartClick?: () => void;
   isCatalog?: boolean;
+  isCartBumping?: boolean;
 }
 
 export default function Header({ 
   cartCount = 0, 
   onCartClick, 
-  isCatalog = false 
+  isCatalog = false,
+  isCartBumping = false,
 }: HeaderProps) {
 
   return (
@@ -97,30 +98,52 @@ export default function Header({
             onMouseEnter={(e) => (e.currentTarget.style.transform = 'scale(1.1)')}
             onMouseLeave={(e) => (e.currentTarget.style.transform = 'scale(1)')}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              className={isCartBumping ? 'cart-icon-bump' : ''}
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"></path>
               <line x1="3" y1="6" x2="21" y2="6"></line>
               <path d="M16 10a4 4 0 0 1-8 0"></path>
             </svg>
             {cartCount > 0 && (
-              <span style={{
-                position: 'absolute',
-                top: '0',
-                right: '0',
-                backgroundColor: 'var(--color-burgundy)',
-                color: 'var(--color-white)',
-                fontWeight: 'bold',
-                borderRadius: '50%',
-                width: '18px',
-                height: '18px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '0.7rem',
-                border: '1px solid var(--color-gold)',
-                boxShadow: 'var(--shadow-gold)',
-              }}>
-                {cartCount}
+              <>
+                {isCartBumping && <span className="cart-badge-ping" aria-hidden="true" />}
+                <span
+                  key={cartCount}
+                  className={isCartBumping ? 'cart-badge-pop' : ''}
+                  style={{
+                    position: 'absolute',
+                    top: '0',
+                    right: '0',
+                    backgroundColor: 'var(--color-burgundy)',
+                    color: 'var(--color-white)',
+                    fontWeight: 'bold',
+                    borderRadius: '50%',
+                    width: '18px',
+                    height: '18px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '0.7rem',
+                    border: '1px solid var(--color-gold)',
+                    boxShadow: 'var(--shadow-gold)',
+                  }}
+                >
+                  {cartCount}
+                </span>
+              </>
+            )}
+            {isCartBumping && (
+              <span className="sr-only" role="status" aria-live="polite">
+                Producto agregado. {cartCount} {cartCount === 1 ? 'producto' : 'productos'} en el carrito.
               </span>
             )}
           </button>
