@@ -5,6 +5,12 @@
 	"compatibility_flags": [
 		"nodejs_compat"
 	],
+	"routes": [
+		{
+			"pattern": "bella-forever.com",
+			"custom_domain": true
+		}
+	],
 	"r2_buckets": [
 		{
 			"binding": "BELLA_IMAGES",

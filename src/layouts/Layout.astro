@@ -18,7 +18,7 @@ const {
   noindex = false,
 } = Astro.props;
 
-const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://bella-forever-catalog.pages.dev';
+const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://bella-forever.com';
 const canonicalURL = new URL(Astro.url.pathname, siteUrl);
 const socialImageURL = new URL(image, siteUrl);
 ---
