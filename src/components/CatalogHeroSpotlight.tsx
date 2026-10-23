@@ -1,4 +1,6 @@
-import { useState, useEffect, useRef, type MouseEvent } from 'react';
+import { useState, useEffect, useRef, type MouseEvent, type TouchEvent } from 'react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 import { CONFIG } from '../config';
 import { getProductImage } from '../utils/image-helpers';
 import type { ProductWithRelations, Tone } from '../db/schema';
@@ -9,37 +11,94 @@ export interface CatalogHeroSpotlightProps {
   onAddToCart: (product: ProductWithRelations, tone: Tone | null) => void;
 }
 
+const SPOTLIGHT_INTERVAL_MS = 4800;
+
 export default function CatalogHeroSpotlight({
   products,
   onProductClick,
   onAddToCart,
 }: CatalogHeroSpotlightProps) {
   const spotlightPool = products.filter((p) => p.isFeatured || p.isNew);
-  const items = spotlightPool.length > 0 ? spotlightPool.slice(0, 4) : products.slice(0, 3);
+  const items = spotlightPool.length > 0 ? spotlightPool.slice(0, 5) : products.slice(0, 4);
 
   const [activeIndex, setActiveIndex] = useState(0);
+  const [toneOverrides, setToneOverrides] = useState<Record<string, Tone>>({});
+  const [isJustAdded, setIsJustAdded] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const cardRef = useRef<HTMLDivElement>(null);
+  const addedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const touchStartXRef = useRef<number | null>(null);
+
   const activeProduct = items[activeIndex] ?? items[0] ?? null;
 
-  const [selectedTone, setSelectedTone] = useState<Tone | null>(
-    activeProduct?.tones && activeProduct.tones.length > 0 ? activeProduct.tones[0] ?? null : null
-  );
-  const [isJustAdded, setIsJustAdded] = useState(false);
-  const addedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const selectedTone: Tone | null = activeProduct
+    ? toneOverrides[activeProduct.id] ??
+      (activeProduct.tones && activeProduct.tones.length > 0
+        ? activeProduct.tones[0] ?? null
+        : null)
+    : null;
 
   const handleSelectProductIndex = (idx: number) => {
     setActiveIndex(idx);
-    const nextProd = items[idx] ?? items[0] ?? null;
-    const firstTone =
-      nextProd?.tones && nextProd.tones.length > 0 ? nextProd.tones[0] ?? null : null;
-    setSelectedTone(firstTone);
     setIsJustAdded(false);
   };
+
+  const handleSelectTone = (tone: Tone) => {
+    if (!activeProduct) return;
+    setToneOverrides((prev) => ({
+      ...prev,
+      [activeProduct.id]: tone,
+    }));
+  };
+
+  // Rotación automática cada 4.8s cuando hay múltiples productos destacados y no está en pausa
+  useEffect(() => {
+    if (items.length <= 1 || isPaused) return;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    const timer = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % items.length);
+      setIsJustAdded(false);
+    }, SPOTLIGHT_INTERVAL_MS);
+
+    return () => clearInterval(timer);
+  }, [items.length, isPaused, activeIndex]);
 
   useEffect(() => {
     return () => {
       if (addedTimerRef.current) clearTimeout(addedTimerRef.current);
     };
   }, []);
+
+  // Coreografía suave de entrada al cambiar de producto destacado
+  useGSAP(
+    () => {
+      if (!cardRef.current || !activeProduct) return;
+      const mm = gsap.matchMedia();
+      mm.add('(prefers-reduced-motion: no-preference)', () => {
+        gsap.fromTo(
+          '.catalog-spotlight__img',
+          { opacity: 0, scale: 0.92, y: 8 },
+          { opacity: 1, scale: 1, y: 0, duration: 0.55, ease: 'power3.out' }
+        );
+        gsap.fromTo(
+          '.catalog-spotlight__anim-item',
+          { opacity: 0, y: 10 },
+          {
+            opacity: 1,
+            y: 0,
+            stagger: 0.05,
+            duration: 0.42,
+            ease: 'power2.out',
+          }
+        );
+      });
+    },
+    { dependencies: [activeProduct?.id], scope: cardRef }
+  );
 
   if (!activeProduct) {
     return null;
@@ -67,6 +126,28 @@ export default function CatalogHeroSpotlight({
     }, 1200);
   };
 
+  const handleTouchStart = (e: TouchEvent) => {
+    setIsPaused(true);
+    touchStartXRef.current = e.touches[0]?.clientX ?? null;
+  };
+
+  const handleTouchEnd = (e: TouchEvent) => {
+    setIsPaused(false);
+    if (touchStartXRef.current === null || items.length <= 1) return;
+    const endX = e.changedTouches[0]?.clientX ?? touchStartXRef.current;
+    const deltaX = endX - touchStartXRef.current;
+    touchStartXRef.current = null;
+
+    if (Math.abs(deltaX) > 40) {
+      if (deltaX < 0) {
+        setActiveIndex((prev) => (prev + 1) % items.length);
+      } else {
+        setActiveIndex((prev) => (prev - 1 + items.length) % items.length);
+      }
+      setIsJustAdded(false);
+    }
+  };
+
   return (
     <section className="catalog-shell" aria-label="Vitrina destacada del catálogo">
       <div className="catalog-hero-frame">
@@ -87,7 +168,7 @@ export default function CatalogHeroSpotlight({
               style={{
                 fontFamily: 'var(--font-sans)',
                 fontSize: '0.72rem',
-                color: 'rgba(255, 255, 255, 0.92)',
+                color: 'rgba(251, 244, 245, 0.92)',
                 maxWidth: '30ch',
                 lineHeight: 1.35,
               }}
@@ -97,12 +178,24 @@ export default function CatalogHeroSpotlight({
           </div>
         </div>
 
-        {/* Columna Derecha / Vitrina Interactiva AMUSE en Móvil */}
-        <div className="catalog-hero__spotlight-pane">
+        {/* Columna Derecha / Vitrina Interactiva AMUSE con Rotación Automática */}
+        <div
+          className="catalog-hero__spotlight-pane"
+          onMouseEnter={() => setIsPaused(true)}
+          onMouseLeave={() => setIsPaused(false)}
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          onFocusCapture={() => setIsPaused(true)}
+          onBlurCapture={() => setIsPaused(false)}
+        >
           <div className="catalog-hero__top-nav">
             <span className="catalog-pill-tag">Favorito de Estudio</span>
             {items.length > 1 && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }} role="tablist" aria-label="Productos destacados">
+              <div
+                style={{ display: 'flex', alignItems: 'center', gap: '6px' }}
+                role="tablist"
+                aria-label="Productos destacados"
+              >
                 {items.map((item, idx) => {
                   const isCurrent = idx === activeIndex;
                   return (
@@ -113,25 +206,26 @@ export default function CatalogHeroSpotlight({
                       aria-selected={isCurrent}
                       aria-label={`Ver destacado ${item.name}`}
                       onClick={() => handleSelectProductIndex(idx)}
+                      className="spotlight-tab-pill"
                       style={{
-                        width: isCurrent ? '22px' : '8px',
-                        height: '8px',
-                        borderRadius: '9999px',
-                        border: 'none',
-                        backgroundColor: isCurrent ? 'var(--catalog-accent)' : 'rgba(140, 29, 50, 0.25)',
-                        cursor: 'pointer',
-                        padding: 0,
-                        transition: 'width 0.25s ease, background-color 0.25s ease',
+                        width: isCurrent ? '32px' : '8px',
                       }}
-                    />
+                    >
+                      {isCurrent && (
+                        <span
+                          key={`${activeProduct.id}-${activeIndex}`}
+                          className={`spotlight-tab-pill__fill ${isPaused ? 'is-paused' : ''}`}
+                        />
+                      )}
+                    </button>
                   );
                 })}
               </div>
             )}
           </div>
 
-          {/* Tarjeta Spotlight interactiva estilo AMUSE Bebe Tint */}
-          <div className="catalog-spotlight-card">
+          {/* Tarjeta Spotlight interactiva estilo AMUSE Bebe Tint en Terciopelo + Luz Alabastro */}
+          <div ref={cardRef} className="catalog-spotlight-card">
             <div
               className="catalog-spotlight__media-wrap"
               onClick={() => onProductClick(activeProduct, selectedTone)}
@@ -152,6 +246,7 @@ export default function CatalogHeroSpotlight({
                 }}
               />
               <img
+                key={currentImage}
                 src={currentImage}
                 alt={`${activeProduct.name}${selectedTone?.name ? ` en tono ${selectedTone.name}` : ''}`}
                 width="240"
@@ -163,7 +258,7 @@ export default function CatalogHeroSpotlight({
             </div>
 
             <div className="catalog-spotlight__info">
-              <div className="catalog-spotlight__price-row">
+              <div className="catalog-spotlight__price-row catalog-spotlight__anim-item">
                 <h1
                   className="catalog-spotlight__title"
                   onClick={() => onProductClick(activeProduct, selectedTone)}
@@ -173,10 +268,12 @@ export default function CatalogHeroSpotlight({
                 <p className="catalog-spotlight__price">{formattedPrice}</p>
               </div>
 
-              <p className="catalog-spotlight__desc">{activeProduct.description}</p>
+              <p className="catalog-spotlight__desc catalog-spotlight__anim-item">
+                {activeProduct.description}
+              </p>
 
               {hasTones && activeProduct.tones && (
-                <div>
+                <div className="catalog-spotlight__anim-item">
                   <p
                     style={{
                       fontSize: '0.68rem',
@@ -200,7 +297,7 @@ export default function CatalogHeroSpotlight({
                           title={`${tone.name}${!toneReady ? ' (Agotado)' : ''}`}
                           aria-label={`Seleccionar tono ${tone.name}`}
                           aria-pressed={isSelected}
-                          onClick={() => setSelectedTone(tone)}
+                          onClick={() => handleSelectTone(tone)}
                           className={`amuse-swatch-btn ${isSelected ? 'is-active' : ''} ${!toneReady ? 'is-out' : ''}`}
                           style={{ backgroundColor: tone.hex }}
                         />
@@ -210,7 +307,10 @@ export default function CatalogHeroSpotlight({
                 </div>
               )}
 
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+              <div
+                className="catalog-spotlight__anim-item"
+                style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}
+              >
                 <button
                   type="button"
                   onClick={handleDirectAdd}
@@ -229,7 +329,7 @@ export default function CatalogHeroSpotlight({
               style={{
                 fontFamily: 'var(--font-sans)',
                 fontSize: '0.72rem',
-                color: 'var(--catalog-accent)',
+                color: 'rgba(251, 244, 245, 0.84)',
                 lineHeight: 1.35,
                 maxWidth: '28ch',
               }}

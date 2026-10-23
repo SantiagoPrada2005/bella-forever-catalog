@@ -112,14 +112,14 @@ export default function ProductModal({
         onClick={(e) => e.stopPropagation()}
         className="bottom-sheet-content"
       >
-        {/* Cabecera de la ficha estilo AMUSE Mobile */}
+        {/* Cabecera de la ficha estilo AMUSE Mobile en Chiaroscuro */}
         <div
           style={{
             padding: '12px 18px 8px 18px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            borderBottom: '1px solid var(--catalog-border-subtle, rgba(36, 7, 14, 0.08))',
+            borderBottom: '1px solid var(--catalog-border-subtle, rgba(215, 176, 106, 0.14))',
             flexShrink: 0,
           }}
         >
@@ -130,7 +130,7 @@ export default function ProductModal({
             style={{
               width: '36px',
               height: '4px',
-              backgroundColor: 'rgba(140, 29, 50, 0.22)',
+              backgroundColor: 'rgba(215, 176, 106, 0.3)',
               borderRadius: '2px',
               cursor: 'pointer',
             }}
@@ -141,8 +141,8 @@ export default function ProductModal({
             onClick={handleClose}
             aria-label="Cerrar detalles del producto"
             style={{
-              backgroundColor: 'var(--catalog-surface-card, #F4ECEE)',
-              border: '1px solid var(--catalog-border, rgba(140, 29, 50, 0.16))',
+              backgroundColor: 'var(--catalog-surface-card, #160A0D)',
+              border: '1px solid var(--catalog-border, rgba(215, 176, 106, 0.26))',
               borderRadius: '50%',
               width: '32px',
               height: '32px',
@@ -150,7 +150,7 @@ export default function ProductModal({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              color: 'var(--catalog-accent, #8C1D32)',
+              color: 'var(--catalog-accent, #D7B06A)',
               fontWeight: 600,
               fontSize: '0.85rem',
             }}
@@ -179,7 +179,7 @@ export default function ProductModal({
                 fontStyle: 'italic',
                 fontSize: 'clamp(1.75rem, 6vw, 2.35rem)',
                 fontWeight: 500,
-                color: 'var(--catalog-accent, #8C1D32)',
+                color: 'var(--catalog-ink, #FCF9F9)',
                 lineHeight: 1.12,
                 paddingBottom: '4px',
                 margin: 0,
@@ -197,7 +197,7 @@ export default function ProductModal({
               alignItems: 'start',
             }}
           >
-            {/* Galería Cuadrada de Estudio */}
+            {/* Galería Cuadrada de Estudio Iluminada */}
             <div>
               <ProductGallery
                 images={product.productImages || []}
@@ -219,7 +219,7 @@ export default function ProductModal({
               >
                 <p
                   style={{
-                    color: 'var(--catalog-accent, #8C1D32)',
+                    color: 'var(--catalog-accent, #D7B06A)',
                     fontSize: '1.35rem',
                     fontWeight: 700,
                     margin: 0,
@@ -236,7 +236,7 @@ export default function ProductModal({
 
               <p
                 style={{
-                  color: 'var(--catalog-ink-muted, #68454D)',
+                  color: 'var(--catalog-ink-muted, #C9B1B6)',
                   fontSize: '0.88rem',
                   lineHeight: 1.55,
                   margin: 0,
@@ -251,8 +251,8 @@ export default function ProductModal({
                   style={{
                     padding: '12px 14px',
                     borderRadius: '14px',
-                    backgroundColor: 'var(--catalog-surface-card, #F4ECEE)',
-                    border: '1px solid var(--catalog-border-subtle, rgba(36, 7, 14, 0.08))',
+                    backgroundColor: 'var(--catalog-surface-card, #160A0D)',
+                    border: '1px solid var(--catalog-border-subtle, rgba(215, 176, 106, 0.14))',
                   }}
                 >
                   <p
@@ -260,13 +260,13 @@ export default function ProductModal({
                       fontSize: '0.74rem',
                       textTransform: 'uppercase',
                       letterSpacing: '0.06em',
-                      color: 'var(--catalog-ink-muted, #68454D)',
+                      color: 'var(--catalog-ink-muted, #C9B1B6)',
                       margin: '0 0 8px 0',
                       fontWeight: 600,
                     }}
                   >
                     Color:{' '}
-                    <span style={{ color: 'var(--catalog-accent, #8C1D32)', fontWeight: 700 }}>
+                    <span style={{ color: 'var(--catalog-accent, #D7B06A)', fontWeight: 700 }}>
                       {selectedTone?.name}
                     </span>
                   </p>

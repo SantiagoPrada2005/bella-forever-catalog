@@ -156,6 +156,9 @@ export default function CatalogClient({
 
   return (
     <div className="theme-catalog-studio">
+      <div className="bg-makeup-blur bg-makeup-blur-1" />
+      <div className="bg-makeup-blur bg-makeup-blur-2" />
+
       <Header
         cartCount={totalCartCount}
         onCartClick={() => setIsCartOpen(true)}
@@ -219,28 +222,25 @@ export default function CatalogClient({
         <p
           style={{
             fontFamily: 'var(--font-serif)',
-            fontStyle: 'italic',
-            fontSize: '1.6rem',
-            fontWeight: 600,
+            fontSize: '1.35rem',
+            fontWeight: 400,
             color: 'var(--catalog-accent)',
+            letterSpacing: '0.16em',
             marginBottom: '6px',
-            lineHeight: 1.15,
-            paddingBottom: '2px',
           }}
         >
-          Bella Forever.
+          BELLA FOREVER
         </p>
         <p
           style={{
             marginBottom: '6px',
             letterSpacing: '0.08em',
             textTransform: 'uppercase',
-            fontSize: '0.7rem',
-            fontWeight: 600,
+            fontSize: '0.72rem',
             color: 'var(--catalog-ink-muted)',
           }}
         >
-          {CONFIG.defaultCity}, Valle del Cauca
+          {CONFIG.defaultCity} · Valle del Cauca
         </p>
         <p style={{ fontSize: '0.78rem', margin: 0 }}>
           Curaduría por{' '}

@@ -33,8 +33,28 @@ export const GET: APIRoute = async ({ params }) => {
       });
     }
 
-    const object = await bucket.get(path);
+    let object = await bucket.get(path);
     if (!object) {
+      // En desarrollo local o si no está en el bucket local, intentar obtenerla de producción
+      if (import.meta.env.DEV) {
+        try {
+          const remoteUrl = `https://bella-forever.com/api/images/${path}`;
+          const remoteRes = await fetch(remoteUrl);
+          if (remoteRes.ok) {
+            const ext = path.split('.').pop()?.toLowerCase() || '';
+            const contentType = remoteRes.headers.get('content-type') || MIME_TYPES[ext] || 'application/octet-stream';
+            return new Response(remoteRes.body, {
+              headers: {
+                'Content-Type': contentType,
+                'Cache-Control': 'no-cache',
+              },
+            });
+          }
+        } catch (e) {
+          console.warn('Fallback a producción falló para:', path, e);
+        }
+      }
+
       return new Response(JSON.stringify({ error: 'Imagen no encontrada' }), {
         status: 404,
         headers: { 'Content-Type': 'application/json' },

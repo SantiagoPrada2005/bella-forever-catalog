@@ -36,9 +36,9 @@ export default function CatalogEditorialInterlude({
 
       <p className="catalog-interlude__statement">
         En Bella Forever seleccionamos cada fórmula pensando en{' '}
-        <span className="catalog-interlude__serif-em">piel real y luz natural.</span>{' '}
+        <span className="catalog-interlude__serif-em">piel real y alto brillo.</span>{' '}
         Pigmentos sedosos que se difuminan sin esfuerzo para que tu rutina diaria se sienta{' '}
-        <span className="catalog-interlude__serif-em">ligera, fresca y auténtica.</span>
+        <span className="catalog-interlude__serif-em">sofisticada, radiante y auténtica.</span>
       </p>
 
       {onSelectFeaturedCategory && (
@@ -46,14 +46,9 @@ export default function CatalogEditorialInterlude({
           <button
             type="button"
             onClick={() => onSelectFeaturedCategory('labiales')}
-            className="catalog-filter-pill"
-            style={{
-              borderColor: 'var(--catalog-accent)',
-              color: 'var(--catalog-accent)',
-              fontWeight: 600,
-            }}
+            className="editorial-pill-btn editorial-pill-btn--alabaster"
           >
-            ( Explorar Labiales )
+            Explorar Labiales
           </button>
         </div>
       )}

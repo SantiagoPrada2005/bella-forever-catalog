@@ -81,8 +81,8 @@ export default function CartToast({
             borderRadius: '10px',
             overflow: 'hidden',
             flexShrink: 0,
-            border: '1px solid var(--catalog-border, rgba(140, 29, 50, 0.2))',
-            backgroundColor: 'var(--catalog-surface-card, #F4ECEE)',
+            border: '1px solid var(--catalog-border, rgba(215, 176, 106, 0.28))',
+            backgroundColor: '#FBF4F5',
           }}
         >
           <img
@@ -100,7 +100,7 @@ export default function CartToast({
               display: 'flex',
               alignItems: 'center',
               gap: '4px',
-              color: 'var(--catalog-accent, #8C1D32)',
+              color: 'var(--catalog-accent, #D7B06A)',
               fontSize: '0.68rem',
               fontWeight: 700,
               letterSpacing: '0.06em',
@@ -114,9 +114,9 @@ export default function CartToast({
           </div>
           <h4
             style={{
-              color: 'var(--catalog-ink, #24070E)',
+              color: 'var(--catalog-ink, #FCF9F9)',
               fontSize: '0.86rem',
-              fontWeight: 600,
+              fontWeight: 500,
               margin: '1px 0 2px 0',
               whiteSpace: 'nowrap',
               overflow: 'hidden',
@@ -127,7 +127,7 @@ export default function CartToast({
           </h4>
           <p
             style={{
-              color: 'var(--catalog-ink-muted, #68454D)',
+              color: 'var(--catalog-ink-muted, #C9B1B6)',
               fontSize: '0.75rem',
               margin: 0,
               whiteSpace: 'nowrap',
@@ -137,10 +137,10 @@ export default function CartToast({
           >
             {notification.toneName ? (
               <>
-                Tono: <span style={{ color: 'var(--catalog-ink, #24070E)', fontWeight: 500 }}>{notification.toneName}</span> -{' '}
+                Tono: <span style={{ color: 'var(--catalog-ink, #FCF9F9)', fontWeight: 500 }}>{notification.toneName}</span> -{' '}
               </>
             ) : null}
-            <span style={{ color: 'var(--catalog-accent, #8C1D32)', fontWeight: 700 }}>{formattedPrice}</span>
+            <span style={{ color: 'var(--catalog-accent, #D7B06A)', fontWeight: 700 }}>{formattedPrice}</span>
           </p>
         </div>
 
@@ -148,9 +148,9 @@ export default function CartToast({
           type="button"
           onClick={onOpenCart}
           style={{
-            backgroundColor: 'var(--catalog-accent, #8C1D32)',
-            color: '#FFFFFF',
-            border: '1px solid var(--catalog-accent, #8C1D32)',
+            backgroundColor: 'var(--catalog-cta-bg, #6E1B2B)',
+            color: 'var(--catalog-ink, #FCF9F9)',
+            border: '1px solid var(--catalog-accent, #D7B06A)',
             borderRadius: 'var(--radius-pill)',
             padding: '7px 14px',
             fontSize: '0.74rem',
@@ -172,7 +172,7 @@ export default function CartToast({
           style={{
             background: 'none',
             border: 'none',
-            color: 'var(--catalog-ink-muted, #68454D)',
+            color: 'var(--catalog-ink-muted, #C9B1B6)',
             cursor: 'pointer',
             padding: '4px',
             display: 'flex',

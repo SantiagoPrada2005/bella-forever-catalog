@@ -226,9 +226,9 @@ export default function CartDrawer({
     width: '100%',
     padding: '10px 12px',
     borderRadius: '10px',
-    border: '1px solid var(--catalog-border, rgba(140, 29, 50, 0.22))',
-    backgroundColor: '#FFFFFF',
-    color: 'var(--catalog-ink, #24070E)',
+    border: '1px solid var(--catalog-border, rgba(215, 176, 106, 0.26))',
+    backgroundColor: '#120709',
+    color: 'var(--catalog-ink, #FCF9F9)',
     fontSize: '0.86rem',
     fontFamily: 'var(--font-sans)',
   } as const;
@@ -237,7 +237,7 @@ export default function CartDrawer({
     display: 'block',
     fontSize: '0.72rem',
     fontWeight: 600,
-    color: 'var(--catalog-ink, #24070E)',
+    color: 'var(--catalog-ink, #FCF9F9)',
     marginBottom: '4px',
   } as const;
 
@@ -251,7 +251,7 @@ export default function CartDrawer({
         left: 0,
         width: '100%',
         height: '100%',
-        backgroundColor: 'rgba(36, 7, 14, 0.42)',
+        backgroundColor: 'rgba(0, 0, 0, 0.72)',
         backdropFilter: 'blur(8px)',
         display: 'flex',
         justifyContent: 'flex-end',
@@ -265,26 +265,26 @@ export default function CartDrawer({
         ref={drawerContent}
         onClick={(e) => e.stopPropagation()}
         style={{
-          backgroundColor: 'var(--catalog-bg, #FBF6F7)',
-          color: 'var(--catalog-ink, #24070E)',
+          background: 'linear-gradient(165deg, #1A0B0E 0%, #0F0507 100%)',
+          color: 'var(--catalog-ink, #FCF9F9)',
           width: '100%',
           maxWidth: '460px',
           height: '100%',
           display: 'flex',
           flexDirection: 'column',
-          boxShadow: '-12px 0 40px rgba(36, 7, 14, 0.16)',
-          borderLeft: '1px solid var(--catalog-border, rgba(140, 29, 50, 0.16))',
+          boxShadow: '-16px 0 48px rgba(0, 0, 0, 0.7)',
+          borderLeft: '1px solid var(--catalog-border, rgba(215, 176, 106, 0.26))',
         }}
       >
         {/* Cabecera */}
         <div
           style={{
             padding: '18px 20px',
-            borderBottom: '1px solid var(--catalog-border, rgba(140, 29, 50, 0.16))',
+            borderBottom: '1px solid var(--catalog-border-subtle, rgba(215, 176, 106, 0.14))',
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            backgroundColor: '#FFFFFF',
+            backgroundColor: 'rgba(18, 7, 9, 0.85)',
           }}
         >
           <div>
@@ -294,7 +294,7 @@ export default function CartDrawer({
                 fontStyle: 'italic',
                 fontSize: '1.55rem',
                 fontWeight: 500,
-                color: 'var(--catalog-accent, #8C1D32)',
+                color: 'var(--catalog-accent, #D7B06A)',
                 lineHeight: 1.15,
                 paddingBottom: '2px',
                 margin: 0,
@@ -306,7 +306,7 @@ export default function CartDrawer({
               <span
                 style={{
                   fontSize: '0.72rem',
-                  color: 'var(--catalog-ink-muted, #68454D)',
+                  color: 'var(--catalog-ink-muted, #C9B1B6)',
                   display: 'block',
                   marginTop: '2px',
                 }}
@@ -320,14 +320,14 @@ export default function CartDrawer({
             onClick={handleClose}
             aria-label="Cerrar bolsa de compras"
             style={{
-              backgroundColor: 'var(--catalog-surface-card, #F4ECEE)',
-              border: '1px solid var(--catalog-border, rgba(140, 29, 50, 0.16))',
+              backgroundColor: 'var(--catalog-surface-card, #160A0D)',
+              border: '1px solid var(--catalog-border, rgba(215, 176, 106, 0.26))',
               borderRadius: '50%',
               width: '32px',
               height: '32px',
               fontSize: '0.9rem',
               cursor: 'pointer',
-              color: 'var(--catalog-accent, #8C1D32)',
+              color: 'var(--catalog-accent, #D7B06A)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -360,7 +360,7 @@ export default function CartDrawer({
                     fontFamily: 'var(--font-serif)',
                     fontStyle: 'italic',
                     fontSize: '1.75rem',
-                    color: 'var(--catalog-accent, #8C1D32)',
+                    color: 'var(--catalog-ink, #FCF9F9)',
                     margin: '0 0 6px 0',
                     fontWeight: 500,
                     lineHeight: 1.15,
@@ -371,7 +371,7 @@ export default function CartDrawer({
                 </h4>
                 <p
                   style={{
-                    color: 'var(--catalog-ink-muted, #68454D)',
+                    color: 'var(--catalog-ink-muted, #C9B1B6)',
                     fontSize: '0.88rem',
                     lineHeight: '1.5',
                     maxWidth: '340px',
@@ -384,22 +384,22 @@ export default function CartDrawer({
 
               <div
                 style={{
-                  backgroundColor: '#FFFFFF',
-                  border: '1px solid var(--catalog-border, rgba(140, 29, 50, 0.16))',
+                  backgroundColor: 'var(--catalog-surface-card, #160A0D)',
+                  border: '1px solid var(--catalog-border, rgba(215, 176, 106, 0.26))',
                   borderRadius: '14px',
                   padding: '16px',
                   width: '100%',
                   textAlign: 'left',
                   fontSize: '0.85rem',
-                  color: 'var(--catalog-ink, #24070E)',
+                  color: 'var(--catalog-ink, #FCF9F9)',
                 }}
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ color: 'var(--catalog-ink-muted, #68454D)' }}>Cliente:</span>
+                  <span style={{ color: 'var(--catalog-ink-muted, #C9B1B6)' }}>Cliente:</span>
                   <span style={{ fontWeight: 600 }}>{completedOrder.customerName}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                  <span style={{ color: 'var(--catalog-ink-muted, #68454D)' }}>Entrega:</span>
+                  <span style={{ color: 'var(--catalog-ink-muted, #C9B1B6)' }}>Entrega:</span>
                   <span style={{ fontWeight: 500 }}>
                     {completedOrder.customerAddress}, {completedOrder.customerCity}
                   </span>
@@ -408,14 +408,14 @@ export default function CartDrawer({
                   style={{
                     display: 'flex',
                     justifyContent: 'space-between',
-                    borderTop: '1px solid var(--catalog-border-subtle, rgba(36, 7, 14, 0.08))',
+                    borderTop: '1px solid var(--catalog-border-subtle, rgba(215, 176, 106, 0.14))',
                     paddingTop: '8px',
                   }}
                 >
-                  <span style={{ color: 'var(--catalog-accent, #8C1D32)', fontWeight: 600 }}>
+                  <span style={{ color: 'var(--catalog-accent, #D7B06A)', fontWeight: 600 }}>
                     Total:
                   </span>
-                  <span style={{ fontWeight: 700, color: 'var(--catalog-accent, #8C1D32)' }}>
+                  <span style={{ fontWeight: 700, color: 'var(--catalog-accent, #D7B06A)' }}>
                     {new Intl.NumberFormat(CONFIG.currency.locale, {
                       style: 'currency',
                       currency: CONFIG.currency.code,
@@ -459,7 +459,7 @@ export default function CartDrawer({
               style={{
                 textAlign: 'center',
                 marginTop: '60px',
-                color: 'var(--catalog-ink-muted, #68454D)',
+                color: 'var(--catalog-ink-muted, #C9B1B6)',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '10px',
@@ -470,7 +470,7 @@ export default function CartDrawer({
                   fontSize: '1.35rem',
                   fontFamily: 'var(--font-serif)',
                   fontStyle: 'italic',
-                  color: 'var(--catalog-accent, #8C1D32)',
+                  color: 'var(--catalog-accent, #D7B06A)',
                   margin: 0,
                 }}
               >
@@ -486,12 +486,12 @@ export default function CartDrawer({
                 <div
                   role="alert"
                   style={{
-                    backgroundColor: '#FEF2F2',
-                    border: '1px solid #FCA5A5',
+                    backgroundColor: 'rgba(239, 68, 68, 0.14)',
+                    border: '1px solid rgba(239, 68, 68, 0.45)',
                     borderRadius: '12px',
                     padding: '12px 14px',
                     marginBottom: '16px',
-                    color: '#991B1B',
+                    color: '#FCA5A5',
                     fontSize: '0.84rem',
                   }}
                 >
@@ -516,7 +516,7 @@ export default function CartDrawer({
                         display: 'flex',
                         gap: '12px',
                         marginBottom: '14px',
-                        borderBottom: '1px solid var(--catalog-border-subtle, rgba(36, 7, 14, 0.08))',
+                        borderBottom: '1px solid var(--catalog-border-subtle, rgba(215, 176, 106, 0.14))',
                         paddingBottom: '14px',
                       }}
                     >
@@ -530,8 +530,8 @@ export default function CartDrawer({
                           height: '64px',
                           objectFit: 'cover',
                           borderRadius: '10px',
-                          border: '1px solid var(--catalog-border-subtle, rgba(36, 7, 14, 0.08))',
-                          backgroundColor: '#FFFFFF',
+                          border: '1px solid var(--catalog-border-subtle, rgba(215, 176, 106, 0.22))',
+                          backgroundColor: '#FBF4F5',
                         }}
                       />
 
@@ -547,8 +547,8 @@ export default function CartDrawer({
                           <h4
                             style={{
                               fontSize: '0.9rem',
-                              fontWeight: 600,
-                              color: 'var(--catalog-ink, #24070E)',
+                              fontWeight: 500,
+                              color: 'var(--catalog-ink, #FCF9F9)',
                               margin: 0,
                             }}
                           >
@@ -558,7 +558,7 @@ export default function CartDrawer({
                             <p
                               style={{
                                 fontSize: '0.76rem',
-                                color: 'var(--catalog-accent, #8C1D32)',
+                                color: 'var(--catalog-accent, #D7B06A)',
                                 fontWeight: 500,
                                 margin: '2px 0 0 0',
                               }}
@@ -585,10 +585,10 @@ export default function CartDrawer({
                                 width: '26px',
                                 height: '26px',
                                 borderRadius: '9999px',
-                                border: '1px solid var(--catalog-border, rgba(140, 29, 50, 0.2))',
-                                backgroundColor: '#FFFFFF',
+                                border: '1px solid var(--catalog-border, rgba(215, 176, 106, 0.28))',
+                                backgroundColor: 'var(--catalog-surface-card, #160A0D)',
                                 cursor: 'pointer',
-                                color: 'var(--catalog-accent, #8C1D32)',
+                                color: 'var(--catalog-accent, #D7B06A)',
                                 fontSize: '0.85rem',
                                 fontWeight: 700,
                                 display: 'flex',
@@ -609,10 +609,10 @@ export default function CartDrawer({
                                 width: '26px',
                                 height: '26px',
                                 borderRadius: '9999px',
-                                border: '1px solid var(--catalog-border, rgba(140, 29, 50, 0.2))',
-                                backgroundColor: '#FFFFFF',
+                                border: '1px solid var(--catalog-border, rgba(215, 176, 106, 0.28))',
+                                backgroundColor: 'var(--catalog-surface-card, #160A0D)',
                                 cursor: 'pointer',
-                                color: 'var(--catalog-accent, #8C1D32)',
+                                color: 'var(--catalog-accent, #D7B06A)',
                                 fontSize: '0.85rem',
                                 fontWeight: 700,
                                 display: 'flex',
@@ -627,7 +627,7 @@ export default function CartDrawer({
                           <p
                             style={{
                               fontWeight: 700,
-                              color: 'var(--catalog-accent, #8C1D32)',
+                              color: 'var(--catalog-accent, #D7B06A)',
                               fontSize: '0.92rem',
                               margin: 0,
                             }}
@@ -644,8 +644,8 @@ export default function CartDrawer({
               {/* Datos de Entrega con Labels explícitos arriba de cada campo (WCAG AA) */}
               <div
                 style={{
-                  backgroundColor: 'var(--catalog-surface-card, #F4ECEE)',
-                  border: '1px solid var(--catalog-border-subtle, rgba(36, 7, 14, 0.08))',
+                  backgroundColor: 'var(--catalog-surface-card, #160A0D)',
+                  border: '1px solid var(--catalog-border-subtle, rgba(215, 176, 106, 0.16))',
                   borderRadius: '14px',
                   padding: '16px',
                   marginBottom: '16px',
@@ -664,7 +664,7 @@ export default function CartDrawer({
                       <span
                         style={{
                           fontSize: '0.8rem',
-                          color: 'var(--catalog-accent, #8C1D32)',
+                          color: 'var(--catalog-accent, #D7B06A)',
                           fontWeight: 700,
                           textTransform: 'uppercase',
                           letterSpacing: '0.06em',
@@ -678,7 +678,7 @@ export default function CartDrawer({
                         style={{
                           background: 'none',
                           border: 'none',
-                          color: 'var(--catalog-accent, #8C1D32)',
+                          color: 'var(--catalog-accent, #D7B06A)',
                           fontSize: '0.76rem',
                           fontWeight: 600,
                           cursor: 'pointer',
@@ -693,7 +693,7 @@ export default function CartDrawer({
                       style={{
                         margin: '0 0 2px 0',
                         fontSize: '0.88rem',
-                        color: 'var(--catalog-ink, #24070E)',
+                        color: 'var(--catalog-ink, #FCF9F9)',
                         fontWeight: 600,
                       }}
                     >
@@ -703,7 +703,7 @@ export default function CartDrawer({
                       style={{
                         margin: '0 0 4px 0',
                         fontSize: '0.82rem',
-                        color: 'var(--catalog-ink-muted, #68454D)',
+                        color: 'var(--catalog-ink-muted, #C9B1B6)',
                       }}
                     >
                       {customer.address}, {customer.city}
@@ -713,7 +713,7 @@ export default function CartDrawer({
                         style={{
                           margin: '4px 0 0 0',
                           fontSize: '0.78rem',
-                          color: 'var(--catalog-accent, #8C1D32)',
+                          color: 'var(--catalog-accent, #D7B06A)',
                           fontStyle: 'italic',
                         }}
                       >
@@ -734,7 +734,7 @@ export default function CartDrawer({
                       <span
                         style={{
                           fontSize: '0.8rem',
-                          color: 'var(--catalog-accent, #8C1D32)',
+                          color: 'var(--catalog-accent, #D7B06A)',
                           fontWeight: 700,
                           textTransform: 'uppercase',
                           letterSpacing: '0.06em',
@@ -749,7 +749,7 @@ export default function CartDrawer({
                           style={{
                             background: 'none',
                             border: 'none',
-                            color: 'var(--catalog-ink-muted, #68454D)',
+                            color: 'var(--catalog-ink-muted, #C9B1B6)',
                             fontSize: '0.75rem',
                             cursor: 'pointer',
                           }}
@@ -851,7 +851,7 @@ export default function CartDrawer({
                           gap: '8px',
                           cursor: 'pointer',
                           fontSize: '0.78rem',
-                          color: 'var(--catalog-ink-muted, #68454D)',
+                          color: 'var(--catalog-ink-muted, #C9B1B6)',
                           marginTop: '4px',
                         }}
                       >
@@ -859,7 +859,7 @@ export default function CartDrawer({
                           type="checkbox"
                           checked={rememberDevice}
                           onChange={(e) => setRememberDevice(e.target.checked)}
-                          style={{ accentColor: 'var(--catalog-accent, #8C1D32)' }}
+                          style={{ accentColor: 'var(--catalog-accent, #D7B06A)' }}
                         />
                         Recordar mis datos para futuros pedidos
                       </label>
@@ -876,8 +876,8 @@ export default function CartDrawer({
           <div
             style={{
               padding: '18px 20px',
-              borderTop: '1px solid var(--catalog-border, rgba(140, 29, 50, 0.16))',
-              backgroundColor: '#FFFFFF',
+              borderTop: '1px solid var(--catalog-border-subtle, rgba(215, 176, 106, 0.16))',
+              backgroundColor: 'rgba(18, 7, 9, 0.92)',
             }}
           >
             <div
@@ -892,7 +892,7 @@ export default function CartDrawer({
                 style={{
                   fontFamily: 'var(--font-sans)',
                   fontSize: '0.9rem',
-                  color: 'var(--catalog-ink-muted, #68454D)',
+                  color: 'var(--catalog-ink-muted, #C9B1B6)',
                   fontWeight: 500,
                 }}
               >
@@ -900,7 +900,7 @@ export default function CartDrawer({
               </span>
               <span
                 style={{
-                  color: 'var(--catalog-accent, #8C1D32)',
+                  color: 'var(--catalog-accent, #D7B06A)',
                   fontWeight: 700,
                   fontSize: '1.25rem',
                 }}

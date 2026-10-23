@@ -912,25 +912,27 @@ body {
 }
 
 /* ==========================================================================
-   Tema Editorial Luminoso para /catalogo (Fusión Glossier + AMUSE)
+   Tema Chiaroscuro de Lujo para /catalogo (Fusión Glossier + AMUSE en Nocturno)
    Mobile-First + Page Theme Lock + Container Queries
    ========================================================================== */
 
 .theme-catalog-studio {
-  --catalog-bg: #FBF6F7;
-  --catalog-surface-card: #F4ECEE;
-  --catalog-surface-elevated: #FFFFFF;
-  --catalog-surface-blush: #F7E2E5;
-  --catalog-surface-blush-deep: #EED0D5;
-  --catalog-ink: #24070E;
-  --catalog-ink-muted: #68454D;
-  --catalog-accent: #8C1D32;
-  --catalog-accent-hover: #6B1324;
-  --catalog-accent-soft: rgba(140, 29, 50, 0.1);
-  --catalog-border: rgba(140, 29, 50, 0.16);
-  --catalog-border-subtle: rgba(36, 7, 14, 0.08);
-  --catalog-shadow-soft: 0 14px 34px rgba(140, 29, 50, 0.07);
-  --catalog-shadow-card-hover: 0 20px 42px rgba(140, 29, 50, 0.12);
+  --catalog-bg: #0A0405;
+  --catalog-surface-card: #160A0D;
+  --catalog-surface-elevated: #210E13;
+  --catalog-surface-blush: #4A121D;
+  --catalog-surface-cocoa: #8A4A55;
+  --catalog-showcase-light: #FBF4F5;
+  --catalog-ink: #FCF9F9;
+  --catalog-ink-muted: #C9B1B6;
+  --catalog-accent: #D7B06A;
+  --catalog-accent-hover: #E8C17F;
+  --catalog-cta-bg: #6E1B2B;
+  --catalog-cta-bg-hover: #872336;
+  --catalog-border: rgba(215, 176, 106, 0.26);
+  --catalog-border-subtle: rgba(215, 176, 106, 0.14);
+  --catalog-shadow-soft: 0 22px 56px rgba(0, 0, 0, 0.62);
+  --catalog-shadow-card-hover: 0 22px 48px rgba(0, 0, 0, 0.72), 0 0 26px rgba(90, 22, 35, 0.34);
   --radius-catalog-card: 18px;
 
   min-height: 100dvh;
@@ -939,19 +941,20 @@ body {
   background-color: var(--catalog-bg);
   color: var(--catalog-ink);
   padding-top: 70px;
+  position: relative;
 }
 
-/* Header adaptado al estudio luminoso (Page Theme Lock) */
+/* Header adaptado al Chiaroscuro de Lujo (Page Theme Lock) */
 .catalog-header-studio {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 70px;
-  background-color: rgba(251, 246, 247, 0.88);
+  background-color: rgba(10, 4, 5, 0.84);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
-  border-bottom: 1px solid var(--catalog-border);
+  border-bottom: 1px solid var(--catalog-border-subtle);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -968,7 +971,7 @@ body {
 @media (prefers-reduced-transparency: reduce) {
   .catalog-header-studio,
   .catalog-filters-sticky {
-    background-color: #FBF6F7 !important;
+    background-color: #0E0507 !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
   }
@@ -989,13 +992,13 @@ body {
 }
 
 /* ==========================================================================
-   Hero Split + AMUSE Product Spotlight (Mobile-First)
+   Hero Split + AMUSE Product Spotlight en Chiaroscuro (Mobile-First)
    ========================================================================== */
 
 .catalog-hero-frame {
-  border: 2px solid var(--catalog-accent);
+  border: 1px solid rgba(215, 176, 106, 0.36);
   border-radius: var(--radius-catalog-card);
-  background-color: var(--catalog-surface-blush);
+  background: linear-gradient(145deg, #6E2432 0%, #4A121D 52%, #24070E 100%);
   overflow: hidden;
   display: grid;
   grid-template-columns: 1fr;
@@ -1016,8 +1019,8 @@ body {
   aspect-ratio: 16 / 9;
   max-height: 205px;
   overflow: hidden;
-  background-color: #D89AA2;
-  border-bottom: 2px solid var(--catalog-accent);
+  background-color: #3D0D16;
+  border-bottom: 1px solid rgba(215, 176, 106, 0.3);
 }
 
 @media (min-width: 768px) {
@@ -1027,7 +1030,7 @@ body {
     height: 100%;
     min-height: 500px;
     border-bottom: none;
-    border-right: 2px solid var(--catalog-accent);
+    border-right: 1px solid rgba(215, 176, 106, 0.3);
   }
 }
 
@@ -1044,9 +1047,9 @@ body {
   inset: 0;
   background: linear-gradient(
     180deg,
-    rgba(36, 7, 14, 0.28) 0%,
-    rgba(36, 7, 14, 0) 45%,
-    rgba(36, 7, 14, 0.42) 100%
+    rgba(10, 4, 5, 0.35) 0%,
+    rgba(10, 4, 5, 0) 42%,
+    rgba(24, 5, 10, 0.72) 100%
   );
   padding: 14px 16px;
   display: flex;
@@ -1067,9 +1070,9 @@ body {
   font-size: clamp(1.35rem, 4vw, 1.75rem);
   line-height: 1.1;
   padding-bottom: 4px;
-  color: #FFFFFF;
+  color: var(--catalog-showcase-light);
   letter-spacing: 0.02em;
-  text-shadow: 0 2px 12px rgba(36, 7, 14, 0.35);
+  text-shadow: 0 2px 14px rgba(10, 4, 5, 0.55);
 }
 
 /* Panel Derecho (Inferior en Móvil): Vitrina Interactiva AMUSE + Glossier Wordmark */
@@ -1079,7 +1082,8 @@ body {
   flex-direction: column;
   justify-content: space-between;
   gap: 14px;
-  background-color: var(--catalog-surface-blush);
+  background: radial-gradient(circle at 80% 15%, rgba(196, 131, 140, 0.22) 0%, transparent 55%),
+    linear-gradient(155deg, #5A1623 0%, #340B14 58%, #18060A 100%);
   position: relative;
 }
 
@@ -1103,23 +1107,65 @@ body {
   align-items: center;
   padding: 4px 12px;
   border-radius: var(--radius-pill);
-  border: 1px solid var(--catalog-accent);
+  border: 1px solid rgba(215, 176, 106, 0.48);
   color: var(--catalog-accent);
   font-family: var(--font-sans);
-  font-size: 0.68rem;
+  font-size: 0.66rem;
   font-weight: 600;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  background-color: rgba(255, 255, 255, 0.55);
+  background-color: rgba(18, 6, 9, 0.52);
 }
 
-/* Tarjeta Blanca Flotante estilo AMUSE Bebe Tint */
+/* Indicadores de paginación con barra de progreso animada para el Spotlight */
+@keyframes spotlight-tab-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.spotlight-tab-pill {
+  position: relative;
+  height: 8px;
+  border-radius: 9999px;
+  border: none;
+  background-color: rgba(215, 176, 106, 0.24);
+  cursor: pointer;
+  padding: 0;
+  overflow: hidden;
+  transition: width 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease;
+}
+
+.spotlight-tab-pill__fill {
+  position: absolute;
+  inset: 0;
+  background-color: var(--catalog-accent);
+  border-radius: 9999px;
+  transform-origin: left center;
+  animation: spotlight-tab-progress 4.8s linear forwards;
+}
+
+.spotlight-tab-pill__fill.is-paused {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spotlight-tab-pill__fill {
+    animation: none !important;
+    transform: scaleX(1) !important;
+  }
+}
+
+/* Vitrina Joyero Flotante estilo AMUSE Bebe Tint en Terciopelo + Luz Alabastro */
 .catalog-spotlight-card {
-  background-color: var(--catalog-surface-elevated);
+  background: linear-gradient(145deg, rgba(28, 11, 15, 0.94) 0%, rgba(16, 6, 9, 0.98) 100%);
   border-radius: 16px;
-  padding: 16px;
-  border: 1px solid rgba(140, 29, 50, 0.12);
-  box-shadow: 0 12px 30px rgba(140, 29, 50, 0.08);
+  padding: 14px;
+  border: 1px solid rgba(215, 176, 106, 0.28);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   display: grid;
   grid-template-columns: 112px 1fr;
   gap: 14px;
@@ -1141,17 +1187,20 @@ body {
   }
 }
 
+/* Marco de producto iluminado (Vitrina Alabastro/Rosa Seda para que el cosmético resalte) */
 .catalog-spotlight__media-wrap {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
   border-radius: 12px;
-  background-color: var(--catalog-surface-card);
+  background: radial-gradient(circle at center, #FBF4F5 0%, #EAD4D7 100%);
+  border: 1px solid rgba(215, 176, 106, 0.35);
   overflow: hidden;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
 }
 
 .catalog-spotlight__swatch-aura {
@@ -1160,7 +1209,7 @@ body {
   height: 78%;
   border-radius: 50%;
   filter: blur(14px);
-  opacity: 0.35;
+  opacity: 0.42;
   pointer-events: none;
   transition: background-color 0.35s ease;
 }
@@ -1195,7 +1244,7 @@ body {
   font-size: clamp(1.35rem, 4.8vw, 2rem);
   line-height: 1.12;
   padding-bottom: 3px;
-  color: var(--catalog-accent);
+  color: var(--catalog-ink);
   margin: 0;
   cursor: pointer;
 }
@@ -1224,11 +1273,11 @@ body {
   font-family: var(--font-sans);
   font-size: 1.05rem;
   font-weight: 700;
-  color: var(--catalog-ink);
+  color: var(--catalog-accent);
   margin: 0;
 }
 
-/* Swatches AMUSE con doble anillo en estado activo */
+/* Swatches AMUSE con doble anillo dorado en estado activo */
 .amuse-swatch-list {
   display: flex;
   align-items: center;
@@ -1240,7 +1289,7 @@ body {
   width: 22px;
   height: 22px;
   border-radius: 50%;
-  border: 1px solid rgba(36, 7, 14, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.28);
   padding: 0;
   cursor: pointer;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -1248,20 +1297,20 @@ body {
 }
 
 .amuse-swatch-btn.is-active {
-  transform: scale(1.12);
-  box-shadow: 0 0 0 2px #FFFFFF, 0 0 0 3.5px var(--catalog-accent);
+  transform: scale(1.14);
+  box-shadow: 0 0 0 2px #160A0D, 0 0 0 3.5px var(--catalog-accent);
 }
 
 .amuse-swatch-btn.is-out {
-  opacity: 0.32;
+  opacity: 0.28;
   cursor: not-allowed;
 }
 
 .catalog-spotlight-cta {
   width: 100%;
-  background-color: var(--catalog-accent);
-  color: #FFFFFF;
-  border: 1px solid var(--catalog-accent);
+  background: linear-gradient(135deg, var(--catalog-cta-bg) 0%, #4A121D 100%);
+  color: var(--catalog-ink);
+  border: 1px solid rgba(215, 176, 106, 0.55);
   border-radius: var(--radius-pill);
   padding: 9px 14px;
   font-family: var(--font-sans);
@@ -1275,12 +1324,14 @@ body {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  transition: background-color 0.2s ease, transform 0.15s ease;
+  box-shadow: 0 4px 18px rgba(215, 176, 106, 0.14);
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
 }
 
 @media (hover: hover) {
   .catalog-spotlight-cta:hover:not(:disabled) {
-    background-color: var(--catalog-accent-hover);
+    background: linear-gradient(135deg, var(--catalog-cta-bg-hover) 0%, #5A1623 100%);
+    border-color: var(--catalog-accent);
   }
 }
 
@@ -1289,9 +1340,10 @@ body {
 }
 
 .catalog-spotlight-cta:disabled {
-  background-color: rgba(36, 7, 14, 0.08);
-  border-color: transparent;
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.08);
   color: var(--catalog-ink-muted);
+  box-shadow: none;
   cursor: not-allowed;
 }
 
@@ -1305,27 +1357,30 @@ body {
 }
 
 .catalog-hero__giant-sig {
-  font-family: var(--font-sans);
-  font-weight: 700;
-  font-size: clamp(2.1rem, 8vw, 4.2rem);
-  line-height: 0.86;
-  letter-spacing: -0.04em;
-  color: var(--catalog-accent);
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 600;
+  font-size: clamp(2.35rem, 8.5vw, 4.4rem);
+  line-height: 0.92;
+  padding-bottom: 4px;
+  letter-spacing: -0.01em;
+  color: var(--catalog-pastel-pink, #F6D6D9);
   margin: 0;
   user-select: none;
+  text-shadow: 0 8px 24px rgba(10, 4, 5, 0.45);
 }
 
 /* ==========================================================================
-   Barra de Filtros Sticky Mobile-First (Estilo Glossier Pills)
+   Barra de Filtros Sticky Mobile-First (Estilo Glossier Pills en Nocturno)
    ========================================================================== */
 
 .catalog-filters-sticky {
   position: sticky;
   top: 70px;
   z-index: 40;
-  background-color: rgba(251, 246, 247, 0.9);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+  background-color: rgba(10, 4, 5, 0.86);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--catalog-border-subtle);
   margin-top: 16px;
 }
@@ -1358,17 +1413,17 @@ body {
 
 .catalog-filter-pill {
   scroll-snap-align: start;
-  padding: 8px 16px;
+  padding: 8px 18px;
   border-radius: var(--radius-pill);
-  border: 1px solid var(--catalog-border);
-  background-color: #FFFFFF;
-  color: var(--catalog-ink);
+  border: 1px solid var(--catalog-border-subtle);
+  background-color: var(--catalog-surface-card);
+  color: var(--catalog-ink-muted);
   font-family: var(--font-sans);
   font-size: 0.8rem;
   font-weight: 500;
-  letter-spacing: 0.02em;
+  letter-spacing: 0.03em;
   cursor: pointer;
-  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
 }
 
 .catalog-filter-pill:active {
@@ -1376,10 +1431,11 @@ body {
 }
 
 .catalog-filter-pill.is-active {
-  background-color: var(--catalog-accent);
+  background: linear-gradient(135deg, var(--catalog-cta-bg) 0%, #4A121D 100%);
   border-color: var(--catalog-accent);
-  color: #FFFFFF;
+  color: var(--catalog-ink);
   font-weight: 600;
+  box-shadow: 0 4px 16px rgba(215, 176, 106, 0.16);
 }
 
 @media (hover: hover) {
@@ -1436,9 +1492,9 @@ body {
 .catalog-section-title {
   font-family: var(--font-sans);
   font-size: clamp(1.45rem, 4vw, 2.15rem);
-  font-weight: 600;
-  color: var(--catalog-accent);
-  letter-spacing: -0.02em;
+  font-weight: 400;
+  color: var(--catalog-ink);
+  letter-spacing: 0.01em;
   line-height: 1.15;
   margin: 0;
 }
@@ -1446,10 +1502,11 @@ body {
 .catalog-section-title__serif {
   font-family: var(--font-serif);
   font-style: italic;
-  font-weight: 600;
-  font-size: 1.12em;
+  font-weight: 500;
+  font-size: 1.16em;
   line-height: 1.15;
   padding-bottom: 4px;
+  color: var(--catalog-accent);
 }
 
 .catalog-studio-grid {
@@ -1473,13 +1530,13 @@ body {
 }
 
 /* ==========================================================================
-   Tarjeta de Producto Studio (Glossier / AMUSE Tile + Container Queries)
+   Tarjeta de Producto Chiaroscuro Studio (Glossier / AMUSE + Luxury Velvet)
    ========================================================================== */
 
 .studio-product-card {
   container-type: inline-size;
   container-name: product-card;
-  background-color: var(--catalog-surface-card);
+  background: linear-gradient(165deg, #1B0B0F 0%, #110608 100%);
   border-radius: var(--radius-catalog-card);
   border: 1px solid var(--catalog-border-subtle);
   padding: 10px;
@@ -1488,7 +1545,8 @@ body {
   height: 100%;
   cursor: pointer;
   position: relative;
-  transition: background-color 0.28s ease, box-shadow 0.28s ease, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+  transition: background 0.28s ease, box-shadow 0.28s ease, transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.28s ease;
 }
 
 @media (min-width: 768px) {
@@ -1499,10 +1557,10 @@ body {
 
 @media (hover: hover) {
   .studio-product-card:hover {
-    background-color: var(--catalog-surface-elevated);
-    border-color: var(--catalog-border);
+    background: linear-gradient(165deg, #251015 0%, #16080B 100%);
+    border-color: var(--catalog-accent);
     box-shadow: var(--catalog-shadow-card-hover);
-    transform: translateY(-3px);
+    transform: translateY(-4px);
   }
 }
 
@@ -1520,7 +1578,7 @@ body {
   font-size: 0.64rem;
   font-weight: 600;
   text-transform: uppercase;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.1em;
   color: var(--catalog-ink-muted);
   white-space: nowrap;
   overflow: hidden;
@@ -1530,26 +1588,28 @@ body {
 .studio-product-card__badge {
   display: inline-flex;
   align-items: center;
-  padding: 2px 8px;
+  padding: 2px 9px;
   border-radius: var(--radius-pill);
-  border: 1px solid var(--catalog-accent);
+  border: 1px solid rgba(215, 176, 106, 0.48);
   color: var(--catalog-accent);
-  background-color: rgba(255, 255, 255, 0.75);
+  background-color: rgba(90, 22, 35, 0.45);
   font-family: var(--font-sans);
-  font-size: 0.6rem;
-  font-weight: 600;
-  letter-spacing: 0.06em;
+  font-size: 0.58rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
 }
 
+/* Vitrina interna iluminada para que el tono del cosmético resalte con pureza */
 .studio-product-card__media {
   position: relative;
   width: 100%;
   aspect-ratio: 1 / 1;
   border-radius: 12px;
   overflow: hidden;
-  background-color: #FFFFFF;
+  background: radial-gradient(circle at center, #FBF4F5 0%, #E8D2D5 100%);
+  border: 1px solid rgba(215, 176, 106, 0.18);
   margin-bottom: 10px;
 }
 
@@ -1577,7 +1637,7 @@ body {
 .studio-product-card__title {
   font-family: var(--font-sans);
   font-size: clamp(0.86rem, 3.8vw, 1rem);
-  font-weight: 600;
+  font-weight: 500;
   line-height: 1.28;
   color: var(--catalog-ink);
   margin: 0;
@@ -1612,7 +1672,7 @@ body {
   gap: 8px;
 }
 
-/* En contenedores de tarjeta más amplios (>= 230px), precio y CTA pueden convivir en fila */
+/* En contenedores de tarjeta más amplios (>= 235px), precio y CTA conviven en fila */
 @supports (container-type: inline-size) {
   @container product-card (min-width: 235px) {
     .studio-product-card__footer {
@@ -1629,7 +1689,7 @@ body {
 
 .studio-product-card__price {
   font-family: var(--font-sans);
-  font-size: 0.94rem;
+  font-size: 0.96rem;
   font-weight: 700;
   color: var(--catalog-accent);
   margin: 0;
@@ -1639,13 +1699,13 @@ body {
   width: 100%;
   padding: 8px 12px;
   border-radius: var(--radius-pill);
-  border: 1px solid var(--catalog-accent);
-  background-color: transparent;
-  color: var(--catalog-accent);
+  border: 1px solid rgba(215, 176, 106, 0.45);
+  background-color: rgba(90, 22, 35, 0.55);
+  color: var(--catalog-ink);
   font-family: var(--font-sans);
   font-size: 0.72rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   white-space: nowrap;
   cursor: pointer;
@@ -1653,13 +1713,14 @@ body {
   align-items: center;
   justify-content: center;
   gap: 5px;
-  transition: background-color 0.2s ease, color 0.2s ease, transform 0.15s ease;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
 }
 
 @media (hover: hover) {
   .studio-product-card__cta:hover:not(:disabled) {
-    background-color: var(--catalog-accent);
-    color: #FFFFFF;
+    background-color: var(--catalog-cta-bg-hover);
+    border-color: var(--catalog-accent);
+    color: var(--catalog-accent);
   }
 }
 
@@ -1668,32 +1729,34 @@ body {
 }
 
 .studio-product-card__cta.is-added {
-  background-color: var(--catalog-accent);
+  background-color: var(--catalog-cta-bg-hover);
   border-color: var(--catalog-accent);
-  color: #FFFFFF;
+  color: var(--catalog-accent);
 }
 
 .studio-product-card__cta:disabled {
-  border-color: rgba(36, 7, 14, 0.12);
+  border-color: rgba(255, 255, 255, 0.06);
   color: var(--catalog-ink-muted);
-  background-color: rgba(36, 7, 14, 0.04);
+  background-color: rgba(255, 255, 255, 0.03);
   cursor: not-allowed;
 }
 
 /* ==========================================================================
-   Interludio Editorial Glossier (Grid Span Full)
+   Interludio Editorial Glossier en Terciopelo Cacao & Borgoña (Grid Span Full)
    ========================================================================== */
 
 .catalog-interlude {
   grid-column: 1 / -1;
-  background-color: var(--catalog-surface-blush);
+  background: radial-gradient(circle at 85% 20%, rgba(215, 176, 106, 0.14) 0%, transparent 50%),
+    linear-gradient(135deg, #8A4A55 0%, #5A1623 52%, #2B0810 100%);
   border-radius: var(--radius-catalog-card);
-  border: 1px solid var(--catalog-border);
+  border: 1px solid rgba(215, 176, 106, 0.34);
   padding: 22px 18px;
   display: flex;
   flex-direction: column;
   gap: 18px;
   margin: 6px 0;
+  box-shadow: var(--catalog-shadow-soft);
 }
 
 @media (min-width: 768px) {
@@ -1722,8 +1785,9 @@ body {
   height: 64px;
   border-radius: 10px;
   overflow: hidden;
-  border: 1px solid rgba(140, 29, 50, 0.18);
-  background-color: #FFFFFF;
+  border: 1px solid rgba(215, 176, 106, 0.42);
+  background-color: #2A0B12;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
 }
 
 @media (min-width: 768px) {
@@ -1744,9 +1808,9 @@ body {
 .catalog-interlude__statement {
   font-family: var(--font-sans);
   font-size: clamp(1.08rem, 3.2vw, 1.55rem);
-  font-weight: 500;
-  line-height: 1.32;
-  color: var(--catalog-accent);
+  font-weight: 400;
+  line-height: 1.35;
+  color: var(--catalog-showcase-light);
   max-width: 54ch;
   margin: 0;
 }
@@ -1754,53 +1818,55 @@ body {
 .catalog-interlude__serif-em {
   font-family: var(--font-serif);
   font-style: italic;
-  font-weight: 600;
-  font-size: 1.16em;
+  font-weight: 500;
+  font-size: 1.18em;
   line-height: 1.15;
   padding-bottom: 3px;
+  color: var(--catalog-accent);
 }
 
 /* ==========================================================================
-   Modal de Producto y Drawer en Tema Studio Luminoso (AMUSE Sheet)
+   Modal de Producto y Drawer en Tema Chiaroscuro de Lujo (AMUSE Sheet)
    ========================================================================== */
 
 .theme-catalog-studio .bottom-sheet-overlay {
-  background-color: rgba(36, 7, 14, 0.42);
+  background-color: rgba(0, 0, 0, 0.72);
 }
 
 .theme-catalog-studio .bottom-sheet-content {
-  background: var(--catalog-surface-elevated);
+  background: linear-gradient(165deg, #1B0B0F 0%, #110608 100%);
   color: var(--catalog-ink);
   border-top: 1px solid var(--catalog-border);
   border-left: 1px solid var(--catalog-border);
   border-right: 1px solid var(--catalog-border);
-  box-shadow: 0 -12px 44px rgba(36, 7, 14, 0.16);
+  box-shadow: 0 -16px 52px rgba(0, 0, 0, 0.75);
 }
 
 @media (min-width: 768px) {
   .theme-catalog-studio .bottom-sheet-content {
     border: 1px solid var(--catalog-border);
-    box-shadow: 0 24px 64px rgba(36, 7, 14, 0.18);
+    box-shadow: 0 28px 72px rgba(0, 0, 0, 0.8);
   }
 }
 
 .theme-catalog-studio .cart-toast {
-  background: rgba(255, 255, 255, 0.96);
+  background: rgba(20, 8, 11, 0.96);
   border: 1px solid var(--catalog-border);
-  box-shadow: 0 16px 40px rgba(36, 7, 14, 0.15);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.65), 0 0 20px rgba(215, 176, 106, 0.14);
   color: var(--catalog-ink);
 }
 
 .theme-catalog-studio .cart-toast-progress {
-  background: linear-gradient(90deg, var(--catalog-accent), #D46A7E);
+  background: linear-gradient(90deg, var(--catalog-cta-bg), var(--catalog-accent));
 }
 
 .catalog-footer-studio {
   padding: 40px 20px;
-  border-top: 1px solid var(--catalog-border);
+  border-top: 1px solid var(--catalog-border-subtle);
   text-align: center;
   color: var(--catalog-ink-muted);
   font-size: 0.82rem;
-  background-color: var(--catalog-surface-blush);
+  background-color: rgba(18, 9, 11, 0.65);
+  backdrop-filter: blur(12px);
 }
 

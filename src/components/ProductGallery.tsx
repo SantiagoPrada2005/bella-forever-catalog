@@ -39,7 +39,8 @@ export default function ProductGallery({
           position: 'relative',
           width: '100%',
           aspectRatio: '1 / 1',
-          backgroundColor: 'var(--catalog-surface-card, #F4ECEE)',
+          background: 'radial-gradient(circle at center, #FBF4F5 0%, #E8D2D5 100%)',
+          border: '1px solid rgba(215, 176, 106, 0.25)',
           borderRadius: '14px',
           overflow: 'hidden',
           marginBottom: hasGallery ? '10px' : '0',
@@ -78,11 +79,11 @@ export default function ProductGallery({
                 overflow: 'hidden',
                 border:
                   index === activeIndex
-                    ? '2px solid var(--catalog-accent, #8C1D32)'
-                    : '1px solid var(--catalog-border-subtle, rgba(36, 7, 14, 0.12))',
+                    ? '2px solid var(--catalog-accent, #D7B06A)'
+                    : '1px solid var(--catalog-border-subtle, rgba(215, 176, 106, 0.18))',
                 cursor: 'pointer',
                 padding: 0,
-                background: '#FFFFFF',
+                background: '#160A0D',
                 transition: 'border-color 0.2s, opacity 0.2s',
                 opacity: index === activeIndex ? 1 : 0.65,
               }}

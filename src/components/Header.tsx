@@ -27,9 +27,9 @@ export default function Header({
           <img
             src="/isotipo.png"
             alt="Bella Forever Isotipo"
-            width="32"
-            height="32"
-            style={{ height: '32px', width: '32px', objectFit: 'contain' }}
+            width="34"
+            height="34"
+            style={{ height: '34px', width: '34px', objectFit: 'contain' }}
           />
           <span
             style={{
@@ -37,14 +37,14 @@ export default function Header({
               fontSize: '1.35rem',
               fontWeight: 600,
               color: 'var(--catalog-accent)',
-              letterSpacing: '0.08em',
+              letterSpacing: '0.12em',
             }}
           >
             BELLA FOREVER
           </span>
         </a>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <a
             href="/"
             style={{
@@ -66,13 +66,14 @@ export default function Header({
               cartCount > 0 ? `Ver pedido con ${cartCount} productos` : 'Ver bolsa de compras'
             }
             style={{
-              backgroundColor: cartCount > 0 ? 'var(--catalog-accent)' : '#FFFFFF',
-              color: cartCount > 0 ? '#FFFFFF' : 'var(--catalog-accent)',
-              border: '1px solid var(--catalog-accent)',
+              backgroundColor:
+                cartCount > 0 ? 'var(--catalog-cta-bg)' : 'var(--catalog-surface-card)',
+              color: cartCount > 0 ? 'var(--catalog-ink)' : 'var(--catalog-accent)',
+              border: '1px solid rgba(215, 176, 106, 0.48)',
               borderRadius: 'var(--radius-pill)',
               cursor: 'pointer',
               position: 'relative',
-              padding: '7px 14px',
+              padding: '7px 15px',
               display: 'inline-flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -80,7 +81,8 @@ export default function Header({
               fontFamily: 'var(--font-sans)',
               fontSize: '0.76rem',
               fontWeight: 600,
-              letterSpacing: '0.04em',
+              letterSpacing: '0.06em',
+              boxShadow: cartCount > 0 ? '0 4px 16px rgba(215, 176, 106, 0.16)' : 'none',
               transition: 'background-color 0.2s ease, color 0.2s ease, transform 0.2s ease',
             }}
           >
