@@ -1,0 +1,134 @@
+---
+interface FaqItem {
+  question: string;
+  answer: string;
+}
+
+const faqs: FaqItem[] = [
+  {
+    question: "¿Dónde comprar maquillaje y cosméticos originales en Roldanillo?",
+    answer: "Bella Forever es tu boutique de belleza de referencia en Roldanillo, Valle del Cauca. Puedes explorar todo nuestro catálogo de productos en línea y realizar tu pedido con asesoría personalizada vía WhatsApp.",
+  },
+  {
+    question: "¿Cómo funciona la compra a través del catálogo digital?",
+    answer: "Navega por las categorías de rubor, labiales, correctores, cejas y pestañas, selecciona tus tonos preferidos y agrégalos a tu bolsa de compra. Al presionar 'Pedir por WhatsApp', se genera un mensaje con el detalle de tu orden para confirmar disponibilidad, pago y entrega.",
+  },
+  {
+    question: "¿Qué marcas y tipos de productos tienen disponibles?",
+    answer: "Ofrecemos cosméticos de alta demanda y calidad comprobada como Trendy y colecciones exclusivas de Bella Forever: rubores en barra (Pocket Blush), brillos velvet (Soda Pop Kit), correctores de alta cobertura, kits de pestañas Gold Eyes y fijadores de cejas.",
+  },
+  {
+    question: "¿Cuáles son los métodos de pago y tiempos de entrega?",
+    answer: "Aceptamos pagos por transferencia bancaria (Bancolombia, Nequi, Daviplata) y efectivo para entregas locales en Roldanillo. Las entregas locales se coordinan el mismo día o al día siguiente de tu confirmación.",
+  },
+];
+
+const faqSchema = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": faqs.map((faq) => ({
+    "@type": "Question",
+    "name": faq.question,
+    "acceptedAnswer": {
+      "@type": "Answer",
+      "text": faq.answer,
+    },
+  })),
+};
+---
+
+<section
+  class="editorial-section-shell"
+  style={{
+    padding: "48px 24px",
+    position: "relative",
+  }}
+  aria-labelledby="faq-section-title"
+>
+  <div
+    style={{
+      maxWidth: "880px",
+      margin: "0 auto",
+      backgroundColor: "rgba(18, 9, 11, 0.65)",
+      border: "1px solid rgba(215, 176, 106, 0.22)",
+      borderRadius: "24px",
+      padding: "36px 28px",
+      backdropFilter: "blur(14px)",
+    }}
+  >
+    <div style={{ textAlign: "center", marginBottom: "32px" }}>
+      <span
+        style={{
+          color: "var(--color-gold)",
+          fontSize: "0.76rem",
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          fontWeight: 600,
+          display: "block",
+          marginBottom: "8px",
+        }}
+      >
+        Dudas Frecuentes
+      </span>
+      <h2
+        id="faq-section-title"
+        style={{
+          fontFamily: "var(--font-serif)",
+          fontSize: "clamp(1.75rem, 4vw, 2.4rem)",
+          fontWeight: 400,
+          color: "var(--color-white)",
+          margin: 0,
+        }}
+      >
+        Preguntas Frecuentes sobre Bella Forever
+      </h2>
+    </div>
+
+    <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+      {faqs.map((faq) => (
+        <details
+          style={{
+            backgroundColor: "rgba(90, 22, 35, 0.18)",
+            border: "1px solid rgba(215, 176, 106, 0.25)",
+            borderRadius: "14px",
+            padding: "16px 20px",
+            color: "var(--color-text-light)",
+            transition: "background-color 0.2s ease",
+          }}
+        >
+          <summary
+            style={{
+              fontFamily: "var(--font-serif)",
+              fontSize: "1.15rem",
+              fontWeight: 500,
+              color: "var(--color-gold)",
+              cursor: "pointer",
+              userSelect: "none",
+              listStyle: "none",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <span>{faq.question}</span>
+            <span style={{ fontSize: "1.2rem", transform: "rotate(0deg)", transition: "transform 0.2s ease" }}>
+              ▾
+            </span>
+          </summary>
+          <p
+            style={{
+              margin: "12px 0 0 0",
+              fontSize: "0.9rem",
+              lineHeight: "1.6",
+              color: "rgba(255, 255, 255, 0.82)",
+            }}
+          >
+            {faq.answer}
+          </p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+
+<script type="application/ld+json" set:html={JSON.stringify(faqSchema)} />

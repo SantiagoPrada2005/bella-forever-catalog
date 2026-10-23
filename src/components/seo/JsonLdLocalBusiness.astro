@@ -9,16 +9,18 @@ const { siteUrl = 'https://bella-forever.com' } = Astro.props;
 
 const schemaData = {
   "@context": "https://schema.org",
-  "@type": "BeautySalon",
+  "@type": ["CosmeticsStore", "LocalBusiness"],
+  "@id": `${siteUrl}/#store`,
   "name": CONFIG.brandName,
-  "description": "Catálogo digital y tienda de cosméticos y maquillaje en Roldanillo, Valle del Cauca. Rubores, labiales, correctores, pestañas y productos de belleza de alta gama.",
+  "alternateName": "Bella Forever Beauty Boutique",
+  "description": "Tienda boutique y catálogo digital de maquillaje y cosméticos de alta gama en Roldanillo, Valle del Cauca. Rubores en barra, labiales velvet, correctores, pestañas y productos de belleza en tendencia con pedidos por WhatsApp.",
   "url": siteUrl,
   "logo": `${siteUrl}/logo.webp`,
-  "image": `${siteUrl}/isotipo.png`,
+  "image": `${siteUrl}/images/og-bella-forever.webp`,
   "telephone": CONFIG.whatsappNumber,
   "priceRange": "$$",
   "currenciesAccepted": "COP",
-  "paymentAccepted": "Cash, Credit Card, Bank Transfer",
+  "paymentAccepted": "Cash, Credit Card, Bank Transfer, Nequi, Daviplata",
   "address": {
     "@type": "PostalAddress",
     "addressLocality": CONFIG.defaultCity,
@@ -29,6 +31,35 @@ const schemaData = {
     "@type": "GeoCoordinates",
     "latitude": 4.4147,
     "longitude": -76.1558
+  },
+  "areaServed": [
+    {
+      "@type": "City",
+      "name": "Roldanillo"
+    },
+    {
+      "@type": "AdministrativeArea",
+      "name": "Valle del Cauca"
+    },
+    {
+      "@type": "Country",
+      "name": "Colombia"
+    }
+  ],
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+      "opens": "08:00",
+      "closes": "19:00"
+    }
+  ],
+  "contactPoint": {
+    "@type": "ContactPoint",
+    "telephone": CONFIG.whatsappNumber,
+    "contactType": "sales",
+    "availableLanguage": ["Spanish"],
+    "contactOption": "TollFree"
   },
   "sameAs": [
     `https://instagram.com/${CONFIG.instagramUser}`

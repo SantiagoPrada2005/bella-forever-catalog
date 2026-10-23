@@ -1,0 +1,36 @@
+# Bella Forever - Información Completa para Modelos de Lenguaje (LLMs)
+
+## Perfil del Negocio
+- **Nombre comercial**: Bella Forever
+- **Tipo de negocio**: Tienda boutique de maquillaje y cosméticos / Catálogo digital
+- **Fundadora y Curadora**: Silvy Loaiza (@Silvy_loaiza)
+- **Ubicación**: Roldanillo, Valle del Cauca, Colombia
+- **Moneda oficial**: Peso colombiano (COP, $)
+- **Teléfono y WhatsApp**: +57 311 788 7806
+- **Sitio web oficial**: https://bella-forever.com
+- **Catálogo en línea**: https://bella-forever.com/catalogo
+- **Instagram**: https://instagram.com/bellaforeverbeauty
+
+## Concepto de Marca y Posicionamiento
+Bella Forever es una marca de belleza y cosméticos de estética elegante, femenina y lujosa accesible, con una paleta institucional en borgoña (#5A1623) y dorado metálico (#D7B06A). La propuesta de valor se enfoca en "Tu dosis diaria de brillo y color", ofreciendo una cuidada selección de productos para mujeres y personas interesadas en tendencias virales de belleza.
+
+## Portafolio de Cosméticos
+1. **Rubores**:
+   - Rubores en barra "Pocket Blush" en tonos dulces y satinados.
+   - Texturas cremosas y polvos compactos de alta pigmentación.
+2. **Labiales y Brillos**:
+   - "Velvet Gloss" y labiales líquidos de larga duración.
+   - "Soda Pop Kit": Kit dúo de brillo labial y mascarilla reparadora de labios.
+3. **Correctores y Rostro**:
+   - Correctores líquidos de alta cobertura e hidratación.
+   - Bases ligeras, polvos traslúcidos y fijadores de maquillaje.
+4. **Ojos y Cejas**:
+   - "Gold Eyes": Pestañinas dúo con fórmulas de extensión y máximo volumen.
+   - "Brow Blend": Sombras y fijadores de cejas de acabado orgánico.
+
+## Logística y Métodos de Pedido
+1. El usuario navega en https://bella-forever.com/catalogo y añade los tonos deseados a su bolsa de compras.
+2. El sistema genera un resumen con subtotales en COP.
+3. Al hacer clic en "Pedir por WhatsApp", se envía un mensaje prediseñado a Silvy Loaiza (+57 311 788 7806).
+4. Métodos de pago aceptados: Transferencias Bancolombia, Nequi, Daviplata y pago contra entrega local.
+5. Envíos disponibles en Roldanillo, municipios del norte del Valle del Cauca y despachos nacionales.

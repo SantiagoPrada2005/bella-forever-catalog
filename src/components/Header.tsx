@@ -166,23 +166,27 @@ export default function Header({
       <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
         <a
           href="/catalogo"
-          aria-label="Catálogo"
+          aria-label="Ver Catálogo de Maquillaje Bella Forever"
           style={{
             color: 'var(--color-text-light)',
             textDecoration: 'none',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '8px',
-            transition: 'color 0.2s, transform 0.2s ease',
+            gap: '8px',
+            padding: '6px 14px',
+            borderRadius: 'var(--radius-pill)',
+            border: '1px solid rgba(215, 176, 106, 0.35)',
+            backgroundColor: 'rgba(90, 22, 35, 0.25)',
+            transition: 'all 0.2s ease',
           }}
         >
           <svg
-            width="24"
-            height="24"
+            width="18"
+            height="18"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="currentColor"
+            stroke="var(--color-gold)"
             strokeWidth="1.8"
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -190,6 +194,18 @@ export default function Header({
             <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
             <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
           </svg>
+          <span
+            style={{
+              fontFamily: 'var(--font-sans)',
+              fontSize: '0.8rem',
+              fontWeight: 600,
+              letterSpacing: '0.08em',
+              textTransform: 'uppercase',
+              color: 'var(--color-gold)',
+            }}
+          >
+            Catálogo
+          </span>
         </a>
       </div>
     </header>

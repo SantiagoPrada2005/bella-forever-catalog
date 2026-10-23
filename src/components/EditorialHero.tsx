@@ -64,6 +64,7 @@ export default function EditorialHero() {
 
           <div className="hero-reveal-item">
             <h1 className="poster-blush__headline">
+              <span className="sr-only">Bella Forever — Boutique y Catálogo de Maquillaje en Roldanillo: </span>
               NUEVO
               <br />
               POCKET
