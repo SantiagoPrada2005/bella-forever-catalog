@@ -1,84 +1,134 @@
-import { useRef } from 'react';
+import { Fragment, useRef } from 'react';
 import ProductCard from './ProductCard';
+import CatalogEditorialInterlude from './CatalogEditorialInterlude';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import type { ProductWithRelations, Tone } from '../db/schema';
 
 export interface ProductGridProps {
   products: ProductWithRelations[];
+  activeCategory?: string;
+  activeCategoryLabel?: string;
   onProductClick: (product: ProductWithRelations, tone: Tone | null) => void;
   onAddToCart?: (product: ProductWithRelations, tone: Tone | null) => void;
+  onSelectCategory?: (categoryId: string) => void;
 }
 
-export default function ProductGrid({ products, onProductClick, onAddToCart = () => {} }: ProductGridProps) {
+export default function ProductGrid({
+  products,
+  activeCategory = 'todos',
+  activeCategoryLabel = 'Completa',
+  onProductClick,
+  onAddToCart = () => {},
+  onSelectCategory,
+}: ProductGridProps) {
   const gridRef = useRef<HTMLDivElement>(null);
 
-  useGSAP(() => {
-    if (!gridRef.current) return;
-    // Animación de entrada diagonal premium
-    gsap.fromTo('.product-card-anim', 
-      { opacity: 0, y: 30, scale: 0.95 },
-      { 
-        opacity: 1, 
-        y: 0, 
-        scale: 1,
-        stagger: {
-          amount: 0.4,
-          grid: 'auto',
-          from: 'start',
-        },
-        duration: 0.8, 
-        ease: 'power3.out',
-      }
-    );
-  }, { dependencies: [products], scope: gridRef });
+  useGSAP(
+    () => {
+      if (!gridRef.current) return;
+      const mm = gsap.matchMedia();
+      mm.add('(prefers-reduced-motion: no-preference)', () => {
+        gsap.fromTo(
+          '.product-card-anim',
+          { opacity: 0, y: 20 },
+          {
+            opacity: 1,
+            y: 0,
+            stagger: {
+              amount: 0.32,
+              from: 'start',
+            },
+            duration: 0.55,
+            ease: 'power2.out',
+          }
+        );
+      });
+    },
+    { dependencies: [products, activeCategory], scope: gridRef }
+  );
+
+  const interludeInsertIndex = products.length >= 4 ? 3 : products.length - 1;
+  const shouldShowInterlude = activeCategory === 'todos' && products.length > 0;
 
   return (
-    <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '0 16px 48px 16px' }}>
+    <section className="catalog-grid-section" aria-label="Colección de productos">
+      <div className="catalog-section-heading">
+        <h2 className="catalog-section-title">
+          {activeCategory === 'todos' ? 'Colección ' : 'Selección '}
+          <span className="catalog-section-title__serif">
+            {activeCategory === 'todos' ? 'de Estudio' : activeCategoryLabel}
+          </span>
+        </h2>
+      </div>
+
       {products.length === 0 ? (
-        <div style={{
-          textAlign: 'center',
-          padding: '80px 24px',
-          color: 'var(--color-text-muted)',
-        }}>
-          <h3 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.8rem', marginBottom: '8px' }}>
-            No se encontraron productos
+        <div
+          style={{
+            textAlign: 'center',
+            padding: '64px 20px',
+            backgroundColor: 'var(--catalog-surface-card)',
+            borderRadius: 'var(--radius-catalog-card)',
+            border: '1px solid var(--catalog-border-subtle)',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '12px',
+          }}
+        >
+          <h3
+            style={{
+              fontFamily: 'var(--font-serif)',
+              fontStyle: 'italic',
+              fontSize: '1.75rem',
+              color: 'var(--catalog-accent)',
+              margin: 0,
+              lineHeight: 1.15,
+              paddingBottom: '4px',
+            }}
+          >
+            Sin piezas en esta categoría
           </h3>
-          <p>Pronto añadiremos más productos en esta sección.</p>
+          <p
+            style={{
+              color: 'var(--catalog-ink-muted)',
+              fontSize: '0.88rem',
+              maxWidth: '38ch',
+              margin: 0,
+            }}
+          >
+            Pronto sumaremos nuevas referencias a esta selección.
+          </p>
+          {onSelectCategory && (
+            <button
+              type="button"
+              onClick={() => onSelectCategory('todos')}
+              className="catalog-filter-pill is-active"
+              style={{ marginTop: '4px' }}
+            >
+              Ver toda la colección
+            </button>
+          )}
         </div>
       ) : (
-        <div>
-          <h2 className="sr-only">Todos los productos</h2>
-          <style>{`
-            .catalog-grid {
-              display: grid;
-              grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-              gap: 16px !important;
-            }
-            @media (min-width: 768px) {
-              .catalog-grid {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)) !important;
-                gap: 30px !important;
-              }
-            }
-          `}</style>
-          <div 
-            ref={gridRef}
-            className="catalog-grid"
-          >
-            {products.map((prod, index) => (
-              <div key={prod.id} className="product-card-anim" style={{ height: '100%' }}>
-                <ProductCard 
-                  product={prod} 
-                  priority={index === 0}
-                  onProductClick={onProductClick} 
+        <div ref={gridRef} className="catalog-studio-grid">
+          {products.map((prod, index) => (
+            <Fragment key={prod.id}>
+              <div className="product-card-anim" style={{ height: '100%' }}>
+                <ProductCard
+                  product={prod}
+                  priority={false}
+                  onProductClick={onProductClick}
                   onAddToCart={onAddToCart}
                 />
               </div>
-            ))}
-          </div>
+              {shouldShowInterlude && index === interludeInsertIndex && (
+                <CatalogEditorialInterlude onSelectFeaturedCategory={onSelectCategory} />
+              )}
+            </Fragment>
+          ))}
         </div>
       )}
-    </div>
+    </section>
   );
 }

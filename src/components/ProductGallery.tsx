@@ -18,12 +18,13 @@ export default function ProductGallery({
 }: ProductGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // Normalizar lista de imágenes con fallback a mainImage
-  const galleryImages = images && images.length > 0
-    ? images
-    : (fallbackImage ? [{ url: fallbackImage, altText: productName }] : []);
+  const galleryImages =
+    images && images.length > 0
+      ? images
+      : fallbackImage
+        ? [{ url: fallbackImage, altText: productName }]
+        : [];
 
-  // Si hay imagen específica del tono, prevalece; si no, la de la galería o el fallback
   const mainSrc = selectedToneImage || galleryImages[activeIndex]?.url || fallbackImage;
   const hasGallery = !selectedToneImage && galleryImages.length > 1;
 
@@ -33,27 +34,27 @@ export default function ProductGallery({
 
   return (
     <div style={{ width: '100%' }}>
-      {/* Main image */}
       <div
         style={{
           position: 'relative',
           width: '100%',
-          aspectRatio: '1',
-          backgroundColor: '#1a0f12',
-          borderRadius: '8px',
+          aspectRatio: '1 / 1',
+          backgroundColor: 'var(--catalog-surface-card, #F4ECEE)',
+          borderRadius: '14px',
           overflow: 'hidden',
-          marginBottom: hasGallery ? '12px' : '0',
+          marginBottom: hasGallery ? '10px' : '0',
         }}
       >
         <img
           src={mainSrc}
           alt={productName || 'Producto'}
-          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+          width="520"
+          height="520"
+          style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
           loading="eager"
         />
       </div>
 
-      {/* Thumbnail strip */}
       {hasGallery && (
         <div
           style={{
@@ -67,48 +68,35 @@ export default function ProductGallery({
           {galleryImages.map((img, index) => (
             <button
               key={index}
+              type="button"
               onClick={() => handleThumbnailClick(index)}
               style={{
                 flexShrink: 0,
-                width: '60px',
-                height: '60px',
-                borderRadius: '6px',
+                width: '56px',
+                height: '56px',
+                borderRadius: '10px',
                 overflow: 'hidden',
-                border: index === activeIndex
-                  ? '2px solid var(--color-gold)'
-                  : '1px solid rgba(255,255,255,0.15)',
+                border:
+                  index === activeIndex
+                    ? '2px solid var(--catalog-accent, #8C1D32)'
+                    : '1px solid var(--catalog-border-subtle, rgba(36, 7, 14, 0.12))',
                 cursor: 'pointer',
                 padding: 0,
-                background: 'none',
+                background: '#FFFFFF',
                 transition: 'border-color 0.2s, opacity 0.2s',
                 opacity: index === activeIndex ? 1 : 0.65,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.opacity = '1';
-              }}
-              onMouseLeave={(e) => {
-                if (index !== activeIndex) {
-                  e.currentTarget.style.opacity = '0.65';
-                }
               }}
             >
               <img
                 src={img.url}
                 alt={img.altText || `${productName || 'Producto'} imagen ${index + 1}`}
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                width="56"
+                height="56"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
                 loading={index === 0 ? 'eager' : 'lazy'}
               />
             </button>
           ))}
-
-          {/* Mobile: limit to 5 visible thumbnails, scroll for more */}
-          <style>{`
-            @media (max-width: 767px) {
-              .product-gallery-thumbs {
-                max-width: calc(60px * 5 + 8px * 4);
-              }
-            }
-          `}</style>
         </div>
       )}
     </div>

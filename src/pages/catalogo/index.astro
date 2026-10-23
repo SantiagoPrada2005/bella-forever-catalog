@@ -34,13 +34,13 @@ const lcpImageUrl = lcpProduct ? getProductImage(lcpProduct, lcpProduct.tones?.[
   description="Explora nuestra colección completa de maquillaje de alta gama: rubores, labiales, correctores, cejas y pestañas en Roldanillo."
 >
   <JsonLdProductList slot="head" products={productsList} />
+  <link rel="preload" as="image" href="/images/studio-hero-blush.webp" fetchpriority="high" slot="head" />
   {lcpImageUrl && (
     <link rel="preload" as="image" href={lcpImageUrl} fetchpriority="high" slot="head" />
   )}
   <CatalogClient
-    client:idle
+    client:load
     initialProducts={productsList}
     initialCategories={categoriesList}
   />
 </Layout>
-
