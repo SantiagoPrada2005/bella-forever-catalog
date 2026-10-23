@@ -40,4 +40,6 @@ dist-ssr
 
 # Backups
 backups/
+proveedores/
+*.zip
 
