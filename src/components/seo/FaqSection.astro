@@ -7,19 +7,31 @@ interface FaqItem {
 const faqs: FaqItem[] = [
   {
     question: "¿Dónde comprar maquillaje y cosméticos originales en Roldanillo?",
-    answer: "Bella Forever es tu boutique de belleza de referencia en Roldanillo, Valle del Cauca. Puedes explorar todo nuestro catálogo de productos en línea y realizar tu pedido con asesoría personalizada vía WhatsApp.",
+    answer: "Bella Forever es la boutique de belleza líder en Roldanillo, Valle del Cauca. Ofrecemos maquillaje de alta calidad, productos en tendencia y marcas de prestigio con asesoría personalizada de Silvy Loaiza a través de nuestro catálogo digital interactivo.",
   },
   {
-    question: "¿Cómo funciona la compra a través del catálogo digital?",
-    answer: "Navega por las categorías de rubor, labiales, correctores, cejas y pestañas, selecciona tus tonos preferidos y agrégalos a tu bolsa de compra. Al presionar 'Pedir por WhatsApp', se genera un mensaje con el detalle de tu orden para confirmar disponibilidad, pago y entrega.",
+    question: "¿Cómo funciona la compra a través del catálogo digital de Bella Forever?",
+    answer: "Explora las secciones de rubor, labiales velvet, correctores, cejas y pestañinas. Selecciona el tono que deseas, agrégalo a tu bolsa de compra y presiona 'Pedir por WhatsApp'. Se abrirá un chat directo con el listado detallado para confirmar tu pedido y coordinar entrega.",
   },
   {
-    question: "¿Qué marcas y tipos de productos tienen disponibles?",
-    answer: "Ofrecemos cosméticos de alta demanda y calidad comprobada como Trendy y colecciones exclusivas de Bella Forever: rubores en barra (Pocket Blush), brillos velvet (Soda Pop Kit), correctores de alta cobertura, kits de pestañas Gold Eyes y fijadores de cejas.",
+    question: "¿Qué marcas y tipos de productos tienen disponibles en tienda?",
+    answer: "Contamos con cosméticos originales de alta gama y marcas aliadas como Trendy, además de las colecciones exclusivas de Bella Forever: rubor en barra Pocket Blush, kits para labios Soda Pop Kit, máscara dúo Gold Eyes, geles fijadores para cejas y correctores faciales de alta cobertura.",
   },
   {
-    question: "¿Cuáles son los métodos de pago y tiempos de entrega?",
-    answer: "Aceptamos pagos por transferencia bancaria (Bancolombia, Nequi, Daviplata) y efectivo para entregas locales en Roldanillo. Las entregas locales se coordinan el mismo día o al día siguiente de tu confirmación.",
+    question: "¿Cómo elegir el tono adecuado de rubor o corrector para mi tipo de piel?",
+    answer: "En Bella Forever brindamos asesoría individualizada. Puedes escribirnos a nuestro WhatsApp (+57 311 788 7806) y te guiaremos según tu subtono (cálido, neutro o frío) para que elijas entre tonos melocotón, rosados o satinados en Pocket Blush y la tonalidad exacta en correctores.",
+  },
+  {
+    question: "¿Realizan envíos a municipios cercanos como La Unión, Zarzal, Cartago o Cali?",
+    answer: "Sí. Además de entregas rápidas en Roldanillo, realizamos envíos a todo el norte del Valle del Cauca (La Unión, Zarzal, Bolívar, Toro, Cartago, Tuluá) y cobertura nacional en Colombia a través de empresas de mensajería certificadas.",
+  },
+  {
+    question: "¿Cuáles son los métodos de pago aceptados para los pedidos?",
+    answer: "Aceptamos transferencias electrónicas por Bancolombia, Nequi y Daviplata. Para clientas con entrega directa en el perímetro urbano de Roldanillo, también está disponible la modalidad de pago en efectivo contra entrega.",
+  },
+  {
+    question: "¿Los productos son aptos para pieles sensibles y de larga duración?",
+    answer: "Todos los productos del catálogo cuentan con fórmulas probadas, hipoalergénicas y de excelente pigmentación, pensadas para resistir el clima cálido del Valle del Cauca manteniendo el brillo y la fijación intactos durante toda la jornada.",
   },
 ];
 
@@ -39,21 +51,19 @@ const faqSchema = {
 
 <section
   class="editorial-section-shell"
-  style={{
-    padding: "48px 24px",
-    position: "relative",
-  }}
   aria-labelledby="faq-section-title"
 >
   <div
     style={{
-      maxWidth: "880px",
+      maxWidth: "920px",
       margin: "0 auto",
-      backgroundColor: "rgba(18, 9, 11, 0.65)",
-      border: "1px solid rgba(215, 176, 106, 0.22)",
+      backgroundColor: "rgba(18, 9, 11, 0.72)",
+      border: "1px solid rgba(215, 176, 106, 0.25)",
       borderRadius: "24px",
-      padding: "36px 28px",
+      padding: "clamp(24px, 5vw, 36px) clamp(16px, 4vw, 28px)",
       backdropFilter: "blur(14px)",
+      boxSizing: "border-box",
+      width: "100%",
     }}
   >
     <div style={{ textAlign: "center", marginBottom: "32px" }}>
@@ -68,19 +78,19 @@ const faqSchema = {
           marginBottom: "8px",
         }}
       >
-        Dudas Frecuentes
+        Resolución de Dudas
       </span>
       <h2
         id="faq-section-title"
         style={{
           fontFamily: "var(--font-serif)",
-          fontSize: "clamp(1.75rem, 4vw, 2.4rem)",
+          fontSize: "clamp(1.75rem, 4vw, 2.45rem)",
           fontWeight: 400,
           color: "var(--color-white)",
           margin: 0,
         }}
       >
-        Preguntas Frecuentes sobre Bella Forever
+        Preguntas Frecuentes sobre Bella Forever en Roldanillo
       </h2>
     </div>
 
@@ -89,7 +99,7 @@ const faqSchema = {
         <details
           style={{
             backgroundColor: "rgba(90, 22, 35, 0.18)",
-            border: "1px solid rgba(215, 176, 106, 0.25)",
+            border: "1px solid rgba(215, 176, 106, 0.22)",
             borderRadius: "14px",
             padding: "16px 20px",
             color: "var(--color-text-light)",
@@ -108,10 +118,11 @@ const faqSchema = {
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
+              gap: "12px",
             }}
           >
             <span>{faq.question}</span>
-            <span style={{ fontSize: "1.2rem", transform: "rotate(0deg)", transition: "transform 0.2s ease" }}>
+            <span style={{ fontSize: "1.2rem", color: "var(--color-gold)", flexShrink: 0 }}>
               ▾
             </span>
           </summary>
@@ -119,7 +130,7 @@ const faqSchema = {
             style={{
               margin: "12px 0 0 0",
               fontSize: "0.9rem",
-              lineHeight: "1.6",
+              lineHeight: "1.65",
               color: "rgba(255, 255, 255, 0.82)",
             }}
           >

@@ -129,8 +129,9 @@ export default function Header({
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        padding: '0 24px',
+        padding: '0 clamp(12px, 3.5vw, 24px)',
         zIndex: 1000,
+        boxSizing: 'border-box',
       }}
     >
       <a
@@ -138,7 +139,7 @@ export default function Header({
         style={{
           display: 'flex',
           alignItems: 'center',
-          gap: '10px',
+          gap: '8px',
           cursor: 'pointer',
           textDecoration: 'none',
         }}
@@ -148,15 +149,15 @@ export default function Header({
           alt="Bella Forever Isotipo"
           width="36"
           height="36"
-          style={{ height: '36px', width: '36px', objectFit: 'contain' }}
+          style={{ height: '34px', width: '34px', objectFit: 'contain' }}
         />
         <span
           style={{
             fontFamily: 'var(--font-serif)',
-            fontSize: '1.4rem',
+            fontSize: 'clamp(1.15rem, 3.8vw, 1.4rem)',
             fontWeight: '600',
             color: 'var(--color-gold)',
-            letterSpacing: '2px',
+            letterSpacing: '1.5px',
           }}
         >
           BELLA FOREVER

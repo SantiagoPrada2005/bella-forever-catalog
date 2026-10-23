@@ -521,10 +521,23 @@ body {
   letter-spacing: 0.14em;
   text-transform: uppercase;
   white-space: nowrap;
+  max-width: 100%;
+  box-sizing: border-box;
   cursor: pointer;
   border: none;
   text-decoration: none;
   transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, background-color 0.25s ease;
+}
+
+@media (max-width: 640px) {
+  .editorial-pill-btn {
+    white-space: normal;
+    text-align: center;
+    padding: 10px 18px;
+    font-size: 0.74rem;
+    letter-spacing: 0.08em;
+    word-break: break-word;
+  }
 }
 
 .editorial-pill-btn:active {

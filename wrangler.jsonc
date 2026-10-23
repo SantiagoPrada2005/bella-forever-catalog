@@ -9,6 +9,10 @@
 		{
 			"pattern": "bella-forever.com",
 			"custom_domain": true
+		},
+		{
+			"pattern": "www.bella-forever.com",
+			"custom_domain": true
 		}
 	],
 	"r2_buckets": [

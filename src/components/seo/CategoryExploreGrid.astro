@@ -1,0 +1,171 @@
+---
+interface CategoryLinkItem {
+  title: string;
+  category: string;
+  description: string;
+  href: string;
+  ctaText: string;
+}
+
+const categoryLinks: CategoryLinkItem[] = [
+  {
+    title: "Rubores y Bronzers",
+    category: "rubor",
+    description: "Fórmulas en barra Pocket Blush y polvos luminosos seleccionados para brindar calidez y realzar tus facciones.",
+    href: "/catalogo?categoria=rubor",
+    ctaText: "Explorar Rubores y Pocket Blush",
+  },
+  {
+    title: "Labiales y Gloss",
+    category: "labiales",
+    description: "Velvet Gloss, tintas líquidas y kits de nutrición labial Soda Pop Kit con aromas frutales y brillo duradero.",
+    href: "/catalogo?categoria=labiales",
+    ctaText: "Ver Colección de Labiales y Brillos",
+  },
+  {
+    title: "Pestañinas y Ojos",
+    category: "pestanas",
+    description: "Kits de máscara dúo Gold Eyes para una mirada definida con efecto lifting, volumen y rizado que no se baja.",
+    href: "/catalogo?categoria=pestanas",
+    ctaText: "Descubrir Pestañinas Gold Eyes",
+  },
+  {
+    title: "Diseño de Cejas",
+    category: "cejas",
+    description: "Paletas compactas Brow Blend y geles fijadores para lograr cejas pobladas, peinadas y con efecto laminado natural.",
+    href: "/catalogo?categoria=cejas",
+    ctaText: "Ver Sombras y Fijadores de Cejas",
+  },
+  {
+    title: "Correctores y Piel",
+    category: "correctores",
+    description: "Correctores fluidos de alta cobertura que disimulan manchas, ojeras e imperfecciones con textura ligera y transpirable.",
+    href: "/catalogo?categoria=correctores",
+    ctaText: "Ver Correctores para Rostro",
+  },
+  {
+    title: "Tendencias y Novedades",
+    category: "todos",
+    description: "Todos los lanzamientos y productos en stock de marcas de prestigio como Trendy listos para entrega inmediata.",
+    href: "/catalogo",
+    ctaText: "Consultar Catálogo Completo",
+  },
+];
+---
+
+<section
+  class="editorial-section-shell"
+  aria-labelledby="category-explore-title"
+>
+  <div
+    style={{
+      maxWidth: "960px",
+      margin: "0 auto",
+    }}
+  >
+    <div style={{ textAlign: "center", marginBottom: "28px" }}>
+      <span
+        style={{
+          color: "var(--color-gold)",
+          fontSize: "0.76rem",
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          fontWeight: 600,
+          display: "block",
+          marginBottom: "8px",
+        }}
+      >
+        Colecciones Destacadas
+      </span>
+      <h2
+        id="category-explore-title"
+        style={{
+          fontFamily: "var(--font-serif)",
+          fontSize: "clamp(1.75rem, 3.8vw, 2.35rem)",
+          fontWeight: 400,
+          color: "var(--color-white)",
+          margin: 0,
+        }}
+      >
+        Explora las Categorías de Nuestra Tienda de Maquillaje
+      </h2>
+      <p
+        style={{
+          color: "rgba(255, 255, 255, 0.72)",
+          fontSize: "0.88rem",
+          maxWidth: "640px",
+          margin: "10px auto 0",
+          lineHeight: "1.55",
+        }}
+      >
+        Encuentra cosméticos de alta gama con asesoría personalizada de tonos para clientas en <strong>Roldanillo</strong> y todo el <strong>Valle del Cauca</strong>.
+      </p>
+    </div>
+
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 250px), 1fr))",
+        gap: "20px",
+      }}
+    >
+      {categoryLinks.map((cat) => (
+        <article
+          style={{
+            backgroundColor: "rgba(18, 9, 11, 0.65)",
+            border: "1px solid rgba(215, 176, 106, 0.22)",
+            borderRadius: "18px",
+            padding: "22px 20px",
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "space-between",
+            backdropFilter: "blur(12px)",
+            transition: "transform 0.2s ease, border-color 0.2s ease",
+          }}
+        >
+          <div>
+            <h3
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontSize: "1.25rem",
+                color: "var(--color-gold)",
+                margin: "0 0 8px 0",
+              }}
+            >
+              {cat.title}
+            </h3>
+            <p
+              style={{
+                color: "rgba(255, 255, 255, 0.78)",
+                fontSize: "0.86rem",
+                lineHeight: "1.55",
+                margin: "0 0 16px 0",
+              }}
+            >
+              {cat.description}
+            </p>
+          </div>
+          <a
+            href={cat.href}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "6px",
+              color: "var(--color-white)",
+              fontSize: "0.8rem",
+              fontWeight: 600,
+              letterSpacing: "0.06em",
+              textDecoration: "none",
+              borderBottom: "1px solid var(--color-gold)",
+              paddingBottom: "4px",
+              width: "fit-content",
+            }}
+          >
+            <span>{cat.ctaText}</span>
+            <span aria-hidden="true" style={{ color: "var(--color-gold)" }}>→</span>
+          </a>
+        </article>
+      ))}
+    </div>
+  </div>
+</section>

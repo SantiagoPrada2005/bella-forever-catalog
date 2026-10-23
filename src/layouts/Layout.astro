@@ -14,7 +14,7 @@ interface Props {
 const {
   title = 'Bella Forever | Tienda y Catálogo de Maquillaje en Roldanillo',
   description = 'Boutique de maquillaje en Roldanillo. Descubre rubores, labiales, correctores y productos de alta gama con pedidos rápidos por WhatsApp.',
-  image = '/images/og-bella-forever.webp',
+  image = '/images/og-bella-forever.jpg',
   type = 'website',
   noindex = false,
 } = Astro.props;
@@ -22,6 +22,11 @@ const {
 const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://bella-forever.com';
 const canonicalURL = new URL(Astro.url.pathname, siteUrl);
 const socialImageURL = new URL(image, siteUrl);
+const imageType = socialImageURL.pathname.endsWith('.png') 
+  ? 'image/png' 
+  : socialImageURL.pathname.endsWith('.webp') 
+    ? 'image/webp' 
+    : 'image/jpeg';
 ---
 
 <!doctype html>
@@ -34,26 +39,29 @@ const socialImageURL = new URL(image, siteUrl);
     <meta name="keywords" content="Bella Forever, maquillaje Roldanillo, tienda de maquillaje, cosméticos, catálogo de maquillaje, labiales, rubor, pestañas, cejas, correctores, belleza, Trendy, Valle del Cauca" />
     <meta name="robots" content={noindex ? "noindex, nofollow" : "index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1"} />
     <link rel="canonical" href={canonicalURL.href} />
-    <meta name="theme-color" content="#12090b" />
+    <meta name="theme-color" content="#5A1623" />
     
-    <!-- Open Graph / Facebook -->
+    <!-- Open Graph / Facebook & WhatsApp (1200x630 Universal Safe Zone) -->
     <meta property="og:site_name" content="Bella Forever" />
     <meta property="og:type" content={type} />
     <meta property="og:url" content={canonicalURL.href} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={socialImageURL.href} />
-    <meta property="og:image:width" content="1140" />
-    <meta property="og:image:height" content="768" />
-    <meta property="og:image:alt" content="Colección y catálogo de maquillaje Bella Forever en Roldanillo" />
+    <meta property="og:image:secure_url" content={socialImageURL.href} />
+    <meta property="og:image:type" content={imageType} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={title} />
     <meta property="og:locale" content="es_CO" />
     
-    <!-- Twitter -->
+    <!-- Twitter Summary Large Image -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:url" content={canonicalURL.href} />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={socialImageURL.href} />
+    <meta name="twitter:image:alt" content={title} />
     
     <!-- Google Fonts: Cormorant Garamond & Outfit -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -64,12 +72,21 @@ const socialImageURL = new URL(image, siteUrl);
       <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Outfit:wght@300;400;500;600;700&display=swap" />
     </noscript>
     
-    <!-- Favicon & App Icons -->
-    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    <!-- Canonical Root Favicon (Googlebot, Bing & Legacy Browsers fallback) -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="shortcut icon" href="/favicon.ico" />
+    
+    <!-- Google Search SERP Favicons (Multiples of 48px: 48, 96, 192) -->
+    <link rel="icon" type="image/png" sizes="48x48" href="/icon-48.png" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/icon-96.png" />
     <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+    
+    <!-- Apple Touch Icon (iOS Home Screen) -->
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+    
+    <!-- Web App Manifest -->
     <link rel="manifest" href="/site.webmanifest" />
-    <meta name="theme-color" content="#5A1623" />
 
     <!-- Datos Estructurados (Schema.org) -->
     <JsonLdWebSite siteUrl={siteUrl} />

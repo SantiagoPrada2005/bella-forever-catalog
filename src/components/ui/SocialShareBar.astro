@@ -1,0 +1,202 @@
+---
+interface Props {
+  url?: string;
+  title?: string;
+  description?: string;
+}
+
+const {
+  url = "https://bella-forever.com",
+  title = "Bella Forever | Catálogo de Maquillaje en Roldanillo",
+  description = "Descubre la boutique de maquillaje Bella Forever en Roldanillo. Cosméticos de alta gama con pedidos rápidos por WhatsApp.",
+} = Astro.props;
+
+const encodedUrl = encodeURIComponent(url);
+const encodedText = encodeURIComponent(`${title} - ${description} ${url}`);
+---
+
+<section
+  class="editorial-section-shell"
+  aria-labelledby="social-share-title"
+>
+  <div
+    style={{
+      maxWidth: "880px",
+      margin: "0 auto",
+      backgroundColor: "rgba(90, 22, 35, 0.22)",
+      border: "1px solid rgba(215, 176, 106, 0.3)",
+      borderRadius: "20px",
+      padding: "clamp(18px, 4vw, 24px) clamp(16px, 4vw, 28px)",
+      display: "flex",
+      flexWrap: "wrap",
+      alignItems: "center",
+      justifyContent: "space-between",
+      gap: "18px",
+      backdropFilter: "blur(12px)",
+      boxSizing: "border-box",
+      width: "100%",
+    }}
+  >
+    <div>
+      <h3
+        id="social-share-title"
+        style={{
+          fontFamily: "var(--font-serif)",
+          fontSize: "1.35rem",
+          color: "var(--color-white)",
+          margin: "0 0 4px 0",
+        }}
+      >
+        Comparte Bella Forever con tus Amigas
+      </h3>
+      <p
+        style={{
+          margin: 0,
+          fontSize: "0.84rem",
+          color: "rgba(255, 255, 255, 0.75)",
+        }}
+      >
+        ¿Te encantaron nuestros tonos? Comparte el catálogo en tus redes o envía el enlace directo.
+      </p>
+    </div>
+
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        flexWrap: "wrap",
+        gap: "10px",
+      }}
+    >
+      <!-- Botón WhatsApp -->
+      <a
+        href={`https://api.whatsapp.com/send?text=${encodedText}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Compartir catálogo en WhatsApp"
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "8px",
+          backgroundColor: "#25D366",
+          color: "#0a0405",
+          padding: "8px 16px",
+          borderRadius: "var(--radius-pill)",
+          textDecoration: "none",
+          fontSize: "0.82rem",
+          fontWeight: 600,
+          transition: "transform 0.2s ease, opacity 0.2s ease",
+        }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.312.045-.694.074-2.148-.526-1.859-.766-3.04-2.658-3.133-2.781-.093-.123-.759-1.009-.759-1.923s.478-1.365.648-1.55c.17-.185.372-.232.496-.232.124 0 .248.001.356.006.114.006.267-.043.418.318.155.372.53 1.29.576 1.383.046.093.078.202.015.326-.062.123-.093.201-.186.31-.093.108-.196.242-.28.326-.093.093-.19.195-.082.381.108.186.48 1.06 1.028 1.548.705.628 1.298.822 1.484.915.186.093.294.077.402-.047.109-.124.465-.542.59-.728.124-.186.248-.155.418-.093.17.062 1.08.51 1.266.603.186.093.31.14.356.217.046.077.046.45-.098.855z"/>
+        </svg>
+        <span>WhatsApp</span>
+      </a>
+
+      <!-- Botón Facebook -->
+      <a
+        href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Compartir en Facebook"
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "8px",
+          backgroundColor: "#1877F2",
+          color: "#ffffff",
+          padding: "8px 16px",
+          borderRadius: "var(--radius-pill)",
+          textDecoration: "none",
+          fontSize: "0.82rem",
+          fontWeight: 600,
+          transition: "transform 0.2s ease, opacity 0.2s ease",
+        }}
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M9 8H6v4h3v12h5V12h3.642L18 8h-4V6.333C14 5.374 14.5 5 15.667 5H18V0h-3.808C10.595 0 9 1.583 9 4.615V8z"/>
+        </svg>
+        <span>Facebook</span>
+      </a>
+
+      <!-- Botón X / Twitter -->
+      <a
+        href={`https://twitter.com/intent/tweet?url=${encodedUrl}&text=${encodeURIComponent(title)}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label="Compartir en X"
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "8px",
+          backgroundColor: "#000000",
+          border: "1px solid rgba(255, 255, 255, 0.25)",
+          color: "#ffffff",
+          padding: "8px 16px",
+          borderRadius: "var(--radius-pill)",
+          textDecoration: "none",
+          fontSize: "0.82rem",
+          fontWeight: 600,
+          transition: "transform 0.2s ease",
+        }}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+        </svg>
+        <span>X</span>
+      </a>
+
+      <!-- Botón Copiar Enlace -->
+      <button
+        id="btn-copy-share-link"
+        type="button"
+        aria-label="Copiar enlace al portapapeles"
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "6px",
+          backgroundColor: "rgba(215, 176, 106, 0.18)",
+          border: "1px solid var(--color-gold)",
+          color: "var(--color-gold)",
+          padding: "8px 16px",
+          borderRadius: "var(--radius-pill)",
+          cursor: "pointer",
+          fontSize: "0.82rem",
+          fontWeight: 600,
+          fontFamily: "var(--font-sans)",
+          transition: "background-color 0.2s ease",
+        }}
+      >
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+          <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+        </svg>
+        <span id="copy-share-btn-text">Copiar Enlace</span>
+      </button>
+    </div>
+  </div>
+</section>
+
+<script is:inline>
+  const copyBtn = document.getElementById('btn-copy-share-link');
+  const copyText = document.getElementById('copy-share-btn-text');
+  if (copyBtn && copyText) {
+    copyBtn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(window.location.href);
+        const original = copyText.textContent;
+        copyText.textContent = '¡Enlace Copiado!';
+        copyBtn.style.backgroundColor = 'var(--color-gold)';
+        copyBtn.style.color = '#12090b';
+        setTimeout(() => {
+          copyText.textContent = original;
+          copyBtn.style.backgroundColor = 'rgba(215, 176, 106, 0.18)';
+          copyBtn.style.color = 'var(--color-gold)';
+        }, 2200);
+      } catch (e) {
+        console.error('Error al copiar enlace', e);
+      }
+    });
+  }
+</script>

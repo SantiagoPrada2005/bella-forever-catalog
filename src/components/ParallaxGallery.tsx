@@ -132,8 +132,8 @@ export default function ParallaxGallery() {
               >
                 GLOSS
               </span>
-              <a href="/catalogo" className="editorial-pill-btn editorial-pill-btn--alabaster">
-                EXPLORAR CATÁLOGO
+              <a href="/catalogo?categoria=labiales" className="editorial-pill-btn editorial-pill-btn--alabaster">
+                VER LABIALES Y GLOSS VELVET
               </a>
             </div>
           </div>
@@ -371,7 +371,7 @@ export default function ParallaxGallery() {
               CATÁLOGO
             </h3>
             <a href="/catalogo" className="editorial-pill-btn editorial-pill-btn--pink">
-              EXPLORAR CATÁLOGO
+              VER COLECCIÓN COMPLETA
             </a>
           </div>
 

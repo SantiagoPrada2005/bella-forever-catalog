@@ -4,8 +4,11 @@ import Header from "../components/Header";
 import EditorialHero from "../components/EditorialHero";
 import BrandStory from "../components/BrandStory";
 import ParallaxGallery from "../components/ParallaxGallery";
+import CategoryExploreGrid from "../components/seo/CategoryExploreGrid.astro";
+import BeautyRitualGuide from "../components/seo/BeautyRitualGuide.astro";
 import AboutBrandSection from "../components/seo/AboutBrandSection.astro";
 import FaqSection from "../components/seo/FaqSection.astro";
+import SocialShareBar from "../components/ui/SocialShareBar.astro";
 import { CONFIG } from "../config";
 ---
 
@@ -24,6 +27,9 @@ import { CONFIG } from "../config";
       flexDirection: "column",
       backgroundColor: "var(--color-bg-dark)",
       paddingTop: "70px",
+      width: "100%",
+      maxWidth: "100vw",
+      overflowX: "hidden",
     }}
   >
     <div class="bg-makeup-blur bg-makeup-blur-1"></div>
@@ -31,93 +37,147 @@ import { CONFIG } from "../config";
 
     <Header client:load cartCount={0} />
 
-    <main style={{ flex: "1 0 auto", paddingBottom: "32px", display: "flex", flexDirection: "column", gap: "24px" }}>
+    <main style={{ flex: "1 0 auto", paddingBottom: "32px", display: "flex", flexDirection: "column", gap: "24px", width: "100%", maxWidth: "100%", overflowX: "hidden" }}>
       <EditorialHero client:load />
       <BrandStory client:visible />
       <ParallaxGallery client:visible />
+      <CategoryExploreGrid />
+      <BeautyRitualGuide />
       <AboutBrandSection />
       <FaqSection />
+      <SocialShareBar />
     </main>
 
-    <!-- Footer Editorial con NAP (Name, Address, Phone) para Local SEO -->
+    <!-- Footer Editorial con Navegación Interna Rica y NAP (Name, Address, Phone) -->
     <footer
       style={{
-        padding: "40px 24px 32px",
+        padding: "48px 24px 36px",
         borderTop: "var(--border-glass)",
-        textAlign: "center",
         color: "var(--color-text-muted)",
         fontSize: "0.82rem",
-        backgroundColor: "rgba(18, 9, 11, 0.75)",
+        backgroundColor: "rgba(18, 9, 11, 0.85)",
         backdropFilter: "blur(14px)",
       }}
     >
-      <div style={{ maxWidth: "680px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "10px" }}>
-        <p
+      <div style={{ maxWidth: "980px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "28px" }}>
+        <!-- Columnas de navegación del Footer para SEO -->
+        <div
           style={{
-            fontFamily: "var(--font-serif)",
-            fontSize: "1.45rem",
-            color: "var(--color-gold)",
-            margin: 0,
-            letterSpacing: "0.16em",
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gap: "28px",
+            textAlign: "left",
           }}
         >
-          BELLA FOREVER
-        </p>
-        <p
+          <!-- Columna 1: Marca & Identidad -->
+          <div>
+            <p
+              style={{
+                fontFamily: "var(--font-serif)",
+                fontSize: "1.45rem",
+                color: "var(--color-gold)",
+                margin: "0 0 8px 0",
+                letterSpacing: "0.14em",
+              }}
+            >
+              BELLA FOREVER
+            </p>
+            <p style={{ margin: "0 0 12px 0", lineHeight: "1.6", color: "rgba(255, 255, 255, 0.72)", fontSize: "0.84rem" }}>
+              Tienda boutique de maquillaje y catálogo interactivo en Roldanillo, Valle del Cauca. Curaduría exclusiva por <strong>Silvy Loaiza</strong>.
+            </p>
+            <p style={{ margin: 0, fontSize: "0.8rem", color: "var(--color-gold)" }}>
+              📍 Roldanillo, Valle del Cauca, Colombia
+            </p>
+          </div>
+
+          <!-- Columna 2: Enlaces a Categorías de Maquillaje -->
+          <div>
+            <h4 style={{ color: "var(--color-white)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 12px 0" }}>
+              Colecciones
+            </h4>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
+              <li>
+                <a href="/catalogo?categoria=rubor" style={{ color: "rgba(255, 255, 255, 0.78)", textDecoration: "none" }}>
+                  Rubores y Pocket Blush
+                </a>
+              </li>
+              <li>
+                <a href="/catalogo?categoria=labiales" style={{ color: "rgba(255, 255, 255, 0.78)", textDecoration: "none" }}>
+                  Labiales y Velvet Gloss
+                </a>
+              </li>
+              <li>
+                <a href="/catalogo?categoria=pestanas" style={{ color: "rgba(255, 255, 255, 0.78)", textDecoration: "none" }}>
+                  Pestañinas Gold Eyes
+                </a>
+              </li>
+              <li>
+                <a href="/catalogo?categoria=cejas" style={{ color: "rgba(255, 255, 255, 0.78)", textDecoration: "none" }}>
+                  Kits y Sombras de Cejas
+                </a>
+              </li>
+              <li>
+                <a href="/catalogo?categoria=correctores" style={{ color: "rgba(255, 255, 255, 0.78)", textDecoration: "none" }}>
+                  Correctores de Alta Cobertura
+                </a>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Columna 3: Información y Asesoría -->
+          <div>
+            <h4 style={{ color: "var(--color-white)", fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 12px 0" }}>
+              Atención y Compras
+            </h4>
+            <ul style={{ listStyle: "none", padding: 0, margin: 0, display: "flex", flexDirection: "column", gap: "8px" }}>
+              <li>
+                <a href="/catalogo" style={{ color: "var(--color-gold)", textDecoration: "underline", fontWeight: 600 }}>
+                  Ver Catálogo Completo
+                </a>
+              </li>
+              <li>
+                <a
+                  href={`https://wa.me/${CONFIG.whatsappNumber.replace(/[^0-9]/g, '')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "rgba(255, 255, 255, 0.78)", textDecoration: "none" }}
+                >
+                  WhatsApp: {CONFIG.whatsappNumber}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={`https://instagram.com/${CONFIG.instagramUser}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "rgba(255, 255, 255, 0.78)", textDecoration: "none" }}
+                >
+                  Instagram: @{CONFIG.instagramUser}
+                </a>
+              </li>
+              <li>
+                <span style={{ color: "rgba(255, 255, 255, 0.65)", fontSize: "0.78rem" }}>
+                  Horario: Lunes a Sábado 8:00 AM - 7:00 PM
+                </span>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Línea inferior de copyright -->
+        <div
           style={{
-            margin: 0,
-            letterSpacing: "0.08em",
-            textTransform: "uppercase",
-            fontSize: "0.76rem",
-            color: "var(--color-text-light)",
+            borderTop: "1px solid rgba(215, 176, 106, 0.18)",
+            paddingTop: "18px",
+            textAlign: "center",
+            fontSize: "0.74rem",
+            color: "rgba(255, 255, 255, 0.45)",
           }}
         >
-          Boutique de Maquillaje y Belleza · {CONFIG.defaultCity}, Valle del Cauca, Colombia
-        </p>
-        <p style={{ margin: 0, fontSize: "0.82rem" }}>
-          <strong style={{ color: "var(--color-gold)" }}>Pedidos y Asesoría WhatsApp:</strong>{" "}
-          <a
-            href={`https://wa.me/${CONFIG.whatsappNumber.replace(/[^0-9]/g, '')}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              color: "var(--color-gold)",
-              textDecoration: "underline",
-              fontWeight: 600,
-            }}
-          >
-            {CONFIG.whatsappNumber}
-          </a>
-        </p>
-        <p style={{ margin: "4px 0 0", fontSize: "0.8rem" }}>
-          Curaduría exclusiva por{" "}
-          <a
-            href={`https://instagram.com/${CONFIG.instagramUser}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              color: "var(--color-gold)",
-              fontWeight: "600",
-              textDecoration: "none",
-            }}
-          >
-            @{CONFIG.instagramUser}
-          </a>
-          {" · "}
-          <a
-            href="/catalogo"
-            style={{
-              color: "var(--color-text-light)",
-              textDecoration: "underline",
-              fontWeight: 500,
-            }}
-          >
-            Ver Catálogo Digital
-          </a>
-        </p>
-        <p style={{ margin: "8px 0 0", fontSize: "0.72rem", color: "rgba(255, 255, 255, 0.45)" }}>
-          © {new Date().getFullYear()} Bella Forever. Todos los derechos reservados.
-        </p>
+          <p style={{ margin: 0 }}>
+            © {new Date().getFullYear()} Bella Forever. Boutique y Catálogo de Maquillaje en Roldanillo, Valle del Cauca. Todos los derechos reservados.
+          </p>
+        </div>
       </div>
     </footer>
   </div>
