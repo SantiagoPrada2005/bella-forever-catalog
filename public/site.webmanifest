@@ -1,0 +1,26 @@
+{
+  "name": "Bella Forever Cosmetics",
+  "short_name": "Bella Forever",
+  "description": "Catálogo de maquillaje y cosméticos de alta gama al por mayor y detal.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0405",
+  "theme_color": "#5A1623",
+  "icons": [
+    {
+      "src": "/favicon-32x32.png",
+      "sizes": "32x32",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
