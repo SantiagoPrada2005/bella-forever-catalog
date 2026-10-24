@@ -7,9 +7,11 @@ import {
   productImages,
   orders,
   orderItems,
+  orderPayments,
   type ProductWithRelations,
   type Category,
   type OrderWithItems,
+  type OrderPayment,
 } from '../db/schema';
 import type { AppDb } from './db';
 
@@ -358,11 +360,13 @@ export interface CreateOrderItemInput {
   productId: string;
   toneId?: string | null;
   quantity: number;
+  price?: number;
 }
 
 export interface CreateOrderInput {
   customer: CreateOrderCustomerInput;
   items: CreateOrderItemInput[];
+  status?: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled' | 'separated';
 }
 
 export async function generateNextOrderNumber(db: AppDb): Promise<string> {
@@ -469,7 +473,8 @@ export async function createOrderWithInventoryCheck(
           .where(eq(tones.id, tone.id))
       );
 
-      const itemSubtotal = prod.price * qty;
+      const effectivePrice = typeof item.price === 'number' && item.price >= 0 ? item.price : prod.price;
+      const itemSubtotal = effectivePrice * qty;
       totalOrder += itemSubtotal;
 
       processedOrderItems.push({
@@ -479,7 +484,7 @@ export async function createOrderWithInventoryCheck(
         toneId: tone.id,
         productName: prod.name,
         toneName: tone.name,
-        price: prod.price,
+        price: effectivePrice,
         quantity: qty,
         subtotal: itemSubtotal,
         imageUrl: tone.image || prod.mainImage || null,
@@ -504,7 +509,8 @@ export async function createOrderWithInventoryCheck(
           .where(eq(products.id, prod.id))
       );
 
-      const itemSubtotal = prod.price * qty;
+      const effectivePrice = typeof item.price === 'number' && item.price >= 0 ? item.price : prod.price;
+      const itemSubtotal = effectivePrice * qty;
       totalOrder += itemSubtotal;
 
       processedOrderItems.push({
@@ -514,7 +520,7 @@ export async function createOrderWithInventoryCheck(
         toneId: null,
         productName: prod.name,
         toneName: null,
-        price: prod.price,
+        price: effectivePrice,
         quantity: qty,
         subtotal: itemSubtotal,
         imageUrl: prod.mainImage || null,
@@ -536,7 +542,7 @@ export async function createOrderWithInventoryCheck(
       customerCity: customer.city.trim(),
       customerNotes: customer.notes?.trim() || null,
       total: totalOrder,
-      status: 'pending',
+      status: input.status || 'pending',
       createdAt: now,
       updatedAt: now,
     }),
@@ -558,6 +564,9 @@ export async function getOrders(db: AppDb, statusFilter?: string): Promise<Order
     where: statusFilter && statusFilter !== 'todos' ? eq(orders.status, statusFilter as any) : undefined,
     with: {
       items: true,
+      payments: {
+        orderBy: (p, { desc: pDesc }) => [pDesc(p.createdAt)],
+      },
     },
     orderBy: (o, { desc: orderDesc }) => [orderDesc(o.createdAt)],
   });
@@ -570,6 +579,9 @@ export async function getOrderById(db: AppDb, id: string): Promise<OrderWithItem
     where: eq(orders.id, id),
     with: {
       items: true,
+      payments: {
+        orderBy: (p, { desc: pDesc }) => [pDesc(p.createdAt)],
+      },
     },
   });
 
@@ -579,7 +591,7 @@ export async function getOrderById(db: AppDb, id: string): Promise<OrderWithItem
 export async function updateOrderStatus(
   db: AppDb,
   id: string,
-  newStatus: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled',
+  newStatus: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled' | 'separated',
   restock: boolean = false
 ): Promise<void> {
   const order = await getOrderById(db, id);
@@ -629,9 +641,350 @@ export async function updateOrderStatus(
     return;
   }
 
+  // Si estaba cancelado y pasa a un estado activo, conciliar stock
+  if (order.status === 'cancelled' && newStatus !== 'cancelled') {
+    await updateOrderWithInventoryReconciliation(db, id, { status: newStatus });
+    return;
+  }
+
   await db.update(orders)
     .set({ status: newStatus, updatedAt: now })
     .where(eq(orders.id, id))
     .run();
+}
+
+export interface UpdateOrderCustomerInput {
+  name?: string;
+  phone?: string;
+  email?: string | null;
+  address?: string;
+  city?: string;
+  notes?: string | null;
+}
+
+export interface UpdateOrderItemInput {
+  productId: string;
+  toneId?: string | null;
+  quantity: number;
+  price?: number;
+}
+
+export interface UpdateOrderInput {
+  customer?: UpdateOrderCustomerInput;
+  status?: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled' | 'separated';
+  items?: UpdateOrderItemInput[];
+}
+
+export async function updateOrderWithInventoryReconciliation(
+  db: AppDb,
+  orderId: string,
+  input: UpdateOrderInput
+): Promise<OrderWithItems> {
+  const existingOrder = await getOrderById(db, orderId);
+  if (!existingOrder) {
+    throw new Error('Pedido no encontrado');
+  }
+
+  const now = new Date().toISOString();
+  const targetStatus = input.status || existingOrder.status;
+
+  const oldIsActive = existingOrder.status !== 'cancelled';
+  const newIsActive = targetStatus !== 'cancelled';
+
+  const itemsToProcess = input.items !== undefined ? input.items : existingOrder.items.map(i => ({
+    productId: i.productId,
+    toneId: i.toneId,
+    quantity: i.quantity,
+    price: i.price,
+  }));
+
+  if (itemsToProcess.length === 0) {
+    throw new Error('El pedido debe incluir al menos un producto');
+  }
+
+  // 1. Mapas de asignación de stock
+  const oldQtyMap = new Map<string, number>();
+  if (oldIsActive) {
+    for (const item of existingOrder.items) {
+      const key = item.toneId ? `tone:${item.toneId}` : `prod:${item.productId}`;
+      oldQtyMap.set(key, (oldQtyMap.get(key) || 0) + item.quantity);
+    }
+  }
+
+  const newQtyMap = new Map<string, number>();
+  if (newIsActive) {
+    for (const item of itemsToProcess) {
+      const qty = Math.floor(item.quantity);
+      if (qty <= 0) {
+        throw new Error('La cantidad de cada item debe ser mayor a cero');
+      }
+      const key = item.toneId ? `tone:${item.toneId}` : `prod:${item.productId}`;
+      newQtyMap.set(key, (newQtyMap.get(key) || 0) + qty);
+    }
+  }
+
+  // 2. Extraer todos los IDs de productos y tonos involucrados
+  const allKeys = new Set([...oldQtyMap.keys(), ...newQtyMap.keys()]);
+  const productIds = new Set<string>();
+  itemsToProcess.forEach(i => productIds.add(i.productId));
+  for (const k of allKeys) {
+    if (k.startsWith('prod:')) productIds.add(k.replace('prod:', ''));
+  }
+
+  const dbProducts = await db.query.products.findMany({
+    where: (p, { inArray }) => inArray(p.id, Array.from(productIds)),
+    with: { tones: true },
+  });
+
+  const productMap = new Map(dbProducts.map(p => [p.id, p]));
+  const toneMap = new Map<string, typeof tones.$inferSelect>();
+  dbProducts.forEach(p => {
+    (p.tones || []).forEach(t => toneMap.set(t.id, t));
+  });
+
+  // Asegurar que tonos individuales también estén cargados
+  for (const k of allKeys) {
+    if (k.startsWith('tone:')) {
+      const toneId = k.replace('tone:', '');
+      if (!toneMap.has(toneId)) {
+        const foundTone = await db.query.tones.findFirst({ where: eq(tones.id, toneId) });
+        if (foundTone) toneMap.set(foundTone.id, foundTone);
+      }
+    }
+  }
+
+  // 3. Validar deltas de inventario y preparar sentencias de actualización de stock
+  const stockUpdateStatements: BatchItem<'sqlite'>[] = [];
+
+  for (const key of allKeys) {
+    const oldQty = oldQtyMap.get(key) || 0;
+    const newQty = newQtyMap.get(key) || 0;
+    const netDelta = newQty - oldQty; // >0: requerimos más stock; <0: devolvemos stock
+
+    if (netDelta === 0) continue;
+
+    if (key.startsWith('tone:')) {
+      const toneId = key.replace('tone:', '');
+      const tone = toneMap.get(toneId);
+      if (!tone) throw new Error(`Tono no encontrado en inventario (ID: ${toneId})`);
+
+      if (netDelta > 0 && tone.stock < netDelta) {
+        throw new Error(
+          `Stock insuficiente para el tono "${tone.name}". Disponibles: ${tone.stock}, adicionales requeridas: ${netDelta}`
+        );
+      }
+
+      const nextStock = tone.stock - netDelta;
+      tone.stock = nextStock;
+      tone.inStock = nextStock > 0;
+      stockUpdateStatements.push(
+        db.update(tones)
+          .set({ stock: nextStock, inStock: nextStock > 0 })
+          .where(eq(tones.id, tone.id))
+      );
+    } else {
+      const prodId = key.replace('prod:', '');
+      const prod = productMap.get(prodId);
+      if (!prod) throw new Error(`Producto no encontrado en inventario (ID: ${prodId})`);
+
+      if (netDelta > 0 && prod.stock < netDelta) {
+        throw new Error(
+          `Stock insuficiente para el producto "${prod.name}". Disponibles: ${prod.stock}, adicionales requeridas: ${netDelta}`
+        );
+      }
+
+      const nextStock = prod.stock - netDelta;
+      prod.stock = nextStock;
+      prod.inStock = nextStock > 0;
+      stockUpdateStatements.push(
+        db.update(products)
+          .set({ stock: nextStock, inStock: nextStock > 0, updatedAt: now })
+          .where(eq(products.id, prod.id))
+      );
+    }
+  }
+
+  // 4. Preparar nuevos order items
+  let newTotal = 0;
+  const processedOrderItems: Array<{
+    id: string;
+    orderId: string;
+    productId: string;
+    toneId: string | null;
+    productName: string;
+    toneName: string | null;
+    price: number;
+    quantity: number;
+    subtotal: number;
+    imageUrl: string | null;
+    createdAt: string;
+  }> = [];
+
+  for (const item of itemsToProcess) {
+    const qty = Math.floor(item.quantity);
+    const prod = productMap.get(item.productId);
+    if (!prod) throw new Error(`Producto no encontrado (ID: ${item.productId})`);
+
+    let toneName: string | null = null;
+    let imageUrl = prod.mainImage || null;
+
+    if (item.toneId) {
+      const tone = toneMap.get(item.toneId);
+      if (!tone || tone.productId !== prod.id) {
+        throw new Error(`Tono no válido para el producto "${prod.name}"`);
+      }
+      toneName = tone.name;
+      imageUrl = tone.image || prod.mainImage || null;
+    }
+
+    const effectivePrice = typeof item.price === 'number' && item.price >= 0 ? item.price : prod.price;
+    const subtotal = effectivePrice * qty;
+    newTotal += subtotal;
+
+    processedOrderItems.push({
+      id: crypto.randomUUID(),
+      orderId,
+      productId: prod.id,
+      toneId: item.toneId || null,
+      productName: prod.name,
+      toneName,
+      price: effectivePrice,
+      quantity: qty,
+      subtotal,
+      imageUrl,
+      createdAt: now,
+    });
+  }
+
+  // 5. Transacción atómica batch
+  const customer = input.customer;
+  const batchStatements: BatchItem<'sqlite'>[] = [
+    ...stockUpdateStatements,
+    db.delete(orderItems).where(eq(orderItems.orderId, orderId)),
+    db.insert(orderItems).values(processedOrderItems),
+    db.update(orders)
+      .set({
+        customerName: customer?.name !== undefined ? customer.name.trim() : existingOrder.customerName,
+        customerPhone: customer?.phone !== undefined ? customer.phone.trim() : existingOrder.customerPhone,
+        customerEmail: customer?.email !== undefined ? (customer.email?.trim() || null) : existingOrder.customerEmail,
+        customerAddress: customer?.address !== undefined ? customer.address.trim() : existingOrder.customerAddress,
+        customerCity: customer?.city !== undefined ? customer.city.trim() : existingOrder.customerCity,
+        customerNotes: customer?.notes !== undefined ? (customer.notes?.trim() || null) : existingOrder.customerNotes,
+        total: newTotal,
+        status: targetStatus,
+        updatedAt: now,
+      })
+      .where(eq(orders.id, orderId)),
+  ];
+
+  await db.batch(batchStatements as [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]]);
+
+  const updatedOrder = await getOrderById(db, orderId);
+  if (!updatedOrder) {
+    throw new Error('Error al recuperar pedido actualizado');
+  }
+
+  return updatedOrder;
+}
+
+export async function deleteOrder(
+  db: AppDb,
+  orderId: string,
+  restock: boolean = true
+): Promise<void> {
+  const order = await getOrderById(db, orderId);
+  if (!order) return;
+
+  const statements: BatchItem<'sqlite'>[] = [];
+  const now = new Date().toISOString();
+
+  if (restock && order.status !== 'cancelled') {
+    for (const item of order.items) {
+      if (item.toneId) {
+        const tone = await db.query.tones.findFirst({
+          where: eq(tones.id, item.toneId),
+        });
+        if (tone) {
+          statements.push(
+            db.update(tones)
+              .set({ stock: tone.stock + item.quantity, inStock: true })
+              .where(eq(tones.id, tone.id))
+          );
+        }
+      } else {
+        const prod = await db.query.products.findFirst({
+          where: eq(products.id, item.productId),
+        });
+        if (prod) {
+          statements.push(
+            db.update(products)
+              .set({ stock: prod.stock + item.quantity, inStock: true, updatedAt: now })
+              .where(eq(products.id, prod.id))
+          );
+        }
+      }
+    }
+  }
+
+  statements.push(db.delete(orders).where(eq(orders.id, orderId)));
+  await db.batch(statements as [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]]);
+}
+
+export interface AddPaymentInput {
+  amount: number;
+  method?: string;
+  reference?: string | null;
+  notes?: string | null;
+}
+
+export async function addOrderPayment(
+  db: AppDb,
+  orderId: string,
+  input: AddPaymentInput
+): Promise<OrderPayment> {
+  const order = await getOrderById(db, orderId);
+  if (!order) {
+    throw new Error('Pedido no encontrado');
+  }
+
+  const amount = Number(input.amount);
+  if (isNaN(amount) || amount <= 0) {
+    throw new Error('El monto del abono debe ser mayor a cero');
+  }
+
+  const paymentId = crypto.randomUUID();
+  const now = new Date().toISOString();
+
+  await db.insert(orderPayments).values({
+    id: paymentId,
+    orderId,
+    amount,
+    method: (input.method || 'efectivo').trim(),
+    reference: input.reference?.trim() || null,
+    notes: input.notes?.trim() || null,
+    createdAt: now,
+  }).run();
+
+  const created = await db.query.orderPayments.findFirst({
+    where: eq(orderPayments.id, paymentId),
+  });
+
+  if (!created) {
+    throw new Error('Error al registrar el abono');
+  }
+
+  return created;
+}
+
+export async function getOrderPayments(db: AppDb, orderId: string): Promise<OrderPayment[]> {
+  const result = await db.query.orderPayments.findMany({
+    where: eq(orderPayments.orderId, orderId),
+    orderBy: (p, { desc: pDesc }) => [pDesc(p.createdAt)],
+  });
+  return result;
+}
+
+export async function deleteOrderPayment(db: AppDb, paymentId: string): Promise<void> {
+  await db.delete(orderPayments).where(eq(orderPayments.id, paymentId)).run();
 }
 

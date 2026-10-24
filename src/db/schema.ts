@@ -54,7 +54,7 @@ export const orders = sqliteTable('Order', {
   customerCity: text('customerCity').notNull(),
   customerNotes: text('customerNotes'),
   total: real('total').notNull(),
-  status: text('status', { enum: ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled'] })
+  status: text('status', { enum: ['pending', 'confirmed', 'shipped', 'delivered', 'cancelled', 'separated'] })
     .notNull()
     .default('pending'),
   createdAt: text('createdAt').notNull(),
@@ -79,6 +79,18 @@ export const orderItems = sqliteTable('OrderItem', {
   createdAt: text('createdAt').notNull(),
 });
 
+export const orderPayments = sqliteTable('OrderPayment', {
+  id: text('id').primaryKey(),
+  orderId: text('orderId')
+    .notNull()
+    .references(() => orders.id, { onDelete: 'cascade' }),
+  amount: real('amount').notNull(),
+  method: text('method').notNull().default('efectivo'),
+  reference: text('reference'),
+  notes: text('notes'),
+  createdAt: text('createdAt').notNull(),
+});
+
 export const productsRelations = relations(products, ({ many }) => ({
   tones: many(tones),
   productImages: many(productImages),
@@ -100,6 +112,14 @@ export const productImagesRelations = relations(productImages, ({ one }) => ({
 
 export const ordersRelations = relations(orders, ({ many }) => ({
   items: many(orderItems),
+  payments: many(orderPayments),
+}));
+
+export const orderPaymentsRelations = relations(orderPayments, ({ one }) => ({
+  order: one(orders, {
+    fields: [orderPayments.orderId],
+    references: [orders.id],
+  }),
 }));
 
 export const orderItemsRelations = relations(orderItems, ({ one }) => ({
@@ -135,8 +155,12 @@ export type NewOrder = typeof orders.$inferInsert;
 export type OrderItem = typeof orderItems.$inferSelect;
 export type NewOrderItem = typeof orderItems.$inferInsert;
 
+export type OrderPayment = typeof orderPayments.$inferSelect;
+export type NewOrderPayment = typeof orderPayments.$inferInsert;
+
 export type OrderWithItems = Order & {
   items: OrderItem[];
+  payments?: OrderPayment[];
 };
 
 export type ProductWithRelations = Product & {

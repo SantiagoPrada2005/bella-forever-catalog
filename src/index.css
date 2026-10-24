@@ -1883,3 +1883,87 @@ body {
   backdrop-filter: blur(12px);
 }
 
+/* ==========================================================================
+   ADMIN DASHBOARD MOBILE-FIRST RESPONSIVE STYLES
+   ========================================================================== */
+.admin-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+@media (min-width: 640px) {
+  .admin-metrics-grid {
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+}
+
+.admin-filter-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  flex-wrap: nowrap;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 6px;
+  margin-bottom: 18px;
+}
+
+.admin-filter-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile Cards vs Desktop Table toggling */
+.admin-orders-mobile-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-orders-desktop-table {
+  display: none;
+}
+
+@media (min-width: 860px) {
+  .admin-orders-mobile-cards {
+    display: none;
+  }
+  .admin-orders-desktop-table {
+    display: block;
+  }
+}
+
+/* Order Modal Dialog responsive sizing */
+.admin-order-modal-dialog {
+  border-radius: 0;
+  width: 100vw;
+  height: 100vh;
+  max-height: 100vh;
+}
+
+@media (min-width: 768px) {
+  .admin-order-modal-dialog {
+    border-radius: 16px !important;
+    width: 95% !important;
+    max-width: 680px !important;
+    height: auto !important;
+    max-height: 90vh !important;
+  }
+}
+
+.admin-order-card {
+  background-color: var(--color-panel-dark);
+  border: 1px solid rgba(215, 176, 106, 0.18);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: var(--shadow-premium);
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+
+.admin-order-card:active {
+  border-color: var(--color-gold);
+}
+
+

@@ -31,7 +31,7 @@ export const GET: APIRoute = async ({ request }) => {
 
 export const POST: APIRoute = async ({ request }) => {
   try {
-    const body = (await request.json()) as CreateOrderInput;
+    const body = (await request.json()) as CreateOrderInput & { isManualAdmin?: boolean };
     if (!body || !body.customer || !body.items) {
       return new Response(
         JSON.stringify({ error: 'Datos de cliente e items requeridos' }),
@@ -42,21 +42,23 @@ export const POST: APIRoute = async ({ request }) => {
     const db = getDb();
     const order = await createOrderWithInventoryCheck(db, body);
 
-    // Formatear la cookie para persistir datos en el navegador del cliente
-    const setCookieHeader = formatCustomerSetCookie({
-      name: order.customerName,
-      phone: order.customerPhone,
-      email: order.customerEmail || undefined,
-      address: order.customerAddress,
-      city: order.customerCity,
-      notes: order.customerNotes || undefined,
-      lastOrderId: order.id,
-      lastOrderNumber: order.orderNumber,
-    });
-
     const headers = new Headers();
     headers.set('Content-Type', 'application/json');
-    headers.set('Set-Cookie', setCookieHeader);
+
+    // Formatear la cookie para persistir datos en el navegador del cliente (solo si no es admin manual)
+    if (!body.isManualAdmin) {
+      const setCookieHeader = formatCustomerSetCookie({
+        name: order.customerName,
+        phone: order.customerPhone,
+        email: order.customerEmail || undefined,
+        address: order.customerAddress,
+        city: order.customerCity,
+        notes: order.customerNotes || undefined,
+        lastOrderId: order.id,
+        lastOrderNumber: order.orderNumber,
+      });
+      headers.set('Set-Cookie', setCookieHeader);
+    }
 
     return new Response(JSON.stringify(order), {
       status: 201,

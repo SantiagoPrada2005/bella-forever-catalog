@@ -1,5 +1,12 @@
-import type { Category, ProductWithRelations, OrderWithItems } from '../db/schema';
-import type { ProductInput, ToneInput, ProductImageInput, CreateOrderInput } from './services';
+import type { Category, ProductWithRelations, OrderWithItems, OrderPayment } from '../db/schema';
+import type {
+  ProductInput,
+  ToneInput,
+  ProductImageInput,
+  CreateOrderInput,
+  UpdateOrderInput,
+  AddPaymentInput,
+} from './services';
 
 export async function getCategories(): Promise<Category[]> {
   const res = await fetch('/api/categories');
@@ -152,7 +159,7 @@ export async function getOrderById(id: string): Promise<OrderWithItems> {
 
 export async function updateOrderStatus(
   id: string,
-  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled',
+  status: 'pending' | 'confirmed' | 'shipped' | 'delivered' | 'cancelled' | 'separated',
   restock: boolean = false
 ): Promise<{ success: boolean; status: string }> {
   const res = await fetch(`/api/orders/${id}`, {
@@ -164,5 +171,73 @@ export async function updateOrderStatus(
   if (!res.ok) throw new Error(json.error || 'Error al actualizar estado del pedido');
   return json;
 }
+
+export async function createManualAdminOrder(data: CreateOrderInput): Promise<OrderWithItems> {
+  const res = await fetch('/api/orders', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ ...data, isManualAdmin: true }),
+  });
+  const json = (await res.json()) as { error?: string } & OrderWithItems;
+  if (!res.ok) {
+    throw new Error(json.error || 'Error al procesar el pedido');
+  }
+  return json as OrderWithItems;
+}
+
+export async function updateOrder(id: string, data: UpdateOrderInput): Promise<OrderWithItems> {
+  const res = await fetch(`/api/orders/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  const json = (await res.json()) as { error?: string } & OrderWithItems;
+  if (!res.ok) {
+    throw new Error(json.error || 'Error al actualizar el pedido');
+  }
+  return json as OrderWithItems;
+}
+
+export async function deleteOrder(id: string, restock: boolean = true): Promise<{ success: boolean }> {
+  const res = await fetch(`/api/orders/${id}?restock=${restock}`, {
+    method: 'DELETE',
+  });
+  const json = (await res.json()) as { success?: boolean; error?: string };
+  if (!res.ok) {
+    throw new Error(json.error || 'Error al eliminar el pedido');
+  }
+  return { success: true };
+}
+
+export async function getOrderPayments(orderId: string): Promise<OrderPayment[]> {
+  const res = await fetch(`/api/orders/${orderId}/payments`);
+  if (!res.ok) throw new Error('Error al cargar historial de pagos');
+  return res.json();
+}
+
+export async function addOrderPayment(orderId: string, data: AddPaymentInput): Promise<OrderPayment> {
+  const res = await fetch(`/api/orders/${orderId}/payments`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  const json = (await res.json()) as { error?: string } & OrderPayment;
+  if (!res.ok) {
+    throw new Error(json.error || 'Error al registrar el abono');
+  }
+  return json as OrderPayment;
+}
+
+export async function deleteOrderPayment(orderId: string, paymentId: string): Promise<{ success: boolean }> {
+  const res = await fetch(`/api/orders/${orderId}/payments?paymentId=${paymentId}`, {
+    method: 'DELETE',
+  });
+  const json = (await res.json()) as { success?: boolean; error?: string };
+  if (!res.ok) {
+    throw new Error(json.error || 'Error al eliminar el abono');
+  }
+  return { success: true };
+}
+
 
 
