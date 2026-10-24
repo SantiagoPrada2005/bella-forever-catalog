@@ -12,6 +12,7 @@ export interface EditProductClientProps {
 export default function EditProductClient({ id }: EditProductClientProps) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [categoriesList, setCategoriesList] = useState<Category[]>([]);
   const [formData, setFormData] = useState({
     name: '',
@@ -53,6 +54,7 @@ export default function EditProductClient({ id }: EditProductClientProps) {
           inStock: prod.inStock,
         });
         setTones((prod.tones || []).map(t => ({
+          id: t.id,
           name: t.name,
           hex: t.hex,
           image: t.image || '',
@@ -65,7 +67,7 @@ export default function EditProductClient({ id }: EditProductClientProps) {
         setImages(existingImages);
       } catch (err: unknown) {
         console.error("Error al cargar producto", err);
-        alert("Ocurrió un error al cargar el producto");
+        setErrorMessage("Ocurrió un error al cargar el producto");
       } finally {
         setLoading(false);
       }
@@ -122,12 +124,14 @@ export default function EditProductClient({ id }: EditProductClientProps) {
     }));
 
     setSaving(true);
+    setErrorMessage(null);
     try {
       await updateProduct(id, formData, tones, imagesData);
       window.location.href = '/admin';
     } catch (err: unknown) {
       console.error(err);
-      alert("Ocurrió un error al actualizar el producto");
+      const msg = err instanceof Error ? err.message : "Ocurrió un error al actualizar el producto";
+      setErrorMessage(msg);
       setSaving(false);
     }
   };
@@ -167,6 +171,24 @@ export default function EditProductClient({ id }: EditProductClientProps) {
           padding: '24px',
           boxShadow: 'var(--shadow-premium)',
         }}>
+          {errorMessage && (
+            <div style={{
+              backgroundColor: 'rgba(239, 68, 68, 0.15)',
+              border: '1px solid rgba(239, 68, 68, 0.4)',
+              color: '#fca5a5',
+              padding: '12px 16px',
+              borderRadius: '8px',
+              marginBottom: '20px',
+              fontSize: '0.9rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+            }}>
+              <span style={{ fontSize: '1.2rem' }}>⚠️</span>
+              <span>{errorMessage}</span>
+            </div>
+          )}
+
           {/* Fila principal */}
           <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '16px', marginBottom: '20px' }}>
             <div>
@@ -197,16 +219,29 @@ export default function EditProductClient({ id }: EditProductClientProps) {
             </div>
             <div>
               <label style={{ display: 'block', color: 'var(--color-gold)', fontSize: '0.85rem', marginBottom: '6px', fontWeight: '600' }}>
-                Stock Numérico *
+                Stock Numérico * {tones.length > 0 && (
+                  <span style={{ color: 'var(--color-text-muted)', fontSize: '0.72rem', fontWeight: '400', display: 'block' }}>
+                    (calculado por variantes: {tones.reduce((s, t) => s + (parseInt(String(t.stock), 10) || 0), 0)} un.)
+                  </span>
+                )}
               </label>
               <input 
                 type="number" 
                 name="stock" 
                 min="0"
-                value={formData.stock} 
+                value={tones.length > 0 ? tones.reduce((s, t) => s + (parseInt(String(t.stock), 10) || 0), 0) : formData.stock} 
                 onChange={handleChange}
+                disabled={tones.length > 0}
                 required
-                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(215,176,106,0.2)', backgroundColor: 'rgba(0,0,0,0.3)', color: '#fff' }}
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  borderRadius: '8px',
+                  border: '1px solid rgba(215,176,106,0.2)',
+                  backgroundColor: tones.length > 0 ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.3)',
+                  color: tones.length > 0 ? 'var(--color-gold)' : '#fff',
+                  cursor: tones.length > 0 ? 'not-allowed' : 'text',
+                }}
               />
             </div>
           </div>

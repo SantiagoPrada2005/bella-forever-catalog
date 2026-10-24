@@ -25,7 +25,8 @@
 		{
 			"binding": "bella_forever_db",
 			"database_name": "bella-forever-db",
-			"database_id": "3cf2ed19-16b9-44eb-b3c3-e6bd4106c3b7"
+			"database_id": "3cf2ed19-16b9-44eb-b3c3-e6bd4106c3b7",
+			"migrations_dir": "drizzle"
 		}
 	],
 	"observability": {

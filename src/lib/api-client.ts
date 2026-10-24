@@ -79,16 +79,18 @@ export async function updateProduct(
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ data, tones, images }),
   });
-  if (!res.ok) throw new Error('Error al actualizar producto');
-  return res.json();
+  const json = (await res.json().catch(() => ({}))) as { error?: string; id?: string };
+  if (!res.ok) throw new Error(json.error || 'Error al actualizar producto');
+  return json as { id: string };
 }
 
 export async function deleteProduct(id: string): Promise<{ success: boolean }> {
   const res = await fetch(`/api/products/${id}`, {
     method: 'DELETE',
   });
-  if (!res.ok) throw new Error('Error al eliminar producto');
-  return res.json();
+  const json = (await res.json().catch(() => ({}))) as { error?: string; success?: boolean };
+  if (!res.ok) throw new Error(json.error || 'Error al eliminar producto');
+  return json as { success: boolean };
 }
 
 export async function toggleProductStock(id: string, inStock: boolean): Promise<{ success: boolean }> {
@@ -97,8 +99,9 @@ export async function toggleProductStock(id: string, inStock: boolean): Promise<
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ inStock }),
   });
-  if (!res.ok) throw new Error('Error al actualizar stock de producto');
-  return res.json();
+  const json = (await res.json().catch(() => ({}))) as { error?: string; success?: boolean };
+  if (!res.ok) throw new Error(json.error || 'Error al actualizar stock de producto');
+  return json as { success: boolean };
 }
 
 export async function updateProductStockQuantity(id: string, stock: number, inStock?: boolean): Promise<{ success: boolean }> {
@@ -107,8 +110,23 @@ export async function updateProductStockQuantity(id: string, stock: number, inSt
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ stock, inStock }),
   });
-  if (!res.ok) throw new Error('Error al actualizar cantidad de stock');
-  return res.json();
+  const json = (await res.json().catch(() => ({}))) as { error?: string; success?: boolean };
+  if (!res.ok) throw new Error(json.error || 'Error al actualizar cantidad de stock');
+  return json as { success: boolean };
+}
+
+export async function updateProductTonesStock(
+  id: string,
+  tones: Array<{ id: string; stock: number; inStock?: boolean }>
+): Promise<{ success: boolean; product?: ProductWithRelations }> {
+  const res = await fetch(`/api/products/${id}/stock`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tones }),
+  });
+  const json = (await res.json().catch(() => ({}))) as { error?: string; success?: boolean; product?: ProductWithRelations };
+  if (!res.ok) throw new Error(json.error || 'Error al actualizar inventario de tonos');
+  return json as { success: boolean; product?: ProductWithRelations };
 }
 
 export async function toggleToneStock(id: string, inStock: boolean): Promise<{ success: boolean }> {
@@ -117,8 +135,9 @@ export async function toggleToneStock(id: string, inStock: boolean): Promise<{ s
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ inStock }),
   });
-  if (!res.ok) throw new Error('Error al actualizar stock de tono');
-  return res.json();
+  const json = (await res.json().catch(() => ({}))) as { error?: string; success?: boolean };
+  if (!res.ok) throw new Error(json.error || 'Error al actualizar stock de tono');
+  return json as { success: boolean };
 }
 
 export async function updateToneStockQuantity(id: string, stock: number, inStock?: boolean): Promise<{ success: boolean }> {
@@ -127,8 +146,9 @@ export async function updateToneStockQuantity(id: string, stock: number, inStock
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ stock, inStock }),
   });
-  if (!res.ok) throw new Error('Error al actualizar cantidad de stock del tono');
-  return res.json();
+  const json = (await res.json().catch(() => ({}))) as { error?: string; success?: boolean };
+  if (!res.ok) throw new Error(json.error || 'Error al actualizar cantidad de stock del tono');
+  return json as { success: boolean };
 }
 
 export async function createOrder(data: CreateOrderInput): Promise<OrderWithItems> {

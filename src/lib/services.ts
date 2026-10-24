@@ -1,4 +1,4 @@
-import { eq } from 'drizzle-orm';
+import { eq, inArray } from 'drizzle-orm';
 import type { BatchItem } from 'drizzle-orm/batch';
 import {
   products,
@@ -28,6 +28,7 @@ export interface ProductInput {
 }
 
 export interface ToneInput {
+  id?: string;
   name: string;
   hex: string;
   image: string;
@@ -180,22 +181,80 @@ export async function updateProductStock(db: AppDb, id: string, stock: number, i
 }
 
 export async function toggleToneStock(db: AppDb, id: string, inStock: boolean): Promise<void> {
-  await db.update(tones)
-    .set({ inStock })
-    .where(eq(tones.id, id))
-    .run();
+  const currentTone = await db.query.tones.findFirst({
+    where: eq(tones.id, id),
+  });
+
+  if (!currentTone) {
+    throw new Error('Tono no encontrado');
+  }
+
+  const statements: BatchItem<'sqlite'>[] = [
+    db.update(tones)
+      .set({ inStock })
+      .where(eq(tones.id, id)),
+  ];
+
+  const productTones = await db.query.tones.findMany({
+    where: eq(tones.productId, currentTone.productId),
+  });
+
+  const allTones = productTones.map(t => t.id === id ? { ...t, inStock } : t);
+  const anyInStock = allTones.some(t => t.inStock && t.stock > 0);
+
+  statements.push(
+    db.update(products)
+      .set({ inStock: anyInStock, updatedAt: new Date().toISOString() })
+      .where(eq(products.id, currentTone.productId))
+  );
+
+  await db.batch(statements as [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]]);
 }
 
 export async function updateToneStock(db: AppDb, id: string, stock: number, inStock?: boolean): Promise<void> {
   const safeStock = Math.max(0, Math.floor(stock));
   const safeInStock = inStock !== undefined ? inStock : safeStock > 0;
-  await db.update(tones)
-    .set({ stock: safeStock, inStock: safeInStock })
-    .where(eq(tones.id, id))
-    .run();
+
+  const currentTone = await db.query.tones.findFirst({
+    where: eq(tones.id, id),
+  });
+
+  if (!currentTone) {
+    throw new Error('Tono no encontrado');
+  }
+
+  const statements: BatchItem<'sqlite'>[] = [
+    db.update(tones)
+      .set({ stock: safeStock, inStock: safeInStock })
+      .where(eq(tones.id, id)),
+  ];
+
+  const productTones = await db.query.tones.findMany({
+    where: eq(tones.productId, currentTone.productId),
+  });
+
+  const allTones = productTones.map(t => t.id === id ? { ...t, stock: safeStock, inStock: safeInStock } : t);
+  const totalStock = allTones.reduce((sum, t) => sum + t.stock, 0);
+  const anyInStock = allTones.some(t => t.inStock && t.stock > 0);
+
+  statements.push(
+    db.update(products)
+      .set({ stock: totalStock, inStock: anyInStock, updatedAt: new Date().toISOString() })
+      .where(eq(products.id, currentTone.productId))
+  );
+
+  await db.batch(statements as [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]]);
 }
 
 export async function deleteProduct(db: AppDb, id: string): Promise<void> {
+  const existingOrder = await db.query.orderItems.findFirst({
+    where: eq(orderItems.productId, id),
+  });
+
+  if (existingOrder) {
+    throw new Error('No es posible eliminar el producto porque tiene pedidos históricos asociados. Puedes marcarlo como no disponible u ocultarlo.');
+  }
+
   await db.delete(products)
     .where(eq(products.id, id))
     .run();
@@ -288,9 +347,104 @@ export async function updateProduct(
   const parsedStock = data.stock !== undefined ? Math.max(0, parseInt(String(data.stock), 10) || 0) : 10;
   const isStockValid = data.inStock !== undefined ? Boolean(data.inStock) : parsedStock > 0;
 
-  const statements: BatchItem<'sqlite'>[] = [
-    db.delete(tones).where(eq(tones.productId, id)),
-    db.delete(productImages).where(eq(productImages.productId, id)),
+  // 1. Obtener tonos existentes en base de datos para reconciliar sin romper IDs
+  const existingTones = await db.query.tones.findMany({
+    where: eq(tones.productId, id),
+  });
+  const existingToneMap = new Map(existingTones.map(t => [t.id, t]));
+
+  const statements: BatchItem<'sqlite'>[] = [];
+
+  const tonesToUpdate: { id: string; name: string; hex: string; image: string; inStock: boolean; stock: number }[] = [];
+  const tonesToInsert: { id: string; name: string; hex: string; image: string; inStock: boolean; stock: number; productId: string }[] = [];
+  const matchedToneIds = new Set<string>();
+
+  for (const t of tonesData) {
+    const toneStock = t.stock !== undefined ? Math.max(0, parseInt(String(t.stock), 10) || 0) : 10;
+    const toneInStock = t.inStock !== undefined ? Boolean(t.inStock) : toneStock > 0;
+
+    // Buscar coincidencia por id
+    let matched = t.id ? existingToneMap.get(t.id) : undefined;
+    // Si no trae id, buscar por nombre exacto no asignado aún
+    if (!matched && !t.id) {
+      matched = existingTones.find(
+        et => !matchedToneIds.has(et.id) && et.name.trim().toLowerCase() === t.name.trim().toLowerCase()
+      );
+    }
+
+    if (matched) {
+      matchedToneIds.add(matched.id);
+      tonesToUpdate.push({
+        id: matched.id,
+        name: t.name,
+        hex: t.hex,
+        image: t.image,
+        inStock: toneInStock,
+        stock: toneStock,
+      });
+    } else {
+      tonesToInsert.push({
+        id: t.id && !existingToneMap.has(t.id) ? t.id : crypto.randomUUID(),
+        name: t.name,
+        hex: t.hex,
+        image: t.image,
+        inStock: toneInStock,
+        stock: toneStock,
+        productId: id,
+      });
+    }
+  }
+
+  // Tonos eliminados por el usuario
+  const removedTones = existingTones.filter(t => !matchedToneIds.has(t.id));
+  const removedToneIds = removedTones.map(t => t.id);
+
+  if (removedToneIds.length > 0) {
+    // Desvincular en OrderItem antes de borrar para garantizar integridad referencial
+    statements.push(
+      db.update(orderItems)
+        .set({ toneId: null })
+        .where(inArray(orderItems.toneId, removedToneIds))
+    );
+    statements.push(
+      db.delete(tones).where(inArray(tones.id, removedToneIds))
+    );
+  }
+
+  for (const updateItem of tonesToUpdate) {
+    statements.push(
+      db.update(tones)
+        .set({
+          name: updateItem.name,
+          hex: updateItem.hex,
+          image: updateItem.image,
+          inStock: updateItem.inStock,
+          stock: updateItem.stock,
+        })
+        .where(eq(tones.id, updateItem.id))
+    );
+  }
+
+  if (tonesToInsert.length > 0) {
+    statements.push(
+      db.insert(tones).values(tonesToInsert)
+    );
+  }
+
+  // 2. Calcular stock e inStock consolidados si hay tonos
+  let finalStock = parsedStock;
+  let finalInStock = isStockValid;
+
+  if (tonesData.length > 0) {
+    const allTones = [...tonesToUpdate, ...tonesToInsert];
+    const totalVariantsStock = allTones.reduce((sum, t) => sum + t.stock, 0);
+    const anyToneInStock = allTones.some(t => t.inStock && t.stock > 0);
+    finalStock = totalVariantsStock;
+    finalInStock = (data.inStock !== undefined ? Boolean(data.inStock) : true) && anyToneInStock;
+  }
+
+  // 3. Actualizar producto principal
+  statements.push(
     db.update(products)
       .set({
         name: data.name,
@@ -300,31 +454,17 @@ export async function updateProduct(
         mainImage: derivedMainImage,
         isNew: Boolean(data.isNew),
         isFeatured: Boolean(data.isFeatured),
-        inStock: isStockValid,
-        stock: parsedStock,
+        inStock: finalInStock,
+        stock: finalStock,
         updatedAt: now,
       })
-      .where(eq(products.id, id)),
-  ];
+      .where(eq(products.id, id))
+  );
 
-  if (tonesData && tonesData.length > 0) {
-    statements.push(
-      db.insert(tones).values(
-        tonesData.map(t => {
-          const toneStock = t.stock !== undefined ? Math.max(0, parseInt(String(t.stock), 10) || 0) : 10;
-          return {
-            id: crypto.randomUUID(),
-            name: t.name,
-            hex: t.hex,
-            image: t.image,
-            inStock: t.inStock !== undefined ? Boolean(t.inStock) : toneStock > 0,
-            stock: toneStock,
-            productId: id,
-          };
-        })
-      )
-    );
-  }
+  // 4. Actualizar imágenes
+  statements.push(
+    db.delete(productImages).where(eq(productImages.productId, id))
+  );
 
   if (imagesData && imagesData.length > 0) {
     statements.push(
@@ -345,6 +485,52 @@ export async function updateProduct(
   await db.batch(statements as [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]]);
 
   return { id };
+}
+
+export async function updateProductTonesStock(
+  db: AppDb,
+  productId: string,
+  tonesStock: Array<{ id: string; stock: number; inStock?: boolean }>
+): Promise<ProductWithRelations | undefined> {
+  const existingProduct = await getProductById(db, productId);
+  if (!existingProduct) {
+    throw new Error('Producto no encontrado');
+  }
+
+  const statements: BatchItem<'sqlite'>[] = [];
+  const now = new Date().toISOString();
+
+  const updatedTonesState = (existingProduct.tones || []).map(tone => {
+    const patch = tonesStock.find(item => item.id === tone.id);
+    if (!patch) return tone;
+
+    const safeStock = Math.max(0, Math.floor(patch.stock));
+    const safeInStock = patch.inStock !== undefined ? patch.inStock : safeStock > 0;
+
+    statements.push(
+      db.update(tones)
+        .set({ stock: safeStock, inStock: safeInStock })
+        .where(eq(tones.id, tone.id))
+    );
+
+    return { ...tone, stock: safeStock, inStock: safeInStock };
+  });
+
+  const totalStock = updatedTonesState.reduce((sum, t) => sum + t.stock, 0);
+  const anyToneInStock = updatedTonesState.some(t => t.inStock && t.stock > 0);
+  const nextInStock = existingProduct.inStock && anyToneInStock;
+
+  statements.push(
+    db.update(products)
+      .set({ stock: totalStock, inStock: nextInStock, updatedAt: now })
+      .where(eq(products.id, productId))
+  );
+
+  if (statements.length > 0) {
+    await db.batch(statements as [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]]);
+  }
+
+  return getProductById(db, productId);
 }
 
 export interface CreateOrderCustomerInput {

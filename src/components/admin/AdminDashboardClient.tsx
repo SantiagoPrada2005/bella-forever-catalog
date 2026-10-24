@@ -17,6 +17,7 @@ import { CONFIG } from '../../config';
 import type { ProductWithRelations, Category, OrderWithItems } from '../../db/schema';
 import OrderModal from './OrderModal';
 import OrderPaymentsModal from './OrderPaymentsModal';
+import ProductTonesInventoryModal from './ProductTonesInventoryModal';
 
 export default function AdminDashboardClient() {
   const [activeTab, setActiveTab] = useState<'orders' | 'products' | 'categories'>('orders');
@@ -32,6 +33,20 @@ export default function AdminDashboardClient() {
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [editingOrder, setEditingOrder] = useState<OrderWithItems | null>(null);
   const [paymentsModalOrder, setPaymentsModalOrder] = useState<OrderWithItems | null>(null);
+
+  // Modal de inventario de tonos y feedback
+  const [selectedProductForTonesStock, setSelectedProductForTonesStock] = useState<ProductWithRelations | null>(null);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const handleTonesStockSaved = (updatedProduct: ProductWithRelations) => {
+    setProducts(prev => prev.map(p => p.id === updatedProduct.id ? updatedProduct : p));
+    showToast(`Inventario actualizado para ${updatedProduct.name}`);
+  };
 
   // Edición rápida de stock en productos
   const [editingStockId, setEditingStockId] = useState<string | null>(null);
@@ -106,9 +121,11 @@ export default function AdminDashboardClient() {
       try {
         await deleteProduct(id);
         await fetchProducts();
+        showToast(`Producto "${name}" eliminado`);
       } catch (err: unknown) {
         console.error("Error al eliminar producto", err);
-        alert("Error al eliminar el producto");
+        const msg = err instanceof Error ? err.message : "Error al eliminar el producto";
+        alert(msg);
       } finally {
         setLoading(false);
       }
@@ -120,9 +137,10 @@ export default function AdminDashboardClient() {
       const nextStock = !currentStock;
       setProducts(prev => prev.map(p => p.id === id ? { ...p, inStock: nextStock } : p));
       await toggleProductStock(id, nextStock);
+      showToast(nextStock ? "Producto visible en catálogo" : "Producto oculto / agotado");
     } catch (err: unknown) {
       console.error("Error al actualizar stock", err);
-      alert("Error al actualizar el stock");
+      showToast("Error al actualizar el stock");
       fetchProducts();
     }
   };
@@ -133,9 +151,10 @@ export default function AdminDashboardClient() {
       setProducts(prev => prev.map(p => p.id === id ? { ...p, stock: safeVal, inStock: safeVal > 0 } : p));
       setEditingStockId(null);
       await updateProductStockQuantity(id, safeVal);
+      showToast(`Stock actualizado a ${safeVal} unidades`);
     } catch (err: unknown) {
       console.error("Error al actualizar cantidad de stock", err);
-      alert("Error al actualizar cantidad de stock");
+      showToast("Error al actualizar cantidad de stock");
       fetchProducts();
     }
   };
@@ -1110,7 +1129,11 @@ export default function AdminDashboardClient() {
                           <td style={{ padding: '12px', color: '#fff', fontWeight: '500' }}>
                             {product.name}
                             {hasTones && (
-                              <div style={{ display: 'flex', gap: '6px', marginTop: '6px', flexWrap: 'wrap' }}>
+                              <div 
+                                onClick={() => setSelectedProductForTonesStock(product)}
+                                title="Click para ajustar inventario de tonos"
+                                style={{ display: 'flex', gap: '6px', marginTop: '6px', flexWrap: 'wrap', cursor: 'pointer' }}
+                              >
                                 {product.tones.map(t => (
                                   <span 
                                     key={t.id} 
@@ -1124,6 +1147,7 @@ export default function AdminDashboardClient() {
                                       borderRadius: '10px',
                                       fontSize: '0.72rem',
                                       border: '1px solid rgba(255,255,255,0.1)',
+                                      transition: 'border-color 0.15s ease',
                                     }}
                                   >
                                     <span style={{ width: '10px', height: '10px', borderRadius: '50%', backgroundColor: t.hex, display: 'inline-block' }} />
@@ -1143,14 +1167,49 @@ export default function AdminDashboardClient() {
                           {/* Columna de Inventario con Edición Rápida */}
                           <td style={{ padding: '12px' }}>
                             {hasTones ? (
-                              <div>
-                                <span style={{ fontSize: '0.85rem', color: 'var(--color-gold)', fontWeight: '600' }}>
-                                  {product.tones.reduce((sum, t) => sum + t.stock, 0)} un.
-                                </span>
-                                <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', display: 'block' }}>
-                                  (en {product.tones.length} tonos)
-                                </span>
-                              </div>
+                              (() => {
+                                const totalTonesStock = product.tones.reduce((sum, t) => sum + t.stock, 0);
+                                const isOut = totalTonesStock === 0;
+                                const isLow = !isOut && totalTonesStock <= 3;
+
+                                return (
+                                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <div>
+                                      <span style={{
+                                        fontSize: '0.85rem',
+                                        fontWeight: '700',
+                                        color: isOut ? '#ef4444' : isLow ? '#f59e0b' : '#10b981',
+                                      }}>
+                                        {totalTonesStock} un.
+                                      </span>
+                                      <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', display: 'block' }}>
+                                        ({product.tones.length} tonos)
+                                      </span>
+                                    </div>
+                                    <button
+                                      type="button"
+                                      onClick={() => setSelectedProductForTonesStock(product)}
+                                      title="Gestionar stock de tonos"
+                                      style={{
+                                        backgroundColor: 'rgba(215, 176, 106, 0.1)',
+                                        border: '1px solid rgba(215, 176, 106, 0.25)',
+                                        color: 'var(--color-gold)',
+                                        borderRadius: '6px',
+                                        padding: '4px 8px',
+                                        fontSize: '0.75rem',
+                                        fontWeight: '600',
+                                        cursor: 'pointer',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        transition: 'all 0.15s ease',
+                                      }}
+                                    >
+                                      ✏️ Ajustar
+                                    </button>
+                                  </div>
+                                );
+                              })()
                             ) : isStockEditing ? (
                               <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                 <input
@@ -1643,6 +1702,42 @@ export default function AdminDashboardClient() {
             onClose={() => setPaymentsModalOrder(null)}
             onUpdated={handlePaymentUpdated}
           />
+        )}
+
+        {/* MODAL DE GESTIÓN RÁPIDA DE INVENTARIO DE TONOS */}
+        {selectedProductForTonesStock && (
+          <ProductTonesInventoryModal
+            product={selectedProductForTonesStock}
+            onClose={() => setSelectedProductForTonesStock(null)}
+            onSaved={handleTonesStockSaved}
+          />
+        )}
+
+        {/* NOTIFICACIÓN TOAST FLOTANTE */}
+        {toastMessage && (
+          <div
+            style={{
+              position: 'fixed',
+              bottom: '24px',
+              right: '24px',
+              backgroundColor: '#160A0D',
+              border: '1px solid var(--color-gold)',
+              boxShadow: '0 8px 30px rgba(0, 0, 0, 0.8), 0 0 15px rgba(215, 176, 106, 0.2)',
+              color: '#fff',
+              padding: '12px 20px',
+              borderRadius: '12px',
+              zIndex: 99999,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '10px',
+              fontSize: '0.9rem',
+              fontWeight: '500',
+              animation: 'fadeIn 0.2s ease-out',
+            }}
+          >
+            <span style={{ fontSize: '1.1rem' }}>✨</span>
+            <span>{toastMessage}</span>
+          </div>
         )}
       </main>
     </div>

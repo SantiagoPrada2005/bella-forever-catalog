@@ -15,6 +15,48 @@
       "when": 1785380020456,
       "tag": "0001_wealthy_nightcrawler",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1785980000000,
+      "tag": "0002_multi_image_products",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "6",
+      "when": 1792600000000,
+      "tag": "0003_inventory_and_orders",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "6",
+      "when": 1792700000000,
+      "tag": "0004_sync_trendy_inventory",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "6",
+      "when": 1792800000000,
+      "tag": "0005_order_payments_and_separated_status",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1792850000000,
+      "tag": "0006_fix_trendy_tones",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "6",
+      "when": 1792873900000,
+      "tag": "0007_order_item_tone_set_null",
+      "breakpoints": true
     }
   ]
 }
