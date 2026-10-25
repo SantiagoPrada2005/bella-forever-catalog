@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import type { OrderWithItems, OrderPayment } from '../../db/schema';
 import { addOrderPayment, deleteOrderPayment } from '../../lib/api-client';
-import { CONFIG } from '../../config';
+import { formatCop, parseCop } from '../../utils/currency';
 
 interface OrderPaymentsModalProps {
   order: OrderWithItems;
@@ -31,13 +31,7 @@ export default function OrderPaymentsModal({ order, onClose, onUpdated }: OrderP
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const formatPrice = (val: number) => {
-    return new Intl.NumberFormat(CONFIG.currency.locale, {
-      style: 'currency',
-      currency: CONFIG.currency.code,
-      maximumFractionDigits: CONFIG.currency.precision,
-    }).format(val);
-  };
+  const formatPrice = formatCop;
 
   const formatDate = (isoStr: string) => {
     try {
@@ -56,8 +50,8 @@ export default function OrderPaymentsModal({ order, onClose, onUpdated }: OrderP
 
   const handleAddPayment = async (e: React.SyntheticEvent) => {
     e.preventDefault();
-    const numAmount = parseFloat(amount);
-    if (isNaN(numAmount) || numAmount <= 0) {
+    const numAmount = parseCop(amount);
+    if (numAmount <= 0) {
       setError('Ingresa un monto válido mayor a 0');
       return;
     }

@@ -2,6 +2,7 @@
 import '../index.css';
 import JsonLdLocalBusiness from '../components/seo/JsonLdLocalBusiness.astro';
 import JsonLdWebSite from '../components/seo/JsonLdWebSite.astro';
+import MetaPixel from '../components/analytics/MetaPixel.astro';
 
 interface Props {
   title?: string;
@@ -91,7 +92,17 @@ const imageType = socialImageURL.pathname.endsWith('.png')
     <!-- Datos Estructurados (Schema.org) -->
     <JsonLdWebSite siteUrl={siteUrl} />
     <JsonLdLocalBusiness siteUrl={siteUrl} />
+
+    <!-- Meta Pixel (Diferido con Micro-Stub) -->
+    <MetaPixel />
     <slot name="head" />
+
+    <script>
+      import { initPerformanceTelemetry } from '../lib/analytics/vitals';
+      import { trackEvent } from '../lib/analytics';
+      initPerformanceTelemetry();
+      trackEvent({ name: 'page_view', path: window.location.pathname });
+    </script>
   </head>
   <body>
     <slot />

@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react';
 import type { ProductWithRelations } from '../../db/schema';
-import { CONFIG } from '../../config';
+import { formatCop, parseCop } from '../../utils/currency';
 
 export interface ConfiguredProductItem {
   productId: string;
@@ -69,17 +69,11 @@ export default function ProductConfigCard({
     return product.stock;
   }, [selectedTone, product]);
 
-  const parsedPrice = parseFloat(customPrice);
-  const isValidPrice = !isNaN(parsedPrice) && parsedPrice >= 0;
+  const parsedPrice = parseCop(customPrice);
+  const isValidPrice = parsedPrice >= 0 && customPrice.trim() !== '';
   const lineTotal = isValidPrice ? parsedPrice * quantity : 0;
 
-  const formatPrice = (val: number) => {
-    return new Intl.NumberFormat(CONFIG.currency.locale, {
-      style: 'currency',
-      currency: CONFIG.currency.code,
-      maximumFractionDigits: CONFIG.currency.precision,
-    }).format(val);
-  };
+  const formatPrice = formatCop;
 
   const handleAdd = () => {
     if (tones.length > 0 && !selectedTone) {

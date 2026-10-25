@@ -1,7 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import type { ProductWithRelations } from '../../db/schema';
 import ProductConfigCard, { type ConfiguredProductItem } from './ProductConfigCard';
-import { CONFIG } from '../../config';
+import { formatCop } from '../../utils/currency';
 
 interface ProductPickerModalProps {
   isOpen: boolean;
@@ -20,6 +20,25 @@ export default function ProductPickerModal({
   const [selectedCategory, setSelectedCategory] = useState<string>('todos');
   const [configuringProduct, setConfiguringProduct] = useState<ProductWithRelations | null>(null);
   const [addedToast, setAddedToast] = useState<string | null>(null);
+
+  // Close on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (configuringProduct) {
+          setConfiguringProduct(null);
+        } else {
+          onClose();
+        }
+      }
+    };
+    if (isOpen) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose, configuringProduct]);
 
   // Extract unique categories from products
   const categoryList = useMemo(() => {
@@ -53,13 +72,7 @@ export default function ProductPickerModal({
     return list;
   }, [products, selectedCategory, searchQuery]);
 
-  const formatPrice = (val: number) => {
-    return new Intl.NumberFormat(CONFIG.currency.locale, {
-      style: 'currency',
-      currency: CONFIG.currency.code,
-      maximumFractionDigits: CONFIG.currency.precision,
-    }).format(val);
-  };
+  const formatPrice = formatCop;
 
   const handleProductAdd = (item: ConfiguredProductItem) => {
     onAddProduct(item);
@@ -78,16 +91,20 @@ export default function ProductPickerModal({
         className="catalog-picker-drawer"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Sticky Header */}
+        {/* Sticky Header - Always visible at top */}
         <div
           style={{
-            padding: '14px 16px',
+            padding: '12px 16px',
             backgroundColor: 'var(--color-panel-dark)',
-            borderBottom: '1px solid rgba(215, 176, 106, 0.25)',
+            borderBottom: '1.5px solid rgba(215, 176, 106, 0.25)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: '12px',
+            position: 'sticky',
+            top: 0,
+            zIndex: 50,
+            flexShrink: 0,
           }}
         >
           <div>
@@ -95,7 +112,7 @@ export default function ProductPickerModal({
               style={{
                 margin: 0,
                 fontFamily: 'var(--font-serif)',
-                fontSize: '1.3rem',
+                fontSize: '1.25rem',
                 color: '#fff',
                 fontWeight: '400',
               }}
@@ -110,22 +127,25 @@ export default function ProductPickerModal({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Cerrar catálogo"
+            aria-label="Cerrar catálogo visual"
             style={{
-              width: '44px',
-              height: '44px',
-              borderRadius: '8px',
-              backgroundColor: 'rgba(255, 255, 255, 0.05)',
-              border: '1px solid rgba(215, 176, 106, 0.3)',
+              backgroundColor: 'rgba(215, 176, 106, 0.2)',
+              border: '1.5px solid var(--color-gold)',
               color: 'var(--color-gold)',
-              fontSize: '1.2rem',
+              borderRadius: '8px',
+              padding: '8px 16px',
+              fontSize: '0.88rem',
+              fontWeight: '700',
               cursor: 'pointer',
-              display: 'flex',
+              display: 'inline-flex',
               alignItems: 'center',
-              justifyContent: 'center',
+              gap: '6px',
+              minHeight: '44px',
+              boxShadow: '0 2px 10px rgba(0, 0, 0, 0.4)',
             }}
           >
-            ✕
+            <span style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>✕</span>
+            <span>Cerrar</span>
           </button>
         </div>
 
@@ -144,6 +164,7 @@ export default function ProductPickerModal({
               alignItems: 'center',
               justifyContent: 'center',
               gap: '6px',
+              flexShrink: 0,
             }}
           >
             <span>✅</span>
@@ -154,25 +175,47 @@ export default function ProductPickerModal({
         {/* In-drawer Product Configuration View */}
         {configuringProduct ? (
           <div style={{ flex: 1, overflowY: 'auto', padding: '16px' }}>
-            <button
-              type="button"
-              onClick={() => setConfiguringProduct(null)}
-              style={{
-                backgroundColor: 'transparent',
-                border: 'none',
-                color: 'var(--color-gold)',
-                fontSize: '0.85rem',
-                fontWeight: '700',
-                cursor: 'pointer',
-                marginBottom: '12px',
-                display: 'inline-flex',
-                alignItems: 'center',
-                gap: '6px',
-                padding: '6px 0',
-              }}
-            >
-              ← Volver al catálogo
-            </button>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+              <button
+                type="button"
+                onClick={() => setConfiguringProduct(null)}
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid rgba(215, 176, 106, 0.3)',
+                  color: 'var(--color-gold)',
+                  fontSize: '0.85rem',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '8px 14px',
+                  borderRadius: '8px',
+                  minHeight: '44px',
+                }}
+              >
+                ← Volver al catálogo
+              </button>
+
+              <button
+                type="button"
+                onClick={onClose}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: '1px solid rgba(215, 176, 106, 0.3)',
+                  color: 'var(--color-text-muted)',
+                  fontSize: '0.82rem',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  padding: '8px 12px',
+                  borderRadius: '8px',
+                  minHeight: '44px',
+                }}
+              >
+                ✕ Cerrar
+              </button>
+            </div>
+
             <ProductConfigCard
               key={configuringProduct.id}
               product={configuringProduct}
@@ -183,7 +226,7 @@ export default function ProductPickerModal({
         ) : (
           <>
             {/* Search Bar inside Drawer */}
-            <div style={{ padding: '12px 14px 4px 14px', backgroundColor: 'var(--color-panel-dark)' }}>
+            <div style={{ padding: '12px 14px 4px 14px', backgroundColor: 'var(--color-panel-dark)', flexShrink: 0 }}>
               <div style={{ position: 'relative', width: '100%' }}>
                 <input
                   type="text"
@@ -192,9 +235,9 @@ export default function ProductPickerModal({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   style={{
                     width: '100%',
-                    height: '44px',
-                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                    border: '1.5px solid rgba(215, 176, 106, 0.3)',
+                    height: '46px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                    border: '1.5px solid rgba(215, 176, 106, 0.35)',
                     borderRadius: '10px',
                     padding: '0 40px 0 14px',
                     color: '#fff',
@@ -212,8 +255,8 @@ export default function ProductPickerModal({
                       right: '6px',
                       top: '50%',
                       transform: 'translateY(-50%)',
-                      width: '32px',
-                      height: '32px',
+                      width: '34px',
+                      height: '34px',
                       background: 'none',
                       border: 'none',
                       color: 'var(--color-text-muted)',
@@ -231,7 +274,7 @@ export default function ProductPickerModal({
             </div>
 
             {/* Category horizontal pills scroll */}
-            <div className="catalog-category-scroll">
+            <div className="catalog-category-scroll" style={{ flexShrink: 0 }}>
               {categoryList.map((cat) => {
                 const isSelected = selectedCategory.toLowerCase() === cat.toLowerCase();
                 return (
@@ -245,12 +288,12 @@ export default function ProductPickerModal({
                       backgroundColor: isSelected ? 'var(--color-gold)' : 'rgba(255, 255, 255, 0.05)',
                       border: `1px solid ${isSelected ? 'var(--color-gold)' : 'rgba(215, 176, 106, 0.2)'}`,
                       color: isSelected ? '#0A0405' : 'var(--color-text-muted)',
-                      fontSize: '0.8rem',
+                      fontSize: '0.82rem',
                       fontWeight: isSelected ? '700' : '500',
                       cursor: 'pointer',
                       textTransform: 'capitalize',
                       flexShrink: 0,
-                      minHeight: '38px',
+                      minHeight: '40px',
                       transition: 'all 0.15s ease',
                     }}
                   >
@@ -446,6 +489,47 @@ export default function ProductPickerModal({
                   })}
                 </div>
               )}
+            </div>
+
+            {/* Sticky Bottom Bar on Mobile - Always provides exit route */}
+            <div
+              style={{
+                padding: '10px 16px',
+                backgroundColor: 'var(--color-panel-dark)',
+                borderTop: '1.5px solid rgba(215, 176, 106, 0.25)',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                position: 'sticky',
+                bottom: 0,
+                zIndex: 40,
+                flexShrink: 0,
+              }}
+            >
+              <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
+                {filteredProducts.length} productos listados
+              </span>
+              <button
+                type="button"
+                onClick={onClose}
+                style={{
+                  backgroundColor: 'var(--color-burgundy)',
+                  border: '1px solid var(--color-gold)',
+                  color: '#fff',
+                  padding: '10px 18px',
+                  borderRadius: '8px',
+                  fontSize: '0.88rem',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  minHeight: '44px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  boxShadow: 'var(--shadow-gold)',
+                }}
+              >
+                <span>← Volver al Pedido</span>
+              </button>
             </div>
           </>
         )}

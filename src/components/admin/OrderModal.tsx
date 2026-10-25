@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo } from 'react';
 import type { OrderWithItems, ProductWithRelations } from '../../db/schema';
 import { createManualAdminOrder, updateOrder } from '../../lib/api-client';
 import { CONFIG } from '../../config';
+import { formatCop, parseCop } from '../../utils/currency';
 import ProductSearchCombobox from './ProductSearchCombobox';
 import ProductPickerModal from './ProductPickerModal';
 import ProductConfigCard, { type ConfiguredProductItem } from './ProductConfigCard';
@@ -164,13 +165,7 @@ export default function OrderModal({
     setErrorMessage(null);
   }, [orderToEdit, products]);
 
-  const formatPrice = (val: number) => {
-    return new Intl.NumberFormat(CONFIG.currency.locale, {
-      style: 'currency',
-      currency: CONFIG.currency.code,
-      maximumFractionDigits: CONFIG.currency.precision,
-    }).format(val);
-  };
+  const formatPrice = formatCop;
 
   const handleAddConfiguredItem = (item: ConfiguredProductItem) => {
     const existingIndex = items.findIndex(
@@ -219,12 +214,10 @@ export default function OrderModal({
   };
 
   const handleUpdateItemPrice = (index: number, newPriceStr: string) => {
-    const val = parseFloat(newPriceStr);
-    if (!isNaN(val) && val >= 0) {
-      setItems((prev) =>
-        prev.map((it, idx) => (idx === index ? { ...it, price: val } : it))
-      );
-    }
+    const val = parseCop(newPriceStr);
+    setItems((prev) =>
+      prev.map((it, idx) => (idx === index ? { ...it, price: val } : it))
+    );
   };
 
   const handleRemoveItem = (index: number) => {
@@ -343,20 +336,21 @@ export default function OrderModal({
   if (!isOpen) return null;
 
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        backdropFilter: 'blur(8px)',
-        zIndex: 3200,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '0',
-      }}
-    >
+    <>
+      <div
+        onClick={onClose}
+        style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.8)',
+          backdropFilter: 'blur(8px)',
+          zIndex: 3200,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '0',
+        }}
+      >
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
@@ -1360,14 +1354,15 @@ export default function OrderModal({
           </div>
         </div>
       </div>
-
-      {/* Drawer táctil de Catálogo Visual a pantalla completa en móviles */}
-      <ProductPickerModal
-        isOpen={isCatalogPickerOpen}
-        onClose={() => setIsCatalogPickerOpen(false)}
-        products={products}
-        onAddProduct={handleAddConfiguredItem}
-      />
     </div>
-  );
+
+    {/* Drawer táctil de Catálogo Visual - SIBLING fuera del contenedor con backdrop-filter */}
+    <ProductPickerModal
+      isOpen={isCatalogPickerOpen}
+      onClose={() => setIsCatalogPickerOpen(false)}
+      products={products}
+      onAddProduct={handleAddConfiguredItem}
+    />
+  </>
+);
 }

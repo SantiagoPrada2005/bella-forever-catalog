@@ -1,4 +1,4 @@
-import { sqliteTable, text, real, integer } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, real, integer, index } from 'drizzle-orm/sqlite-core';
 import { relations } from 'drizzle-orm';
 
 export const products = sqliteTable('Product', {
@@ -90,6 +90,31 @@ export const orderPayments = sqliteTable('OrderPayment', {
   notes: text('notes'),
   createdAt: text('createdAt').notNull(),
 });
+
+export const analyticsEvents = sqliteTable(
+  'AnalyticsEvent',
+  {
+    id: text('id').primaryKey(),
+    eventName: text('eventName').notNull(),
+    path: text('path'),
+    productId: text('productId'),
+    productName: text('productName'),
+    category: text('category'),
+    value: real('value'),
+    source: text('source'),
+    sessionId: text('sessionId'),
+    createdAt: text('createdAt').notNull(),
+  },
+  (table) => [
+    index('idx_analytics_event_name').on(table.eventName),
+    index('idx_analytics_created_at').on(table.createdAt),
+    index('idx_analytics_product_id').on(table.productId),
+    index('idx_analytics_session_id').on(table.sessionId),
+  ]
+);
+
+export type AnalyticsEventRecord = typeof analyticsEvents.$inferSelect;
+export type NewAnalyticsEventRecord = typeof analyticsEvents.$inferInsert;
 
 export const productsRelations = relations(products, ({ many }) => ({
   tones: many(tones),

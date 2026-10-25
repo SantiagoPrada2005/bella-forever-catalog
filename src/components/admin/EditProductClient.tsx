@@ -2,6 +2,7 @@ import { useState, useEffect, type ChangeEvent, type SubmitEvent } from 'react';
 import Header from '../Header';
 import ImageUpload from '../ui/ImageUpload';
 import { getProductById, updateProduct, getCategories } from '../../lib/api-client';
+import { parseCop } from '../../utils/currency';
 import type { Category } from '../../db/schema';
 import type { ToneInput } from '../../lib/services';
 
@@ -126,7 +127,15 @@ export default function EditProductClient({ id }: EditProductClientProps) {
     setSaving(true);
     setErrorMessage(null);
     try {
-      await updateProduct(id, formData, tones, imagesData);
+      await updateProduct(
+        id,
+        {
+          ...formData,
+          price: parseCop(formData.price),
+        },
+        tones,
+        imagesData
+      );
       window.location.href = '/admin';
     } catch (err: unknown) {
       console.error(err);

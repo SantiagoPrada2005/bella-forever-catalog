@@ -1,7 +1,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { CONFIG } from '../config';
+import { formatCop } from '../utils/currency';
 import ProductGallery from './ProductGallery';
 import type { ProductWithRelations, Tone } from '../db/schema';
 
@@ -86,11 +86,7 @@ export default function ProductModal({
 
   if (!product) return null;
 
-  const formattedPrice = new Intl.NumberFormat(CONFIG.currency.locale, {
-    style: 'currency',
-    currency: CONFIG.currency.code,
-    maximumFractionDigits: CONFIG.currency.precision,
-  }).format(product.price);
+  const formattedPrice = formatCop(product.price);
 
   const hasTones = Boolean(product.tones && product.tones.length > 0);
   const isToneAvailable = selectedTone ? Boolean(selectedTone.inStock) && selectedTone.stock > 0 : true;

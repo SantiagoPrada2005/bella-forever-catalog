@@ -6,6 +6,7 @@ import type {
   CreateOrderInput,
   UpdateOrderInput,
   AddPaymentInput,
+  AnalyticsSummary,
 } from './services';
 
 export async function getCategories(): Promise<Category[]> {
@@ -257,6 +258,12 @@ export async function deleteOrderPayment(orderId: string, paymentId: string): Pr
     throw new Error(json.error || 'Error al eliminar el abono');
   }
   return { success: true };
+}
+
+export async function getDbAnalyticsMetrics(period: string = 'all'): Promise<AnalyticsSummary> {
+  const res = await fetch(`/api/analytics/metrics?period=${encodeURIComponent(period)}`);
+  if (!res.ok) throw new Error('Error al cargar métricas de base de datos');
+  return res.json();
 }
 
 

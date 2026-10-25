@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { CONFIG } from '../../config';
+import { formatCop } from '../../utils/currency';
 
 export interface CartToastItem {
   id: number;
@@ -24,13 +24,7 @@ export default function CartToast({
   const [isPaused, setIsPaused] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const formattedPrice = notification
-    ? new Intl.NumberFormat(CONFIG.currency.locale, {
-        style: 'currency',
-        currency: CONFIG.currency.code,
-        maximumFractionDigits: CONFIG.currency.precision,
-      }).format(notification.price)
-    : '';
+  const formattedPrice = notification ? formatCop(notification.price) : '';
 
   const triggerClose = useCallback(() => {
     setIsClosing(true);

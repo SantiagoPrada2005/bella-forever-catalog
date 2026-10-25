@@ -1,5 +1,6 @@
-import { eq, inArray } from 'drizzle-orm';
+import { eq, inArray, gte, sql, desc } from 'drizzle-orm';
 import type { BatchItem } from 'drizzle-orm/batch';
+import { parseCop } from '../utils/currency';
 import {
   products,
   tones,
@@ -8,6 +9,7 @@ import {
   orders,
   orderItems,
   orderPayments,
+  analyticsEvents,
   type ProductWithRelations,
   type Category,
   type OrderWithItems,
@@ -268,7 +270,7 @@ export async function createProduct(
 ): Promise<{ id: string }> {
   const now = new Date().toISOString();
   const productId = crypto.randomUUID();
-  const parsedPrice = typeof data.price === 'number' ? data.price : (parseFloat(String(data.price)) || 0);
+  const parsedPrice = parseCop(data.price);
   const derivedMainImage = imagesData.length > 0 ? imagesData[0]?.url || '' : (data.mainImage || '');
   const parsedStock = data.stock !== undefined ? Math.max(0, parseInt(String(data.stock), 10) || 0) : 10;
   const isStockValid = data.inStock !== undefined ? Boolean(data.inStock) : parsedStock > 0;
@@ -343,7 +345,7 @@ export async function updateProduct(
   }
 
   const now = new Date().toISOString();
-  const parsedPrice = typeof data.price === 'number' ? data.price : (parseFloat(String(data.price)) || 0);
+  const parsedPrice = parseCop(data.price);
   const parsedStock = data.stock !== undefined ? Math.max(0, parseInt(String(data.stock), 10) || 0) : 10;
   const isStockValid = data.inStock !== undefined ? Boolean(data.inStock) : parsedStock > 0;
 
@@ -659,7 +661,10 @@ export async function createOrderWithInventoryCheck(
           .where(eq(tones.id, tone.id))
       );
 
-      const effectivePrice = typeof item.price === 'number' && item.price >= 0 ? item.price : prod.price;
+      const effectivePrice =
+        item.price !== undefined && item.price !== null
+          ? parseCop(item.price)
+          : prod.price;
       const itemSubtotal = effectivePrice * qty;
       totalOrder += itemSubtotal;
 
@@ -695,7 +700,10 @@ export async function createOrderWithInventoryCheck(
           .where(eq(products.id, prod.id))
       );
 
-      const effectivePrice = typeof item.price === 'number' && item.price >= 0 ? item.price : prod.price;
+      const effectivePrice =
+        item.price !== undefined && item.price !== null
+          ? parseCop(item.price)
+          : prod.price;
       const itemSubtotal = effectivePrice * qty;
       totalOrder += itemSubtotal;
 
@@ -1172,5 +1180,191 @@ export async function getOrderPayments(db: AppDb, orderId: string): Promise<Orde
 
 export async function deleteOrderPayment(db: AppDb, paymentId: string): Promise<void> {
   await db.delete(orderPayments).where(eq(orderPayments.id, paymentId)).run();
+}
+
+export interface AnalyticsSummary {
+  period: string;
+  totalPageViews: number;
+  uniqueSessions: number;
+  totalProductViews: number;
+  totalCartAdds: number;
+  totalCheckouts: number;
+  totalWhatsAppClicks: number;
+  conversionRate: number;
+  topViewedProducts: Array<{
+    productId: string | null;
+    productName: string | null;
+    views: number;
+  }>;
+  whatsAppClicksBySource: Record<string, number>;
+}
+
+export async function recordAnalyticsEvent(
+  db: AppDb,
+  input: {
+    eventName: string;
+    path?: string | null;
+    productId?: string | null;
+    productName?: string | null;
+    category?: string | null;
+    value?: number | null;
+    source?: string | null;
+    sessionId?: string | null;
+  }
+): Promise<{ id: string }> {
+  const id = crypto.randomUUID();
+  const now = new Date().toISOString();
+
+  await db
+    .insert(analyticsEvents)
+    .values({
+      id,
+      eventName: input.eventName,
+      path: input.path || null,
+      productId: input.productId || null,
+      productName: input.productName || null,
+      category: input.category || null,
+      value: input.value != null ? Number(input.value) : null,
+      source: input.source || null,
+      sessionId: input.sessionId || null,
+      createdAt: now,
+    })
+    .run();
+
+  return { id };
+}
+
+export async function getAnalyticsSummary(
+  db: AppDb,
+  period: 'all' | 'today' | '7days' | '30days' = 'all'
+): Promise<AnalyticsSummary> {
+  const now = new Date();
+  let sinceDate: string | null = null;
+
+  if (period === 'today') {
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    sinceDate = startOfToday.toISOString();
+  } else if (period === '7days') {
+    sinceDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString();
+  } else if (period === '30days') {
+    sinceDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString();
+  }
+
+  const eventCountsQuery = sinceDate
+    ? db
+        .select({
+          eventName: analyticsEvents.eventName,
+          count: sql<number>`count(*)`.as('count'),
+        })
+        .from(analyticsEvents)
+        .where(gte(analyticsEvents.createdAt, sinceDate))
+        .groupBy(analyticsEvents.eventName)
+    : db
+        .select({
+          eventName: analyticsEvents.eventName,
+          count: sql<number>`count(*)`.as('count'),
+        })
+        .from(analyticsEvents)
+        .groupBy(analyticsEvents.eventName);
+
+  const sessionsQuery = sinceDate
+    ? db
+        .select({
+          uniqueSessions: sql<number>`count(distinct ${analyticsEvents.sessionId})`.as('sessions'),
+        })
+        .from(analyticsEvents)
+        .where(gte(analyticsEvents.createdAt, sinceDate))
+    : db
+        .select({
+          uniqueSessions: sql<number>`count(distinct ${analyticsEvents.sessionId})`.as('sessions'),
+        })
+        .from(analyticsEvents);
+
+  const topProductsQuery = sinceDate
+    ? db
+        .select({
+          productId: analyticsEvents.productId,
+          productName: analyticsEvents.productName,
+          views: sql<number>`count(*)`.as('views'),
+        })
+        .from(analyticsEvents)
+        .where(
+          sql`${analyticsEvents.eventName} = 'view_item' AND ${analyticsEvents.createdAt} >= ${sinceDate}`
+        )
+        .groupBy(analyticsEvents.productId, analyticsEvents.productName)
+        .orderBy(desc(sql`views`))
+        .limit(5)
+    : db
+        .select({
+          productId: analyticsEvents.productId,
+          productName: analyticsEvents.productName,
+          views: sql<number>`count(*)`.as('views'),
+        })
+        .from(analyticsEvents)
+        .where(eq(analyticsEvents.eventName, 'view_item'))
+        .groupBy(analyticsEvents.productId, analyticsEvents.productName)
+        .orderBy(desc(sql`views`))
+        .limit(5);
+
+  const whatsappQuery = sinceDate
+    ? db
+        .select({
+          source: analyticsEvents.source,
+          clicks: sql<number>`count(*)`.as('clicks'),
+        })
+        .from(analyticsEvents)
+        .where(
+          sql`${analyticsEvents.eventName} = 'contact_whatsapp' AND ${analyticsEvents.createdAt} >= ${sinceDate}`
+        )
+        .groupBy(analyticsEvents.source)
+    : db
+        .select({
+          source: analyticsEvents.source,
+          clicks: sql<number>`count(*)`.as('clicks'),
+        })
+        .from(analyticsEvents)
+        .where(eq(analyticsEvents.eventName, 'contact_whatsapp'))
+        .groupBy(analyticsEvents.source);
+
+  const [eventCounts, sessionsResult, topProducts, whatsappResults] = await Promise.all([
+    eventCountsQuery.all(),
+    sessionsQuery.all(),
+    topProductsQuery.all(),
+    whatsappQuery.all(),
+  ]);
+
+  const countsMap = new Map(eventCounts.map((e) => [e.eventName, Number(e.count) || 0]));
+
+  const totalPageViews = countsMap.get('page_view') || 0;
+  const uniqueSessions = Number(sessionsResult[0]?.uniqueSessions) || 0;
+  const totalProductViews = countsMap.get('view_item') || 0;
+  const totalCartAdds = countsMap.get('add_to_cart') || 0;
+  const totalCheckouts = countsMap.get('initiate_checkout') || 0;
+  const totalWhatsAppClicks = countsMap.get('contact_whatsapp') || 0;
+
+  const conversionRate = totalPageViews > 0 ? Number(((totalCheckouts / totalPageViews) * 100).toFixed(1)) : 0;
+
+  const whatsAppClicksBySource: Record<string, number> = {};
+  whatsappResults.forEach((w) => {
+    const src = w.source || 'general';
+    whatsAppClicksBySource[src] = Number(w.clicks) || 0;
+  });
+
+  return {
+    period,
+    totalPageViews,
+    uniqueSessions,
+    totalProductViews,
+    totalCartAdds,
+    totalCheckouts,
+    totalWhatsAppClicks,
+    conversionRate,
+    topViewedProducts: topProducts.map((p) => ({
+      productId: p.productId,
+      productName: p.productName || 'Producto',
+      views: Number(p.views) || 0,
+    })),
+    whatsAppClicksBySource,
+  };
 }
 

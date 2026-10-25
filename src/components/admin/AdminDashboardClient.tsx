@@ -14,13 +14,15 @@ import {
   deleteOrder,
 } from '../../lib/api-client';
 import { CONFIG } from '../../config';
+import { formatCop } from '../../utils/currency';
 import type { ProductWithRelations, Category, OrderWithItems } from '../../db/schema';
 import OrderModal from './OrderModal';
 import OrderPaymentsModal from './OrderPaymentsModal';
 import ProductTonesInventoryModal from './ProductTonesInventoryModal';
+import AdminMetricsTab from './AdminMetricsTab';
 
 export default function AdminDashboardClient() {
-  const [activeTab, setActiveTab] = useState<'orders' | 'products' | 'categories'>('orders');
+  const [activeTab, setActiveTab] = useState<'orders' | 'products' | 'categories' | 'metrics'>('orders');
   const [products, setProducts] = useState<ProductWithRelations[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [orders, setOrders] = useState<OrderWithItems[]>([]);
@@ -271,13 +273,7 @@ export default function AdminDashboardClient() {
     }
   };
 
-  const formatPrice = (value: number) => {
-    return new Intl.NumberFormat(CONFIG.currency.locale, {
-      style: 'currency',
-      currency: CONFIG.currency.code,
-      maximumFractionDigits: CONFIG.currency.precision,
-    }).format(value);
-  };
+  const formatPrice = formatCop;
 
   const formatDate = (isoStr: string) => {
     try {
@@ -440,6 +436,24 @@ export default function AdminDashboardClient() {
                 {separatedOrdersCount} separados
               </span>
             )}
+          </button>
+
+          <button 
+            onClick={() => setActiveTab('metrics')}
+            style={{
+              background: activeTab === 'metrics' ? 'rgba(215, 176, 106, 0.12)' : 'none',
+              border: 'none',
+              borderBottom: activeTab === 'metrics' ? '2px solid var(--color-gold)' : '2px solid transparent',
+              color: activeTab === 'metrics' ? 'var(--color-gold)' : 'var(--color-text-muted)',
+              fontSize: '1.05rem',
+              fontWeight: '600',
+              padding: '10px 18px',
+              cursor: 'pointer',
+              borderRadius: '8px 8px 0 0',
+              transition: 'all 0.2s',
+            }}
+          >
+            📊 Métricas
           </button>
           
           <button 
@@ -1456,6 +1470,15 @@ export default function AdminDashboardClient() {
               </table>
             </div>
           </div>
+        )}
+
+        {/* TAB 4: MÉTRICAS Y ANALÍTICA */}
+        {activeTab === 'metrics' && (
+          <AdminMetricsTab
+            orders={orders}
+            products={products}
+            categories={categories}
+          />
         )}
 
         {/* MODAL DE DETALLE DE PEDIDO */}

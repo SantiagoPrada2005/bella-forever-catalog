@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, type MouseEvent as ReactMouseEvent } from 'react';
-import { CONFIG } from '../config';
 import { getProductImage } from '../utils/image-helpers';
+import { formatCop } from '../utils/currency';
 import type { ProductWithRelations, Tone } from '../db/schema';
 
 export interface ProductCardProps {
@@ -28,11 +28,7 @@ export default function ProductCard({
     };
   }, []);
 
-  const formattedPrice = new Intl.NumberFormat(CONFIG.currency.locale, {
-    style: 'currency',
-    currency: CONFIG.currency.code,
-    maximumFractionDigits: CONFIG.currency.precision,
-  }).format(product.price);
+  const formattedPrice = formatCop(product.price);
 
   const currentImage = getProductImage(product, selectedTone);
 

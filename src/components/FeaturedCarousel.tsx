@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, type MouseEvent } from 'react';
-import { CONFIG } from '../config';
 import { getProductImage } from '../utils/image-helpers';
+import { formatCop } from '../utils/currency';
 import type { ProductWithRelations, Tone } from '../db/schema';
 
 export interface FeaturedCarouselProps {
@@ -38,13 +38,7 @@ export default function FeaturedCarousel({
 
   if (featured.length === 0) return null;
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat(CONFIG.currency.locale, {
-      style: 'currency',
-      currency: CONFIG.currency.code,
-      maximumFractionDigits: CONFIG.currency.precision,
-    }).format(price);
-  };
+  const formatPrice = formatCop;
 
   return (
     <section style={{

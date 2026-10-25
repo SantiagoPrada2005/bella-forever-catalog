@@ -1,0 +1,86 @@
+---
+import { CONFIG } from '../../config';
+
+interface Props {
+  pixelId?: string;
+}
+
+const { pixelId = CONFIG.metaPixelId } = Astro.props;
+---
+
+{pixelId && (
+  <>
+    <!-- Micro-Stub reactivo y Carga Diferida del Pixel de Meta (Cero bloqueo en LCP/INP) -->
+    <script is:inline define:vars={{ pixelId }}>
+      (function () {
+        if (typeof window === 'undefined') return;
+        if (window.location.pathname.startsWith('/admin')) return;
+
+        // 1. Inicializar Micro-Stub en memoria (< 150 B)
+        var n = (window.fbq = function () {
+          if (n.callMethod) {
+            n.callMethod.apply(n, arguments);
+          } else {
+            n.queue.push(arguments);
+          }
+        });
+        if (!window._fbq) window._fbq = n;
+        n.push = n;
+        n.loaded = true;
+        n.version = '2.0';
+        n.queue = [];
+
+        // 2. Registrar init y primer PageView en el búfer
+        n('init', pixelId);
+        n('track', 'PageView');
+
+        // 3. Descarga diferida de fbevents.js (no compite con fuentes ni LCP)
+        var isLoaded = false;
+        function loadPixelScript() {
+          if (isLoaded) return;
+          isLoaded = true;
+
+          // Limpiar listeners de interacción temprana
+          interactionEvents.forEach(function (eventName) {
+            window.removeEventListener(eventName, loadPixelScript);
+          });
+
+          var s = document.createElement('script');
+          s.async = true;
+          s.fetchPriority = 'low';
+          s.src = 'https://connect.facebook.net/en_US/fbevents.js';
+          var firstScript = document.getElementsByTagName('script')[0];
+          if (firstScript && firstScript.parentNode) {
+            firstScript.parentNode.insertBefore(s, firstScript);
+          } else {
+            document.head.appendChild(s);
+          }
+        }
+
+        // Activar en tiempo de inactividad del navegador
+        if ('requestIdleCallback' in window) {
+          window.requestIdleCallback(loadPixelScript, { timeout: 3500 });
+        } else {
+          window.addEventListener('load', function () {
+            setTimeout(loadPixelScript, 2000);
+          });
+        }
+
+        // O activar ante la primera interacción física del usuario
+        var interactionEvents = ['pointerdown', 'touchstart', 'scroll'];
+        interactionEvents.forEach(function (eventName) {
+          window.addEventListener(eventName, loadPixelScript, { once: true, passive: true });
+        });
+      })();
+    </script>
+    <noscript>
+      <img
+        height="1"
+        width="1"
+        style="display:none"
+        alt=""
+        src={`https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`}
+      />
+    </noscript>
+  </>
+)}

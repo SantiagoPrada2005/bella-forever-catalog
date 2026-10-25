@@ -1,8 +1,8 @@
 import { useState, useEffect, useRef, type MouseEvent, type TouchEvent } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { CONFIG } from '../config';
 import { getProductImage } from '../utils/image-helpers';
+import { formatCop } from '../utils/currency';
 import type { ProductWithRelations, Tone } from '../db/schema';
 
 export interface CatalogHeroSpotlightProps {
@@ -104,11 +104,7 @@ export default function CatalogHeroSpotlight({
     return null;
   }
 
-  const formattedPrice = new Intl.NumberFormat(CONFIG.currency.locale, {
-    style: 'currency',
-    currency: CONFIG.currency.code,
-    maximumFractionDigits: CONFIG.currency.precision,
-  }).format(activeProduct.price);
+  const formattedPrice = formatCop(activeProduct.price);
 
   const currentImage = getProductImage(activeProduct, selectedTone);
   const hasTones = Boolean(activeProduct.tones && activeProduct.tones.length > 0);

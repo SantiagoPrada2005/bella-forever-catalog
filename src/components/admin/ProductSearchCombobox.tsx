@@ -1,6 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from 'react';
 import type { ProductWithRelations } from '../../db/schema';
-import { CONFIG } from '../../config';
+import { formatCop } from '../../utils/currency';
 
 interface ProductSearchComboboxProps {
   products: ProductWithRelations[];
@@ -43,13 +43,7 @@ export default function ProductSearchCombobox({
     );
   }, [products, searchQuery]);
 
-  const formatPrice = (val: number) => {
-    return new Intl.NumberFormat(CONFIG.currency.locale, {
-      style: 'currency',
-      currency: CONFIG.currency.code,
-      maximumFractionDigits: CONFIG.currency.precision,
-    }).format(val);
-  };
+  const formatPrice = formatCop;
 
   return (
     <div ref={containerRef} style={{ position: 'relative', width: '100%' }}>

@@ -9,6 +9,7 @@ import CartToast, { type CartToastItem } from './ui/CartToast';
 import { CONFIG } from '../config';
 import { getProductImage } from '../utils/image-helpers';
 import type { ProductWithRelations, Category, Tone } from '../db/schema';
+import { trackEvent } from '../lib/analytics';
 
 export interface CatalogClientProps {
   initialProducts?: ProductWithRelations[];
@@ -93,6 +94,18 @@ export default function CatalogClient({
       price: product.price,
       image: getProductImage(product, selectedTone),
     });
+
+    trackEvent({
+      name: 'add_to_cart',
+      product: {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        category: product.category,
+        tone: selectedTone?.name || null,
+        quantity: 1,
+      },
+    });
   };
 
   const handleUpdateQuantity = (key: string, delta: number) => {
@@ -142,11 +155,22 @@ export default function CatalogClient({
     product: ProductWithRelations,
     defaultTone: Tone | null = null
   ) => {
-    setSelectedProduct(product);
-    setSelectedProductTone(
+    const targetTone =
       defaultTone ||
-        (product.tones && product.tones.length > 0 ? product.tones[0] ?? null : null)
-    );
+      (product.tones && product.tones.length > 0 ? product.tones[0] ?? null : null);
+    setSelectedProduct(product);
+    setSelectedProductTone(targetTone);
+
+    trackEvent({
+      name: 'view_item',
+      product: {
+        id: product.id,
+        name: product.name,
+        price: product.price,
+        category: product.category,
+        tone: targetTone?.name || null,
+      },
+    });
   };
 
   const handleCloseProductModal = () => {

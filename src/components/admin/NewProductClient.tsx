@@ -2,6 +2,7 @@ import { useState, useEffect, type ChangeEvent, type SubmitEvent } from 'react';
 import Header from '../Header';
 import ImageUpload from '../ui/ImageUpload';
 import { createProduct, getCategories } from '../../lib/api-client';
+import { parseCop } from '../../utils/currency';
 import type { Category } from '../../db/schema';
 import type { ToneInput } from '../../lib/services';
 
@@ -85,7 +86,14 @@ export default function NewProductClient() {
 
     setLoading(true);
     try {
-      await createProduct(formData, tones, imagesData);
+      await createProduct(
+        {
+          ...formData,
+          price: parseCop(formData.price),
+        },
+        tones,
+        imagesData
+      );
       window.location.href = '/admin';
     } catch (err: unknown) {
       console.error(err);

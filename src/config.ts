@@ -3,6 +3,7 @@ export interface AppConfig {
   instagramUser: string;
   whatsappNumber: string;
   defaultCity: string;
+  metaPixelId?: string;
   currency: {
     symbol: string;
     code: string;
@@ -17,6 +18,7 @@ export const CONFIG: AppConfig = {
   instagramUser: "bellaforeverbeauty",
   whatsappNumber: "+573117887806",
   defaultCity: "Roldanillo",
+  metaPixelId: import.meta.env.PUBLIC_META_PIXEL_ID || "",
   currency: {
     symbol: "$",
     code: "COP",

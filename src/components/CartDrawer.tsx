@@ -5,6 +5,8 @@ import { CONFIG } from '../config';
 import { getCustomerCookie, setCustomerCookie, type CustomerData } from '../utils/cookie';
 import { createOrder } from '../lib/api-client';
 import type { OrderWithItems, ProductWithRelations } from '../db/schema';
+import { trackEvent } from '../lib/analytics';
+import { formatCop } from '../utils/currency';
 
 export interface CartItem {
   key: string;
@@ -69,6 +71,25 @@ export default function CartDrawer({
     }
   }, []);
 
+  useEffect(() => {
+    if (cart.length > 0) {
+      const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      trackEvent({
+        name: 'initiate_checkout',
+        items: cart.map((item) => ({
+          id: item.productId,
+          name: item.productName,
+          price: item.price,
+          quantity: item.quantity,
+          category: 'maquillaje',
+          tone: item.toneName || null,
+        })),
+        total: totalAmount,
+      });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   useGSAP(
     () => {
       if (!drawerOverlay.current || !drawerContent.current) return;
@@ -111,28 +132,18 @@ export default function CartDrawer({
   };
 
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
-  const formattedTotal = new Intl.NumberFormat(CONFIG.currency.locale, {
-    style: 'currency',
-    currency: CONFIG.currency.code,
-    maximumFractionDigits: CONFIG.currency.precision,
-  }).format(cartTotal);
+  const formattedTotal = formatCop(cartTotal);
 
   const buildWhatsAppUrl = (order: OrderWithItems) => {
-    const numberFormatter = new Intl.NumberFormat(CONFIG.currency.locale, {
-      style: 'currency',
-      currency: CONFIG.currency.code,
-      maximumFractionDigits: CONFIG.currency.precision,
-    });
-
     let message = `Hola, ${CONFIG.brandName}.\nAcabo de registrar el pedido *#${order.orderNumber}* desde el catálogo:\n\n*Detalle de mi compra:*\n`;
 
     order.items.forEach((item) => {
-      const itemTotal = numberFormatter.format(item.price * item.quantity);
+      const itemTotal = formatCop(item.price * item.quantity);
       const toneStr = item.toneName ? ` (${item.toneName})` : '';
       message += `- ${item.quantity} x ${item.productName}${toneStr} - ${itemTotal}\n`;
     });
 
-    message += `\n*Total:* ${numberFormatter.format(order.total)}\n`;
+    message += `\n*Total:* ${formatCop(order.total)}\n`;
     message += `*Entrega a:* ${order.customerName}\n`;
     message += `*Teléfono:* ${order.customerPhone}\n`;
     message += `*Dirección:* ${order.customerAddress}, ${order.customerCity}\n`;
@@ -207,6 +218,33 @@ export default function CartDrawer({
       const waUrl = buildWhatsAppUrl(newOrder);
       setLastWhatsAppUrl(waUrl);
       setCompletedOrder(newOrder);
+
+      trackEvent({
+        name: 'purchase',
+        orderId: newOrder.id,
+        orderNumber: newOrder.orderNumber,
+        total: newOrder.total,
+        items: cart.map((item) => ({
+          id: item.productId,
+          name: item.productName,
+          price: item.price,
+          quantity: item.quantity,
+          category: 'maquillaje',
+          tone: item.toneName || null,
+        })),
+        customer: {
+          name: customer.name,
+          phone: customer.phone,
+          email: customer.email,
+          city: customer.city,
+          address: customer.address,
+        },
+      });
+
+      trackEvent({
+        name: 'contact_whatsapp',
+        source: 'cart',
+      });
 
       onOrderCompleted(newOrder);
       window.open(waUrl, '_blank');
@@ -416,11 +454,7 @@ export default function CartDrawer({
                     Total:
                   </span>
                   <span style={{ fontWeight: 700, color: 'var(--catalog-accent, #D7B06A)' }}>
-                    {new Intl.NumberFormat(CONFIG.currency.locale, {
-                      style: 'currency',
-                      currency: CONFIG.currency.code,
-                      maximumFractionDigits: CONFIG.currency.precision,
-                    }).format(completedOrder.total)}
+                    {formatCop(completedOrder.total)}
                   </span>
                 </div>
               </div>
@@ -438,6 +472,7 @@ export default function CartDrawer({
                   href={lastWhatsAppUrl}
                   target="_blank"
                   rel="noopener noreferrer"
+                  onClick={() => trackEvent({ name: 'contact_whatsapp', source: 'cart' })}
                   className="catalog-spotlight-cta"
                   style={{ textDecoration: 'none', padding: '12px 16px' }}
                 >
@@ -502,11 +537,7 @@ export default function CartDrawer({
               {/* Lista de productos */}
               <div style={{ marginBottom: '20px' }}>
                 {cart.map((item) => {
-                  const formattedItemPrice = new Intl.NumberFormat(CONFIG.currency.locale, {
-                    style: 'currency',
-                    currency: CONFIG.currency.code,
-                    maximumFractionDigits: CONFIG.currency.precision,
-                  }).format(item.price * item.quantity);
+                  const formattedItemPrice = formatCop(item.price * item.quantity);
 
                   return (
                     <div
