@@ -1966,4 +1966,126 @@ body {
   border-color: var(--color-gold);
 }
 
+/* Visual Product Picker & Catalog Drawer (Mobile-First) */
+@keyframes slideUpDrawer {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInDrawerBackdrop {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.catalog-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  z-index: 3300;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  animation: fadeInDrawerBackdrop 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.catalog-picker-drawer {
+  background-color: var(--color-bg-dark);
+  border: 1px solid var(--color-gold);
+  border-bottom: none;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  width: 100vw;
+  height: 94vh;
+  max-height: 94vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.7);
+  animation: slideUpDrawer 0.28s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+  padding-bottom: env(safe-area-inset-bottom, 16px);
+}
+
+@media (min-width: 768px) {
+  .catalog-picker-backdrop {
+    align-items: center;
+    padding: 20px;
+  }
+
+  .catalog-picker-drawer {
+    border-radius: 20px;
+    border-bottom: 1px solid var(--color-gold);
+    width: 90vw;
+    max-width: 820px;
+    height: 85vh;
+    max-height: 85vh;
+  }
+}
+
+.catalog-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  padding: 12px;
+}
+
+@media (min-width: 640px) {
+  .catalog-picker-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    padding: 16px;
+  }
+}
+
+@media (min-width: 900px) {
+  .catalog-picker-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    padding: 18px;
+  }
+}
+
+/* Touch-optimized Category Horizontal Scroll */
+.catalog-category-scroll {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 8px 14px 10px 14px;
+  white-space: nowrap;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.catalog-category-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+/* Multistep animation in Order Modal */
+.admin-multistep-step {
+  animation: fadeInOrderStep 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes fadeInOrderStep {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
 

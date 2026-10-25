@@ -2,6 +2,9 @@ import { useState, useEffect, useMemo } from 'react';
 import type { OrderWithItems, ProductWithRelations } from '../../db/schema';
 import { createManualAdminOrder, updateOrder } from '../../lib/api-client';
 import { CONFIG } from '../../config';
+import ProductSearchCombobox from './ProductSearchCombobox';
+import ProductPickerModal from './ProductPickerModal';
+import ProductConfigCard, { type ConfiguredProductItem } from './ProductConfigCard';
 
 interface OrderModalProps {
   isOpen: boolean;
@@ -103,12 +106,12 @@ export default function OrderModal({
   >('pending');
   const [items, setItems] = useState<FormOrderItem[]>([]);
 
-  // Product Picker State
-  const [searchQuery, setSearchQuery] = useState('');
-  const [selectedProductId, setSelectedProductId] = useState<string>('');
-  const [selectedToneId, setSelectedToneId] = useState<string>('');
-  const [addQty, setAddQty] = useState<number>(1);
-  const [customPriceInput, setCustomPriceInput] = useState<string>('');
+  // Visual Product Selector State
+  const [isCatalogPickerOpen, setIsCatalogPickerOpen] = useState(false);
+  const [selectedProductForConfig, setSelectedProductForConfig] = useState<ProductWithRelations | null>(null);
+
+  // Multistep Flow State (1: Productos, 2: Cliente, 3: Estado y Confirmar)
+  const [currentStep, setCurrentStep] = useState<1 | 2 | 3>(1);
 
   // Status & submission state
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -116,6 +119,7 @@ export default function OrderModal({
 
   // Populate data when editing or opening
   useEffect(() => {
+    setCurrentStep(1);
     if (orderToEdit) {
       setCustomerName(orderToEdit.customerName || '');
       setCustomerPhone(orderToEdit.customerPhone || '');
@@ -160,54 +164,6 @@ export default function OrderModal({
     setErrorMessage(null);
   }, [orderToEdit, products]);
 
-  // Selected Product helper
-  const selectedProduct = useMemo(() => {
-    return products.find((p) => p.id === selectedProductId) || null;
-  }, [products, selectedProductId]);
-
-  // Available tones for selected product
-  const availableTones = useMemo(() => {
-    return selectedProduct?.tones || [];
-  }, [selectedProduct]);
-
-  // Stock for current selection in picker
-  const currentSelectionStock = useMemo(() => {
-    if (!selectedProduct) return 0;
-    if (availableTones.length > 0) {
-      const tone = availableTones.find((t) => t.id === selectedToneId);
-      return tone ? tone.stock : 0;
-    }
-    return selectedProduct.stock;
-  }, [selectedProduct, availableTones, selectedToneId]);
-
-  // Set default tone and price when product changes
-  useEffect(() => {
-    if (selectedProduct) {
-      if (selectedProduct.tones && selectedProduct.tones.length > 0) {
-        setSelectedToneId(selectedProduct.tones[0].id);
-      } else {
-        setSelectedToneId('');
-      }
-      setCustomPriceInput(selectedProduct.price.toString());
-      setAddQty(1);
-    } else {
-      setSelectedToneId('');
-      setCustomPriceInput('');
-    }
-  }, [selectedProduct]);
-
-  // Filtered products list for search
-  const filteredCatalog = useMemo(() => {
-    if (!searchQuery.trim()) return products;
-    const q = searchQuery.toLowerCase();
-    return products.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.category.toLowerCase().includes(q) ||
-        (p.tones || []).some((t) => t.name.toLowerCase().includes(q))
-    );
-  }, [products, searchQuery]);
-
   const formatPrice = (val: number) => {
     return new Intl.NumberFormat(CONFIG.currency.locale, {
       style: 'currency',
@@ -216,65 +172,36 @@ export default function OrderModal({
     }).format(val);
   };
 
-  const handleAddItem = () => {
-    if (!selectedProduct) return;
-
-    let toneName: string | null = null;
-    let imageUrl = selectedProduct.mainImage;
-    let toneId: string | null = null;
-
-    if (availableTones.length > 0) {
-      const tone = availableTones.find((t) => t.id === selectedToneId);
-      if (!tone) {
-        setErrorMessage('Por favor selecciona un tono');
-        return;
-      }
-      toneName = tone.name;
-      toneId = tone.id;
-      if (tone.image) imageUrl = tone.image;
-    }
-
-    const price = parseFloat(customPriceInput);
-    if (isNaN(price) || price < 0) {
-      setErrorMessage('Ingresa un precio unitario válido');
-      return;
-    }
-
-    const qty = Math.max(1, Math.floor(addQty));
-
-    // Check if already in items list
+  const handleAddConfiguredItem = (item: ConfiguredProductItem) => {
     const existingIndex = items.findIndex(
-      (it) => it.productId === selectedProduct.id && it.toneId === toneId
+      (it) => it.productId === item.productId && it.toneId === item.toneId
     );
 
     if (existingIndex >= 0) {
-      // Update quantity
       setItems((prev) =>
         prev.map((it, idx) =>
           idx === existingIndex
-            ? { ...it, quantity: it.quantity + qty, price }
+            ? { ...it, quantity: it.quantity + item.quantity, price: item.price }
             : it
         )
       );
     } else {
       const newItem: FormOrderItem = {
-        key: `${selectedProduct.id}_${toneId || 'notone'}_${Date.now()}`,
-        productId: selectedProduct.id,
-        productName: selectedProduct.name,
-        toneId,
-        toneName,
-        imageUrl,
-        price,
-        catalogPrice: selectedProduct.price,
-        quantity: qty,
-        maxStock: currentSelectionStock,
+        key: `${item.productId}_${item.toneId || 'notone'}_${Date.now()}`,
+        productId: item.productId,
+        productName: item.productName,
+        toneId: item.toneId,
+        toneName: item.toneName,
+        imageUrl: item.imageUrl,
+        price: item.price,
+        catalogPrice: item.catalogPrice,
+        quantity: item.quantity,
+        maxStock: item.maxStock,
       };
       setItems((prev) => [...prev, newItem]);
     }
 
-    // Reset picker
-    setSelectedProductId('');
-    setSearchQuery('');
+    setSelectedProductForConfig(null);
     setErrorMessage(null);
   };
 
@@ -312,11 +239,17 @@ export default function OrderModal({
     return items.reduce((acc, it) => acc + it.quantity, 0);
   }, [items]);
 
-  const handleSubmit = async (e: React.SyntheticEvent) => {
-    e.preventDefault();
+  // Multistep Navigation Handlers
+  const handleNextFromStep1 = () => {
+    if (items.length === 0) {
+      setErrorMessage('Por favor agrega al menos un producto al pedido');
+      return;
+    }
     setErrorMessage(null);
+    setCurrentStep(2);
+  };
 
-    // Validations
+  const handleNextFromStep2 = () => {
     if (!customerName.trim()) {
       setErrorMessage('El nombre del cliente es obligatorio');
       return;
@@ -333,8 +266,26 @@ export default function OrderModal({
       setErrorMessage('La ciudad de entrega es obligatoria');
       return;
     }
+    setErrorMessage(null);
+    setCurrentStep(3);
+  };
+
+  const handleSubmit = async (e: React.SyntheticEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+
+    // Validations with auto-switch to problematic step
     if (items.length === 0) {
       setErrorMessage('Debes agregar al menos un producto al pedido');
+      setCurrentStep(1);
+      return;
+    }
+    if (!customerName.trim() || !customerPhone.trim() || !customerAddress.trim() || !customerCity.trim()) {
+      if (!customerName.trim()) setErrorMessage('El nombre del cliente es obligatorio');
+      else if (!customerPhone.trim()) setErrorMessage('El teléfono del cliente es obligatorio');
+      else if (!customerAddress.trim()) setErrorMessage('La dirección de entrega es obligatoria');
+      else setErrorMessage('La ciudad de entrega es obligatoria');
+      setCurrentStep(2);
       return;
     }
 
@@ -499,6 +450,106 @@ export default function OrderModal({
           </button>
         </div>
 
+        {/* Step Navigation Bar (Multistep) */}
+        <div
+          style={{
+            display: 'flex',
+            borderBottom: '1px solid rgba(215, 176, 106, 0.2)',
+            backgroundColor: 'var(--color-panel-dark)',
+            padding: '2px 8px',
+            position: 'sticky',
+            top: '73px',
+            zIndex: 9,
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setCurrentStep(1)}
+            style={{
+              flex: 1,
+              padding: '10px 4px',
+              border: 'none',
+              borderBottom: currentStep === 1 ? '2.5px solid var(--color-gold)' : '2.5px solid transparent',
+              backgroundColor: 'transparent',
+              color: currentStep === 1 ? 'var(--color-gold)' : 'var(--color-text-muted)',
+              fontWeight: currentStep === 1 ? '700' : '500',
+              fontSize: '0.8rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+              minHeight: '44px',
+            }}
+          >
+            <span>💄</span>
+            <span>1. Productos</span>
+            <span
+              style={{
+                backgroundColor: currentStep === 1 ? 'rgba(215, 176, 106, 0.25)' : 'rgba(255, 255, 255, 0.08)',
+                color: currentStep === 1 ? 'var(--color-gold)' : 'inherit',
+                padding: '1px 6px',
+                borderRadius: '10px',
+                fontSize: '0.72rem',
+                fontWeight: '700',
+              }}
+            >
+              {items.length}
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setCurrentStep(2)}
+            style={{
+              flex: 1,
+              padding: '10px 4px',
+              border: 'none',
+              borderBottom: currentStep === 2 ? '2.5px solid var(--color-gold)' : '2.5px solid transparent',
+              backgroundColor: 'transparent',
+              color: currentStep === 2 ? 'var(--color-gold)' : 'var(--color-text-muted)',
+              fontWeight: currentStep === 2 ? '700' : '500',
+              fontSize: '0.8rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+              minHeight: '44px',
+            }}
+          >
+            <span>👤</span>
+            <span>2. Cliente</span>
+            {customerName.trim() && customerPhone.trim() && customerAddress.trim() && customerCity.trim() ? (
+              <span style={{ color: '#34d399', fontSize: '0.75rem', fontWeight: '700' }}>✓</span>
+            ) : null}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setCurrentStep(3)}
+            style={{
+              flex: 1,
+              padding: '10px 4px',
+              border: 'none',
+              borderBottom: currentStep === 3 ? '2.5px solid var(--color-gold)' : '2.5px solid transparent',
+              backgroundColor: 'transparent',
+              color: currentStep === 3 ? 'var(--color-gold)' : 'var(--color-text-muted)',
+              fontWeight: currentStep === 3 ? '700' : '500',
+              fontSize: '0.8rem',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              cursor: 'pointer',
+              minHeight: '44px',
+            }}
+          >
+            <span>📦</span>
+            <span>3. Estado</span>
+          </button>
+        </div>
+
         {/* Scrollable Form Body */}
         <div style={{ overflowY: 'auto', flex: 1, padding: '16px' }}>
           {errorMessage && (
@@ -521,652 +572,633 @@ export default function OrderModal({
             </div>
           )}
 
-          {/* SECCIÓN 1: ESTADO DEL PEDIDO */}
-          <div
-            style={{
-              backgroundColor: 'var(--color-panel-dark)',
-              border: '1px solid rgba(215, 176, 106, 0.16)',
-              borderRadius: '12px',
-              padding: '14px',
-              marginBottom: '16px',
-            }}
-          >
-            <label
-              style={{
-                display: 'block',
-                fontSize: '0.78rem',
-                color: 'var(--color-gold)',
-                fontWeight: '700',
-                textTransform: 'uppercase',
-                marginBottom: '8px',
-                letterSpacing: '0.5px',
-              }}
-            >
-              Estado del Pedido *
-            </label>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
-                gap: '8px',
-              }}
-            >
-              {ORDER_STATUS_OPTIONS.map((opt) => {
-                const isSelected = status === opt.id;
-                return (
-                  <button
-                    key={opt.id}
-                    type="button"
-                    onClick={() => setStatus(opt.id)}
-                    style={{
-                      backgroundColor: isSelected ? opt.badgeBg : 'rgba(255, 255, 255, 0.03)',
-                      border: `1.5px solid ${isSelected ? opt.badgeBorder : 'rgba(255, 255, 255, 0.1)'}`,
-                      color: isSelected ? opt.badgeColor : 'var(--color-text-muted)',
-                      padding: '8px 10px',
-                      borderRadius: '8px',
-                      fontSize: '0.8rem',
-                      fontWeight: isSelected ? '700' : '500',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      transition: 'all 0.2s',
-                    }}
-                  >
-                    <div>{opt.label}</div>
-                  </button>
-                );
-              })}
-            </div>
-            <p
-              style={{
-                margin: '8px 0 0 0',
-                fontSize: '0.75rem',
-                color: 'var(--color-text-muted)',
-                fontStyle: 'italic',
-              }}
-            >
-              ℹ️ {ORDER_STATUS_OPTIONS.find((o) => o.id === status)?.description}
-            </p>
-          </div>
-
-          {/* SECCIÓN 2: DATOS DEL CLIENTE */}
-          <div
-            style={{
-              backgroundColor: 'var(--color-panel-dark)',
-              border: '1px solid rgba(215, 176, 106, 0.16)',
-              borderRadius: '12px',
-              padding: '14px',
-              marginBottom: '16px',
-            }}
-          >
-            <h3
-              style={{
-                fontSize: '0.82rem',
-                color: 'var(--color-gold)',
-                fontWeight: '700',
-                textTransform: 'uppercase',
-                margin: '0 0 12px 0',
-                letterSpacing: '0.5px',
-              }}
-            >
-              1. Datos de Entrega y Cliente
-            </h3>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginBottom: '12px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--color-text-muted)', marginBottom: '4px' }}>
-                  Nombre Completo *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ej: Laura Gómez"
-                  value={customerName}
-                  onChange={(e) => setCustomerName(e.target.value)}
-                  style={{
-                    width: '100%',
-                    backgroundColor: 'rgba(0,0,0,0.4)',
-                    border: '1px solid rgba(215, 176, 106, 0.25)',
-                    borderRadius: '8px',
-                    padding: '10px 12px',
-                    color: '#fff',
-                    fontSize: '16px', // Previene zoom en iOS
-                    outline: 'none',
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--color-text-muted)', marginBottom: '4px' }}>
-                  Teléfono / WhatsApp *
-                </label>
-                <input
-                  type="tel"
-                  inputMode="tel"
-                  required
-                  placeholder="Ej: 300 123 4567"
-                  value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
-                  style={{
-                    width: '100%',
-                    backgroundColor: 'rgba(0,0,0,0.4)',
-                    border: '1px solid rgba(215, 176, 106, 0.25)',
-                    borderRadius: '8px',
-                    padding: '10px 12px',
-                    color: '#fff',
-                    fontSize: '16px',
-                    outline: 'none',
-                  }}
-                />
-              </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginBottom: '12px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--color-text-muted)', marginBottom: '4px' }}>
-                  Ciudad *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ej: Cali, Palmira, Medellín..."
-                  value={customerCity}
-                  onChange={(e) => setCustomerCity(e.target.value)}
-                  style={{
-                    width: '100%',
-                    backgroundColor: 'rgba(0,0,0,0.4)',
-                    border: '1px solid rgba(215, 176, 106, 0.25)',
-                    borderRadius: '8px',
-                    padding: '10px 12px',
-                    color: '#fff',
-                    fontSize: '16px',
-                    outline: 'none',
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--color-text-muted)', marginBottom: '4px' }}>
-                  Dirección de Entrega *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="Ej: Carrera 1 # 2 - 34, Apto 501"
-                  value={customerAddress}
-                  onChange={(e) => setCustomerAddress(e.target.value)}
-                  style={{
-                    width: '100%',
-                    backgroundColor: 'rgba(0,0,0,0.4)',
-                    border: '1px solid rgba(215, 176, 106, 0.25)',
-                    borderRadius: '8px',
-                    padding: '10px 12px',
-                    color: '#fff',
-                    fontSize: '16px',
-                    outline: 'none',
-                  }}
-                />
-              </div>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--color-text-muted)', marginBottom: '4px' }}>
-                  Email (opcional)
-                </label>
-                <input
-                  type="email"
-                  inputMode="email"
-                  placeholder="cliente@ejemplo.com"
-                  value={customerEmail}
-                  onChange={(e) => setCustomerEmail(e.target.value)}
-                  style={{
-                    width: '100%',
-                    backgroundColor: 'rgba(0,0,0,0.4)',
-                    border: '1px solid rgba(215, 176, 106, 0.25)',
-                    borderRadius: '8px',
-                    padding: '10px 12px',
-                    color: '#fff',
-                    fontSize: '16px',
-                    outline: 'none',
-                  }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--color-text-muted)', marginBottom: '4px' }}>
-                  Notas de Entrega (opcional)
-                </label>
-                <input
-                  type="text"
-                  placeholder="Dejar en portería, envolver para regalo..."
-                  value={customerNotes}
-                  onChange={(e) => setCustomerNotes(e.target.value)}
-                  style={{
-                    width: '100%',
-                    backgroundColor: 'rgba(0,0,0,0.4)',
-                    border: '1px solid rgba(215, 176, 106, 0.25)',
-                    borderRadius: '8px',
-                    padding: '10px 12px',
-                    color: '#fff',
-                    fontSize: '16px',
-                    outline: 'none',
-                  }}
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* SECCIÓN 3: SELECTOR DE PRODUCTOS */}
-          <div
-            style={{
-              backgroundColor: 'var(--color-panel-dark)',
-              border: '1px solid rgba(215, 176, 106, 0.16)',
-              borderRadius: '12px',
-              padding: '14px',
-              marginBottom: '16px',
-            }}
-          >
-            <h3
-              style={{
-                fontSize: '0.82rem',
-                color: 'var(--color-gold)',
-                fontWeight: '700',
-                textTransform: 'uppercase',
-                margin: '0 0 10px 0',
-                letterSpacing: '0.5px',
-              }}
-            >
-              2. Agregar Productos al Pedido
-            </h3>
-
-            {/* Buscador de catálogo */}
-            <div style={{ marginBottom: '10px' }}>
-              <input
-                type="text"
-                placeholder="🔍 Buscar por nombre o categoría..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                style={{
-                  width: '100%',
-                  backgroundColor: 'rgba(0, 0, 0, 0.5)',
-                  border: '1px solid rgba(215, 176, 106, 0.3)',
-                  borderRadius: '8px',
-                  padding: '9px 12px',
-                  color: '#fff',
-                  fontSize: '0.88rem',
-                  outline: 'none',
-                }}
-              />
-            </div>
-
-            {/* Dropdown de producto */}
-            <div style={{ marginBottom: '10px' }}>
-              <select
-                value={selectedProductId}
-                onChange={(e) => setSelectedProductId(e.target.value)}
-                style={{
-                  width: '100%',
-                  backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                  border: '1px solid rgba(215, 176, 106, 0.4)',
-                  borderRadius: '8px',
-                  padding: '10px 12px',
-                  color: '#fff',
-                  fontSize: '0.9rem',
-                  outline: 'none',
-                  cursor: 'pointer',
-                }}
-              >
-                <option value="" style={{ backgroundColor: '#16090c', color: '#888' }}>
-                  -- Selecciona un producto ({filteredCatalog.length} disponibles) --
-                </option>
-                {filteredCatalog.map((p) => (
-                  <option key={p.id} value={p.id} style={{ backgroundColor: '#16090c', color: '#fff' }}>
-                    {p.name} - {formatPrice(p.price)} (Stock total: {p.tones?.length ? p.tones.reduce((s, t) => s + t.stock, 0) : p.stock})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            {/* Detalle del producto seleccionado para agregar */}
-            {selectedProduct && (
+          {/* PASO 1: PRODUCTOS */}
+          {currentStep === 1 && (
+            <div className="admin-multistep-step">
+              {/* Bloque: Agregar Productos */}
               <div
                 style={{
-                  backgroundColor: 'rgba(215, 176, 106, 0.05)',
-                  border: '1px solid rgba(215, 176, 106, 0.25)',
-                  borderRadius: '10px',
-                  padding: '12px',
-                  marginTop: '10px',
+                  backgroundColor: 'var(--color-panel-dark)',
+                  border: '1px solid rgba(215, 176, 106, 0.22)',
+                  borderRadius: '14px',
+                  padding: '14px',
+                  marginBottom: '16px',
                 }}
               >
-                {/* Selector de tonos si aplica */}
-                {availableTones.length > 0 && (
-                  <div style={{ marginBottom: '12px' }}>
-                    <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--color-gold)', marginBottom: '6px', fontWeight: '600' }}>
-                      Selecciona el Tono:
-                    </label>
-                    <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                      {availableTones.map((t) => {
-                        const isToneSelected = selectedToneId === t.id;
-                        return (
-                          <button
-                            key={t.id}
-                            type="button"
-                            onClick={() => setSelectedToneId(t.id)}
+                <div
+                  style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '10px',
+                  }}
+                >
+                  <h3
+                    style={{
+                      fontSize: '0.82rem',
+                      color: 'var(--color-gold)',
+                      fontWeight: '700',
+                      textTransform: 'uppercase',
+                      margin: 0,
+                      letterSpacing: '0.5px',
+                    }}
+                  >
+                    1. Seleccionar Productos
+                  </h3>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)' }}>
+                    {products.length} disponibles
+                  </span>
+                </div>
+
+                <ProductSearchCombobox
+                  products={products}
+                  onSelectProduct={(p) => setSelectedProductForConfig(p)}
+                  onOpenCatalogPicker={() => setIsCatalogPickerOpen(true)}
+                />
+
+                {selectedProductForConfig && (
+                  <ProductConfigCard
+                    key={selectedProductForConfig.id}
+                    product={selectedProductForConfig}
+                    onAdd={handleAddConfiguredItem}
+                    onCancel={() => setSelectedProductForConfig(null)}
+                  />
+                )}
+              </div>
+
+              {/* Bloque: Items en este Pedido */}
+              <div
+                style={{
+                  backgroundColor: 'var(--color-panel-dark)',
+                  border: '1px solid rgba(215, 176, 106, 0.16)',
+                  borderRadius: '12px',
+                  padding: '14px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                  <h3
+                    style={{
+                      fontSize: '0.82rem',
+                      color: 'var(--color-gold)',
+                      fontWeight: '700',
+                      textTransform: 'uppercase',
+                      margin: 0,
+                      letterSpacing: '0.5px',
+                    }}
+                  >
+                    Productos en este Pedido ({items.length})
+                  </h3>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
+                    {totalUnits} unidades en total
+                  </span>
+                </div>
+
+                {items.length === 0 ? (
+                  <div
+                    style={{
+                      textAlign: 'center',
+                      padding: '32px 16px',
+                      backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                      borderRadius: '10px',
+                      border: '1px dashed rgba(215, 176, 106, 0.2)',
+                      color: 'var(--color-text-muted)',
+                      fontSize: '0.85rem',
+                    }}
+                  >
+                    <span style={{ fontSize: '1.8rem', display: 'block', marginBottom: '8px' }}>🛍️</span>
+                    No has agregado productos a este pedido. Usa el buscador arriba o toca <strong>Explorar Catálogo</strong> para añadir prendas o cosméticos con foto.
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    {items.map((item, idx) => (
+                      <div
+                        key={item.key}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '10px',
+                          backgroundColor: 'rgba(255, 255, 255, 0.03)',
+                          border: '1px solid rgba(215, 176, 106, 0.14)',
+                          borderRadius: '10px',
+                          padding: '10px',
+                        }}
+                      >
+                        {item.imageUrl ? (
+                          <img
+                            src={item.imageUrl}
+                            alt={item.productName}
                             style={{
-                              backgroundColor: isToneSelected ? 'rgba(215, 176, 106, 0.25)' : 'rgba(0,0,0,0.4)',
-                              border: `1.5px solid ${isToneSelected ? 'var(--color-gold)' : 'rgba(255,255,255,0.15)'}`,
-                              color: isToneSelected ? 'var(--color-gold)' : '#fff',
-                              borderRadius: '20px',
-                              padding: '5px 12px',
-                              fontSize: '0.78rem',
-                              cursor: 'pointer',
-                              display: 'inline-flex',
+                              width: '52px',
+                              height: '52px',
+                              objectFit: 'cover',
+                              borderRadius: '8px',
+                              border: '1px solid rgba(215, 176, 106, 0.25)',
+                              flexShrink: 0,
+                            }}
+                          />
+                        ) : (
+                          <div
+                            style={{
+                              width: '52px',
+                              height: '52px',
+                              borderRadius: '8px',
+                              backgroundColor: 'rgba(0,0,0,0.4)',
+                              border: '1px solid rgba(215, 176, 106, 0.2)',
+                              display: 'flex',
                               alignItems: 'center',
-                              gap: '6px',
+                              justifyContent: 'center',
+                              fontSize: '1.2rem',
+                              flexShrink: 0,
                             }}
                           >
-                            <span
+                            💄
+                          </div>
+                        )}
+
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ margin: 0, fontWeight: '600', color: '#fff', fontSize: '0.88rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {item.productName}
+                          </p>
+                          {item.toneName && (
+                            <p style={{ margin: '2px 0 0 0', fontSize: '0.74rem', color: 'var(--color-gold)' }}>
+                              💄 Tono: <strong>{item.toneName}</strong>
+                            </p>
+                          )}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
+                            <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)' }}>Precio:</span>
+                            <input
+                              type="number"
+                              inputMode="numeric"
+                              value={item.price}
+                              onChange={(e) => handleUpdateItemPrice(idx, e.target.value)}
                               style={{
-                                width: '12px',
-                                height: '12px',
-                                borderRadius: '50%',
-                                backgroundColor: t.hex,
-                                display: 'inline-block',
-                                border: '1px solid rgba(255,255,255,0.3)',
+                                width: '84px',
+                                backgroundColor: 'rgba(0,0,0,0.5)',
+                                border: '1px solid rgba(215, 176, 106, 0.25)',
+                                borderRadius: '4px',
+                                padding: '2px 6px',
+                                color: 'var(--color-gold)',
+                                fontSize: '0.78rem',
+                                fontWeight: '700',
                               }}
                             />
-                            <span>{t.name}</span>
-                            <span style={{ color: t.stock > 0 ? '#34d399' : '#f87171', fontSize: '0.72rem', fontWeight: '700' }}>
-                              ({t.stock})
-                            </span>
+                          </div>
+                        </div>
+
+                        {/* Stepper Cantidad Táctil (≥ 36px en móvil) */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateItemQuantity(idx, -1)}
+                            aria-label="Restar una unidad"
+                            style={{
+                              width: '36px',
+                              height: '36px',
+                              backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                              border: '1px solid rgba(215, 176, 106, 0.25)',
+                              borderRadius: '6px',
+                              color: '#fff',
+                              fontSize: '1.1rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            -
                           </button>
-                        );
-                      })}
-                    </div>
+                          <span style={{ minWidth: '24px', textAlign: 'center', fontWeight: '700', fontSize: '0.9rem', color: '#fff' }}>
+                            {item.quantity}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleUpdateItemQuantity(idx, 1)}
+                            aria-label="Sumar una unidad"
+                            style={{
+                              width: '36px',
+                              height: '36px',
+                              backgroundColor: 'rgba(255, 255, 255, 0.08)',
+                              border: '1px solid rgba(215, 176, 106, 0.25)',
+                              borderRadius: '6px',
+                              color: '#fff',
+                              fontSize: '1.1rem',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                            }}
+                          >
+                            +
+                          </button>
+                        </div>
+
+                        {/* Subtotal & Delete */}
+                        <div style={{ textAlign: 'right', minWidth: '70px' }}>
+                          <span style={{ fontWeight: '700', color: 'var(--color-gold)', fontSize: '0.9rem', display: 'block' }}>
+                            {formatPrice(item.price * item.quantity)}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveItem(idx)}
+                            title="Eliminar producto"
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              color: '#f87171',
+                              fontSize: '0.8rem',
+                              cursor: 'pointer',
+                              marginTop: '2px',
+                              padding: '4px 6px',
+                            }}
+                          >
+                            Eliminar ✕
+                          </button>
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 )}
+              </div>
+            </div>
+          )}
 
-                {/* Cantidad y Precio unitario */}
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
-                  <div style={{ flex: '1 1 120px' }}>
-                    <label style={{ display: 'block', fontSize: '0.74rem', color: 'var(--color-text-muted)', marginBottom: '4px' }}>
-                      Cantidad
-                    </label>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <button
-                        type="button"
-                        onClick={() => setAddQty((q) => Math.max(1, q - 1))}
-                        style={{
-                          width: '38px',
-                          height: '38px',
-                          backgroundColor: 'rgba(255,255,255,0.06)',
-                          border: '1px solid rgba(215, 176, 106, 0.3)',
-                          borderRadius: '6px',
-                          color: '#fff',
-                          fontSize: '1.1rem',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        -
-                      </button>
-                      <input
-                        type="number"
-                        inputMode="numeric"
-                        min="1"
-                        value={addQty}
-                        onChange={(e) => setAddQty(Math.max(1, parseInt(e.target.value, 10) || 1))}
-                        style={{
-                          width: '50px',
-                          height: '38px',
-                          textAlign: 'center',
-                          backgroundColor: 'rgba(0,0,0,0.5)',
-                          border: '1px solid rgba(215, 176, 106, 0.3)',
-                          borderRadius: '6px',
-                          color: '#fff',
-                          fontWeight: '700',
-                          fontSize: '0.95rem',
-                          outline: 'none',
-                        }}
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setAddQty((q) => q + 1)}
-                        style={{
-                          width: '38px',
-                          height: '38px',
-                          backgroundColor: 'rgba(255,255,255,0.06)',
-                          border: '1px solid rgba(215, 176, 106, 0.3)',
-                          borderRadius: '6px',
-                          color: '#fff',
-                          fontSize: '1.1rem',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        +
-                      </button>
-                    </div>
-                  </div>
+          {/* PASO 2: DATOS DEL CLIENTE */}
+          {currentStep === 2 && (
+            <div className="admin-multistep-step">
+              <div
+                style={{
+                  backgroundColor: 'var(--color-panel-dark)',
+                  border: '1px solid rgba(215, 176, 106, 0.16)',
+                  borderRadius: '12px',
+                  padding: '16px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
+                  <h3
+                    style={{
+                      fontSize: '0.85rem',
+                      color: 'var(--color-gold)',
+                      fontWeight: '700',
+                      textTransform: 'uppercase',
+                      margin: 0,
+                      letterSpacing: '0.5px',
+                    }}
+                  >
+                    2. Datos de Entrega y Cliente
+                  </h3>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)' }}>
+                    * Campos obligatorios
+                  </span>
+                </div>
 
-                  <div style={{ flex: '1 1 140px' }}>
-                    <label style={{ display: 'block', fontSize: '0.74rem', color: 'var(--color-text-muted)', marginBottom: '4px' }}>
-                      Precio Unitario ($)
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginBottom: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--color-text-muted)', marginBottom: '4px', fontWeight: '600' }}>
+                      Nombre Completo *
                     </label>
                     <input
-                      type="number"
-                      inputMode="numeric"
-                      value={customPriceInput}
-                      onChange={(e) => setCustomPriceInput(e.target.value)}
+                      type="text"
+                      required
+                      placeholder="Ej: Laura Gómez"
+                      value={customerName}
+                      onChange={(e) => setCustomerName(e.target.value)}
                       style={{
                         width: '100%',
-                        height: '38px',
-                        backgroundColor: 'rgba(0,0,0,0.5)',
-                        border: '1px solid rgba(215, 176, 106, 0.3)',
-                        borderRadius: '6px',
-                        padding: '0 10px',
-                        color: 'var(--color-gold)',
-                        fontWeight: '700',
-                        fontSize: '0.95rem',
+                        backgroundColor: 'rgba(0,0,0,0.4)',
+                        border: '1px solid rgba(215, 176, 106, 0.25)',
+                        borderRadius: '8px',
+                        padding: '10px 12px',
+                        color: '#fff',
+                        fontSize: '16px',
                         outline: 'none',
                       }}
                     />
                   </div>
 
-                  <button
-                    type="button"
-                    onClick={handleAddItem}
-                    style={{
-                      height: '38px',
-                      backgroundColor: 'var(--color-gold)',
-                      color: '#000',
-                      border: 'none',
-                      padding: '0 16px',
-                      borderRadius: '6px',
-                      fontWeight: '700',
-                      fontSize: '0.85rem',
-                      cursor: 'pointer',
-                      boxShadow: 'var(--shadow-gold)',
-                    }}
-                  >
-                    + Agregar
-                  </button>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--color-text-muted)', marginBottom: '4px', fontWeight: '600' }}>
+                      Teléfono / WhatsApp *
+                    </label>
+                    <input
+                      type="tel"
+                      inputMode="tel"
+                      required
+                      placeholder="Ej: 300 123 4567"
+                      value={customerPhone}
+                      onChange={(e) => setCustomerPhone(e.target.value)}
+                      style={{
+                        width: '100%',
+                        backgroundColor: 'rgba(0,0,0,0.4)',
+                        border: '1px solid rgba(215, 176, 106, 0.25)',
+                        borderRadius: '8px',
+                        padding: '10px 12px',
+                        color: '#fff',
+                        fontSize: '16px',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px', marginBottom: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--color-text-muted)', marginBottom: '4px', fontWeight: '600' }}>
+                      Ciudad *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ej: Cali, Palmira, Medellín..."
+                      value={customerCity}
+                      onChange={(e) => setCustomerCity(e.target.value)}
+                      style={{
+                        width: '100%',
+                        backgroundColor: 'rgba(0,0,0,0.4)',
+                        border: '1px solid rgba(215, 176, 106, 0.25)',
+                        borderRadius: '8px',
+                        padding: '10px 12px',
+                        color: '#fff',
+                        fontSize: '16px',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--color-text-muted)', marginBottom: '4px', fontWeight: '600' }}>
+                      Dirección de Entrega *
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Ej: Carrera 1 # 2 - 34, Apto 501"
+                      value={customerAddress}
+                      onChange={(e) => setCustomerAddress(e.target.value)}
+                      style={{
+                        width: '100%',
+                        backgroundColor: 'rgba(0,0,0,0.4)',
+                        border: '1px solid rgba(215, 176, 106, 0.25)',
+                        borderRadius: '8px',
+                        padding: '10px 12px',
+                        color: '#fff',
+                        fontSize: '16px',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '12px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--color-text-muted)', marginBottom: '4px' }}>
+                      Email (opcional)
+                    </label>
+                    <input
+                      type="email"
+                      inputMode="email"
+                      placeholder="cliente@ejemplo.com"
+                      value={customerEmail}
+                      onChange={(e) => setCustomerEmail(e.target.value)}
+                      style={{
+                        width: '100%',
+                        backgroundColor: 'rgba(0,0,0,0.4)',
+                        border: '1px solid rgba(215, 176, 106, 0.25)',
+                        borderRadius: '8px',
+                        padding: '10px 12px',
+                        color: '#fff',
+                        fontSize: '16px',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ display: 'block', fontSize: '0.78rem', color: 'var(--color-text-muted)', marginBottom: '4px' }}>
+                      Notas de Entrega (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      placeholder="Dejar en portería, envolver para regalo..."
+                      value={customerNotes}
+                      onChange={(e) => setCustomerNotes(e.target.value)}
+                      style={{
+                        width: '100%',
+                        backgroundColor: 'rgba(0,0,0,0.4)',
+                        border: '1px solid rgba(215, 176, 106, 0.25)',
+                        borderRadius: '8px',
+                        padding: '10px 12px',
+                        color: '#fff',
+                        fontSize: '16px',
+                        outline: 'none',
+                      }}
+                    />
+                  </div>
                 </div>
               </div>
-            )}
-          </div>
-
-          {/* SECCIÓN 4: LISTA DE PRODUCTOS SELECCIONADOS */}
-          <div
-            style={{
-              backgroundColor: 'var(--color-panel-dark)',
-              border: '1px solid rgba(215, 176, 106, 0.16)',
-              borderRadius: '12px',
-              padding: '14px',
-              marginBottom: '16px',
-            }}
-          >
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <h3
-                style={{
-                  fontSize: '0.82rem',
-                  color: 'var(--color-gold)',
-                  fontWeight: '700',
-                  textTransform: 'uppercase',
-                  margin: 0,
-                  letterSpacing: '0.5px',
-                }}
-              >
-                3. Items en este Pedido ({items.length})
-              </h3>
-              <span style={{ fontSize: '0.78rem', color: 'var(--color-text-muted)' }}>
-                {totalUnits} unidades en total
-              </span>
             </div>
+          )}
 
-            {items.length === 0 ? (
+          {/* PASO 3: ESTADO Y RESUMEN FINAL */}
+          {currentStep === 3 && (
+            <div className="admin-multistep-step">
+              {/* Selector de Estado */}
               <div
                 style={{
-                  textAlign: 'center',
-                  padding: '28px 16px',
-                  backgroundColor: 'rgba(255, 255, 255, 0.02)',
-                  borderRadius: '10px',
-                  border: '1px dashed rgba(215, 176, 106, 0.2)',
-                  color: 'var(--color-text-muted)',
-                  fontSize: '0.85rem',
+                  backgroundColor: 'var(--color-panel-dark)',
+                  border: '1px solid rgba(215, 176, 106, 0.16)',
+                  borderRadius: '12px',
+                  padding: '14px',
+                  marginBottom: '16px',
                 }}
               >
-                No has agregado productos a este pedido. Usa el selector arriba para añadir prendas o cosméticos.
+                <label
+                  style={{
+                    display: 'block',
+                    fontSize: '0.78rem',
+                    color: 'var(--color-gold)',
+                    fontWeight: '700',
+                    textTransform: 'uppercase',
+                    marginBottom: '8px',
+                    letterSpacing: '0.5px',
+                  }}
+                >
+                  Estado del Pedido *
+                </label>
+                <div
+                  style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+                    gap: '8px',
+                  }}
+                >
+                  {ORDER_STATUS_OPTIONS.map((opt) => {
+                    const isSelected = status === opt.id;
+                    return (
+                      <button
+                        key={opt.id}
+                        type="button"
+                        onClick={() => setStatus(opt.id)}
+                        style={{
+                          backgroundColor: isSelected ? opt.badgeBg : 'rgba(255, 255, 255, 0.03)',
+                          border: `1.5px solid ${isSelected ? opt.badgeBorder : 'rgba(255, 255, 255, 0.1)'}`,
+                          color: isSelected ? opt.badgeColor : 'var(--color-text-muted)',
+                          padding: '8px 10px',
+                          borderRadius: '8px',
+                          fontSize: '0.8rem',
+                          fontWeight: isSelected ? '700' : '500',
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          transition: 'all 0.2s',
+                          minHeight: '44px',
+                        }}
+                      >
+                        <div>{opt.label}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+                <p
+                  style={{
+                    margin: '8px 0 0 0',
+                    fontSize: '0.75rem',
+                    color: 'var(--color-text-muted)',
+                    fontStyle: 'italic',
+                  }}
+                >
+                  ℹ️ {ORDER_STATUS_OPTIONS.find((o) => o.id === status)?.description}
+                </p>
               </div>
-            ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                {items.map((item, idx) => (
-                  <div
-                    key={item.key}
+
+              {/* Resumen del Cliente */}
+              <div
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                  border: '1px solid rgba(215, 176, 106, 0.16)',
+                  borderRadius: '12px',
+                  padding: '12px 14px',
+                  marginBottom: '14px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-gold)', textTransform: 'uppercase', fontWeight: '700' }}>
+                    👤 Cliente y Entrega
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(2)}
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '10px',
-                      backgroundColor: 'rgba(255, 255, 255, 0.03)',
-                      border: '1px solid rgba(215, 176, 106, 0.12)',
-                      borderRadius: '10px',
-                      padding: '10px',
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--color-gold)',
+                      fontSize: '0.74rem',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      padding: '2px 6px',
                     }}
                   >
-                    {item.imageUrl && (
-                      <img
-                        src={item.imageUrl}
-                        alt={item.productName}
-                        style={{
-                          width: '46px',
-                          height: '46px',
-                          objectFit: 'cover',
-                          borderRadius: '6px',
-                          border: '1px solid rgba(215, 176, 106, 0.2)',
-                        }}
-                      />
-                    )}
+                    ✏️ Editar
+                  </button>
+                </div>
+                <div style={{ fontSize: '0.84rem', color: '#fff', lineHeight: 1.4 }}>
+                  <div><strong>{customerName || '(Sin nombre)'}</strong> • {customerPhone || '(Sin teléfono)'}</div>
+                  <div style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem', marginTop: '2px' }}>
+                    📍 {customerAddress || '(Sin dirección)'}, {customerCity}
+                  </div>
+                  {customerNotes && (
+                    <div style={{ color: 'var(--color-gold)', fontSize: '0.76rem', marginTop: '4px', fontStyle: 'italic' }}>
+                      📝 Nota: {customerNotes}
+                    </div>
+                  )}
+                </div>
+              </div>
 
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <p style={{ margin: 0, fontWeight: '600', color: '#fff', fontSize: '0.88rem', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                        {item.productName}
-                      </p>
-                      {item.toneName && (
-                        <p style={{ margin: '2px 0 0 0', fontSize: '0.74rem', color: 'var(--color-gold)' }}>
-                          💄 Tono: {item.toneName}
-                        </p>
-                      )}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginTop: '4px' }}>
-                        <span style={{ fontSize: '0.74rem', color: 'var(--color-text-muted)' }}>Precio:</span>
-                        <input
-                          type="number"
-                          inputMode="numeric"
-                          value={item.price}
-                          onChange={(e) => handleUpdateItemPrice(idx, e.target.value)}
-                          style={{
-                            width: '74px',
-                            backgroundColor: 'rgba(0,0,0,0.4)',
-                            border: '1px solid rgba(215, 176, 106, 0.2)',
-                            borderRadius: '4px',
-                            padding: '2px 6px',
-                            color: 'var(--color-gold)',
-                            fontSize: '0.76rem',
-                            fontWeight: '700',
-                          }}
-                        />
+              {/* Resumen de Productos */}
+              <div
+                style={{
+                  backgroundColor: 'rgba(255, 255, 255, 0.02)',
+                  border: '1px solid rgba(215, 176, 106, 0.16)',
+                  borderRadius: '12px',
+                  padding: '12px 14px',
+                }}
+              >
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '0.74rem', color: 'var(--color-gold)', textTransform: 'uppercase', fontWeight: '700' }}>
+                    💄 Productos ({items.length} items • {totalUnits} unidades)
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setCurrentStep(1)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: 'var(--color-gold)',
+                      fontSize: '0.74rem',
+                      fontWeight: '700',
+                      cursor: 'pointer',
+                      padding: '2px 6px',
+                    }}
+                  >
+                    ✏️ Editar
+                  </button>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                  {items.map((it) => (
+                    <div
+                      key={it.key}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '6px 0',
+                        borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+                        fontSize: '0.82rem',
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px', minWidth: 0 }}>
+                        {it.imageUrl && (
+                          <img
+                            src={it.imageUrl}
+                            alt={it.productName}
+                            style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '6px',
+                              objectFit: 'cover',
+                            }}
+                          />
+                        )}
+                        <div style={{ minWidth: 0 }}>
+                          <span style={{ color: '#fff', fontWeight: '600', display: 'block', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                            {it.productName}
+                          </span>
+                          {it.toneName && (
+                            <span style={{ fontSize: '0.7rem', color: 'var(--color-gold)' }}>
+                              Tono: {it.toneName}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div style={{ textAlign: 'right', flexShrink: 0, paddingLeft: '8px' }}>
+                        <span style={{ color: 'var(--color-text-muted)', fontSize: '0.75rem' }}>
+                          {it.quantity} × {formatPrice(it.price)} =
+                        </span>{' '}
+                        <strong style={{ color: 'var(--color-gold)' }}>
+                          {formatPrice(it.quantity * it.price)}
+                        </strong>
                       </div>
                     </div>
-
-                    {/* Stepper Cantidad Táctil */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateItemQuantity(idx, -1)}
-                        style={{
-                          width: '32px',
-                          height: '32px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                          border: '1px solid rgba(215, 176, 106, 0.25)',
-                          borderRadius: '6px',
-                          color: '#fff',
-                          fontSize: '1rem',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        -
-                      </button>
-                      <span style={{ minWidth: '24px', textAlign: 'center', fontWeight: '700', fontSize: '0.9rem', color: '#fff' }}>
-                        {item.quantity}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleUpdateItemQuantity(idx, 1)}
-                        style={{
-                          width: '32px',
-                          height: '32px',
-                          backgroundColor: 'rgba(255, 255, 255, 0.08)',
-                          border: '1px solid rgba(215, 176, 106, 0.25)',
-                          borderRadius: '6px',
-                          color: '#fff',
-                          fontSize: '1rem',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        +
-                      </button>
-                    </div>
-
-                    {/* Subtotal & Delete */}
-                    <div style={{ textAlign: 'right', minWidth: '70px' }}>
-                      <span style={{ fontWeight: '700', color: 'var(--color-gold)', fontSize: '0.9rem', display: 'block' }}>
-                        {formatPrice(item.price * item.quantity)}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveItem(idx)}
-                        title="Eliminar producto"
-                        style={{
-                          background: 'none',
-                          border: 'none',
-                          color: '#f87171',
-                          fontSize: '0.8rem',
-                          cursor: 'pointer',
-                          marginTop: '2px',
-                          padding: '2px 4px',
-                        }}
-                      >
-                        Eliminar ✕
-                      </button>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* Sticky Mobile-First Footer with Total & CTA */}
+        {/* Sticky Mobile-First Footer with Step Navigation */}
         <div
           style={{
-            padding: '14px 18px',
+            padding: '12px 18px',
             borderTop: '1px solid rgba(215, 176, 106, 0.2)',
             backgroundColor: 'var(--color-panel-dark)',
             display: 'flex',
@@ -1178,60 +1210,164 @@ export default function OrderModal({
             boxShadow: '0 -4px 16px rgba(0,0,0,0.4)',
           }}
         >
+          {/* Left Side: Summary or Back button */}
           <div>
-            <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>
-              Total ({totalUnits} un.):
-            </span>
-            <div style={{ fontFamily: 'var(--font-serif)', fontSize: '1.45rem', fontWeight: '700', color: 'var(--color-gold)', lineHeight: 1.1 }}>
-              {formatPrice(orderTotal)}
-            </div>
+            {currentStep === 1 ? (
+              <div>
+                <span style={{ fontSize: '0.72rem', color: 'var(--color-text-muted)', textTransform: 'uppercase' }}>
+                  Total ({totalUnits} un.):
+                </span>
+                <div style={{ fontFamily: 'var(--font-serif)', fontSize: '1.35rem', fontWeight: '700', color: 'var(--color-gold)', lineHeight: 1.1 }}>
+                  {formatPrice(orderTotal)}
+                </div>
+              </div>
+            ) : currentStep === 2 ? (
+              <button
+                type="button"
+                onClick={() => setCurrentStep(1)}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: '1px solid rgba(215, 176, 106, 0.3)',
+                  color: 'var(--color-text-muted)',
+                  padding: '10px 14px',
+                  borderRadius: '8px',
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  minHeight: '44px',
+                }}
+              >
+                ← Productos
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setCurrentStep(2)}
+                style={{
+                  backgroundColor: 'transparent',
+                  border: '1px solid rgba(215, 176, 106, 0.3)',
+                  color: 'var(--color-text-muted)',
+                  padding: '10px 14px',
+                  borderRadius: '8px',
+                  fontSize: '0.85rem',
+                  cursor: 'pointer',
+                  fontWeight: '600',
+                  minHeight: '44px',
+                }}
+              >
+                ← Cliente
+              </button>
+            )}
           </div>
 
+          {/* Right Side: Step Advancement or Submit */}
           <div style={{ display: 'flex', gap: '8px' }}>
-            <button
-              type="button"
-              onClick={onClose}
-              disabled={isSubmitting}
-              style={{
-                backgroundColor: 'transparent',
-                border: '1px solid rgba(215, 176, 106, 0.3)',
-                color: 'var(--color-text-muted)',
-                padding: '10px 16px',
-                borderRadius: '8px',
-                fontSize: '0.85rem',
-                cursor: 'pointer',
-                fontWeight: '600',
-              }}
-            >
-              Cancelar
-            </button>
+            {currentStep === 1 && (
+              <>
+                <button
+                  type="button"
+                  onClick={onClose}
+                  style={{
+                    backgroundColor: 'transparent',
+                    border: '1px solid rgba(215, 176, 106, 0.3)',
+                    color: 'var(--color-text-muted)',
+                    padding: '10px 14px',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                    cursor: 'pointer',
+                    fontWeight: '600',
+                    minHeight: '44px',
+                  }}
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleNextFromStep1}
+                  style={{
+                    backgroundColor: 'var(--color-burgundy)',
+                    border: '1px solid var(--color-gold)',
+                    color: '#fff',
+                    padding: '10px 18px',
+                    borderRadius: '8px',
+                    fontSize: '0.88rem',
+                    fontWeight: '700',
+                    cursor: 'pointer',
+                    boxShadow: 'var(--shadow-gold)',
+                    minHeight: '44px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                  }}
+                >
+                  <span>Cliente</span>
+                  <span>→</span>
+                </button>
+              </>
+            )}
 
-            <button
-              type="button"
-              onClick={handleSubmit}
-              disabled={isSubmitting}
-              style={{
-                backgroundColor: 'var(--color-burgundy)',
-                border: '1px solid var(--color-gold)',
-                color: 'var(--color-white)',
-                padding: '10px 20px',
-                borderRadius: '8px',
-                fontSize: '0.9rem',
-                fontWeight: '700',
-                cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                boxShadow: 'var(--shadow-gold)',
-                opacity: isSubmitting ? 0.7 : 1,
-              }}
-            >
-              {isSubmitting
-                ? 'Guardando...'
-                : isEditing
-                ? 'Guardar Cambios'
-                : 'Crear Pedido'}
-            </button>
+            {currentStep === 2 && (
+              <button
+                type="button"
+                onClick={handleNextFromStep2}
+                style={{
+                  backgroundColor: 'var(--color-burgundy)',
+                  border: '1px solid var(--color-gold)',
+                  color: '#fff',
+                  padding: '10px 18px',
+                  borderRadius: '8px',
+                  fontSize: '0.88rem',
+                  fontWeight: '700',
+                  cursor: 'pointer',
+                  boxShadow: 'var(--shadow-gold)',
+                  minHeight: '44px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                }}
+              >
+                <span>Estado y Total</span>
+                <span>→</span>
+              </button>
+            )}
+
+            {currentStep === 3 && (
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                style={{
+                  backgroundColor: 'var(--color-burgundy)',
+                  border: '1px solid var(--color-gold)',
+                  color: 'var(--color-white)',
+                  padding: '10px 22px',
+                  borderRadius: '8px',
+                  fontSize: '0.9rem',
+                  fontWeight: '700',
+                  cursor: isSubmitting ? 'not-allowed' : 'pointer',
+                  boxShadow: 'var(--shadow-gold)',
+                  opacity: isSubmitting ? 0.7 : 1,
+                  minHeight: '44px',
+                }}
+              >
+                {isSubmitting
+                  ? 'Guardando...'
+                  : isEditing
+                  ? 'Guardar Cambios'
+                  : `Crear Pedido (${formatPrice(orderTotal)})`}
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Drawer táctil de Catálogo Visual a pantalla completa en móviles */}
+      <ProductPickerModal
+        isOpen={isCatalogPickerOpen}
+        onClose={() => setIsCatalogPickerOpen(false)}
+        products={products}
+        onAddProduct={handleAddConfiguredItem}
+      />
     </div>
   );
 }
