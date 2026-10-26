@@ -29,6 +29,18 @@
 			"migrations_dir": "drizzle"
 		}
 	],
+	"send_email": [
+		{
+			"name": "EMAIL",
+			"remote": true,
+			"allowed_sender_addresses": [
+				"welcome@bella-forever.com",
+				"pedidos@bella-forever.com",
+				"notificaciones@bella-forever.com",
+				"soporte@bella-forever.com"
+			]
+		}
+	],
 	"observability": {
 		"logs": {
 			"enabled": true,

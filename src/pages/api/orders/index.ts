@@ -7,6 +7,7 @@ import {
 } from '../../../lib/services';
 import { formatCustomerSetCookie } from '../../../utils/cookie';
 import { getErrorMessage } from '../../../lib/errors';
+import { sendOrderNotification } from '../../../lib/email';
 
 export const prerender = false;
 
@@ -41,6 +42,13 @@ export const POST: APIRoute = async ({ request }) => {
 
     const db = getDb();
     const order = await createOrderWithInventoryCheck(db, body);
+
+    // Enviar confirmación por correo (cliente y administradores) de forma resiliente
+    try {
+      await sendOrderNotification(order);
+    } catch (emailErr) {
+      console.error('[OrdersAPI] Error al despachar email de orden:', emailErr);
+    }
 
     const headers = new Headers();
     headers.set('Content-Type', 'application/json');
