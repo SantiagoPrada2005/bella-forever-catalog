@@ -6,6 +6,7 @@ import ProductGrid from './ProductGrid';
 import ProductModal from './ProductModal';
 import CartDrawer, { type CartItem } from './CartDrawer';
 import CartToast, { type CartToastItem } from './ui/CartToast';
+import WhatsAppFloatingButton from './ui/WhatsAppFloatingButton';
 import { CONFIG } from '../config';
 import { getProductImage } from '../utils/image-helpers';
 import type { ProductWithRelations, Category, Tone } from '../db/schema';
@@ -16,6 +17,14 @@ export interface CatalogClientProps {
   initialCategories?: Category[];
 }
 
+function normalizeSearchText(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .trim();
+}
+
 export default function CatalogClient({
   initialProducts = [],
   initialCategories = [],
@@ -23,7 +32,19 @@ export default function CatalogClient({
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartLoaded, setIsCartLoaded] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
-  const [activeCategory, setActiveCategory] = useState('todos');
+  const [activeCategory, setActiveCategory] = useState(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const catParam = params.get('categoria');
+        if (catParam) return catParam;
+      } catch {
+        // Ignorar errores de lectura de URL
+      }
+    }
+    return 'todos';
+  });
+  const [searchQuery, setSearchQuery] = useState('');
   const [selectedProduct, setSelectedProduct] = useState<ProductWithRelations | null>(null);
   const [selectedProductTone, setSelectedProductTone] = useState<Tone | null>(null);
   const [cartToast, setCartToast] = useState<CartToastItem | null>(null);
@@ -136,10 +157,22 @@ export default function CatalogClient({
 
   const totalCartCount = cart.reduce((acc, item) => acc + item.quantity, 0);
 
-  const filteredProducts =
-    activeCategory === 'todos'
-      ? initialProducts
-      : initialProducts.filter((p) => p.category === activeCategory);
+  const normalizedQuery = normalizeSearchText(searchQuery);
+
+  const filteredProducts = initialProducts.filter((p) => {
+    const matchesCategory = activeCategory === 'todos' || p.category === activeCategory;
+    if (!matchesCategory) return false;
+    if (!normalizedQuery) return true;
+
+    const inName = normalizeSearchText(p.name).includes(normalizedQuery);
+    const inDesc = normalizeSearchText(p.description).includes(normalizedQuery);
+    const inCategory = normalizeSearchText(p.category).includes(normalizedQuery);
+    const inTones = Boolean(
+      p.tones?.some((t) => normalizeSearchText(t.name).includes(normalizedQuery))
+    );
+
+    return inName || inDesc || inCategory || inTones;
+  });
 
   const baseCategories =
     initialCategories.length > 0
@@ -201,25 +234,33 @@ export default function CatalogClient({
           categories={initialCategories}
           products={initialProducts}
           activeCategory={activeCategory}
+          searchQuery={searchQuery}
+          filteredCount={filteredProducts.length}
           onCategoryChange={setActiveCategory}
+          onSearchChange={setSearchQuery}
         />
 
         <ProductGrid
           products={filteredProducts}
+          categories={initialCategories}
           activeCategory={activeCategory}
           activeCategoryLabel={activeCategoryLabel}
+          searchQuery={searchQuery}
           onProductClick={handleOpenProductModal}
           onAddToCart={handleAddToCart}
           onSelectCategory={setActiveCategory}
+          onClearSearch={() => setSearchQuery('')}
         />
       </main>
 
       {selectedProduct && (
         <ProductModal
           product={selectedProduct}
+          allProducts={initialProducts}
           initialTone={selectedProductTone}
           onClose={handleCloseProductModal}
           onAddToCart={handleAddToCart}
+          onSelectProduct={handleOpenProductModal}
         />
       )}
 
@@ -240,6 +281,11 @@ export default function CatalogClient({
           setCartToast(null);
           setIsCartOpen(true);
         }}
+      />
+
+      <WhatsAppFloatingButton
+        isHidden={Boolean(selectedProduct) || isCartOpen}
+        hasToastOffset={Boolean(cartToast)}
       />
 
       <footer className="catalog-footer-studio">
