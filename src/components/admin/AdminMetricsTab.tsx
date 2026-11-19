@@ -30,6 +30,7 @@ export default function AdminMetricsTab({
       ? `${window.location.origin}/catalogo/meta-feed.xml`
       : 'https://bella-forever.com/catalogo/meta-feed.xml'
   );
+  const csvFeedUrl = feedUrl.replace(/\.xml$/, '.csv');
   const [copiedFeedUrl, setCopiedFeedUrl] = useState(false);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -860,7 +861,62 @@ export default function AdminMetricsTab({
                 >
                   Ver XML ↗
                 </a>
+                <a
+                  href={csvFeedUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    padding: '6px 10px',
+                    borderRadius: '6px',
+                    border: '1px solid rgba(215, 176, 106, 0.35)',
+                    color: 'var(--color-gold)',
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                  }}
+                >
+                  Ver CSV ↗
+                </a>
               </div>
+
+              {feedStats.imageWarnings.length > 0 && (
+                <div
+                  style={{
+                    marginBottom: '8px',
+                    padding: '8px 10px',
+                    backgroundColor: 'rgba(245, 158, 11, 0.1)',
+                    border: '1px solid rgba(245, 158, 11, 0.3)',
+                    borderRadius: '8px',
+                  }}
+                >
+                  <span style={{ display: 'block', fontSize: '0.72rem', color: '#f59e0b', fontWeight: 600, marginBottom: '4px' }}>
+                    ⚠️ {feedStats.imageWarnings.length} {feedStats.imageWarnings.length === 1 ? 'producto usa' : 'productos usan'} formato WebP o miniatura externa (recomendado JPG/PNG ≥ 500×500 px en Meta):
+                  </span>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '3px', maxHeight: '96px', overflowY: 'auto' }}>
+                    {feedStats.imageWarnings.map((warn) => (
+                      <div
+                        key={warn.productId}
+                        style={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          gap: '8px',
+                          fontSize: '0.7rem',
+                          color: 'rgba(255, 255, 255, 0.85)',
+                        }}
+                      >
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {warn.productName}
+                        </span>
+                        <span style={{ color: '#f59e0b', flexShrink: 0, fontWeight: 600 }}>
+                          {warn.reason === 'thumbnail' ? 'Miniatura externa' : 'Formato WebP'}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <p style={{ margin: 0, fontSize: '0.68rem', color: 'var(--color-text-muted)', lineHeight: 1.4 }}>
                 Usa <code style={{ color: '#fff' }}>custom_label_0</code> (categoría), <code style={{ color: '#fff' }}>custom_label_1</code> (rango de precio), <code style={{ color: '#fff' }}>custom_label_2</code> (destacado/nuevo) y <code style={{ color: '#fff' }}>custom_label_3</code> (salud de stock) para crear Conjuntos de Productos en Meta Commerce Manager.

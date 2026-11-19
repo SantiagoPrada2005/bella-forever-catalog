@@ -14,13 +14,27 @@ export default defineConfig({
   integrations: [
     react(),
     sitemap({
-      filter: (page) => !page.includes('/admin') && !page.includes('/api') && !page.endsWith('.xml'),
+      filter: (page) =>
+        !page.includes('/admin') &&
+        !page.includes('/api') &&
+        !page.endsWith('.xml') &&
+        !page.endsWith('.csv'),
     }),
     robotsTxt({
       policy: [
         {
           userAgent: '*',
-          allow: ['/', '/catalogo/meta-feed.xml', '/api/catalog/meta-feed.xml'],
+          allow: [
+            '/',
+            '/media/',
+            '/media/*',
+            '/api/images/',
+            '/api/images/*',
+            '/catalogo/meta-feed.xml',
+            '/catalogo/meta-feed.csv',
+            '/api/catalog/meta-feed.xml',
+            '/api/catalog/meta-feed.csv',
+          ],
           disallow: ['/admin', '/admin/*', '/api', '/api/*'],
         },
       ],

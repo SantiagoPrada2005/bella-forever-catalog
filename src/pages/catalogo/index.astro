@@ -6,6 +6,7 @@ import type { ProductWithRelations, Category } from '../../db/schema';
 import { getDb } from '../../lib/db';
 import { getProducts, getCategories } from '../../lib/services';
 import { getProductImage } from '../../utils/image-helpers';
+import { toMetaImageUrl } from '../../lib/catalog/meta-feed';
 
 export const prerender = false;
 
@@ -50,8 +51,9 @@ const pageDescription = activeProduct
     ? activeProduct.description.slice(0, 160)
     : `Compra ${activeProduct.name} en Bella Forever Roldanillo.`
   : 'Catálogo exclusivo de maquillaje en Roldanillo: rubores, labiales, pestañas y cosméticos de alta gama. Pide fácil y rápido por WhatsApp.';
-const pageImage = activeProduct
-  ? getProductImage(activeProduct, activeTone) || '/images/og-bella-forever.jpg'
+const rawProductImage = activeProduct ? getProductImage(activeProduct, activeTone) : '';
+const pageImage = rawProductImage
+  ? toMetaImageUrl(rawProductImage, siteUrl)
   : '/images/og-bella-forever.jpg';
 const pageType = activeProduct ? 'product' : 'website';
 const productOgUrl = activeProduct
