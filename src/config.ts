@@ -18,7 +18,7 @@ export const CONFIG: AppConfig = {
   instagramUser: "bellaforeverbeauty",
   whatsappNumber: "+573117887806",
   defaultCity: "Roldanillo",
-  metaPixelId: import.meta.env.PUBLIC_META_PIXEL_ID || "",
+  metaPixelId: import.meta.env.PUBLIC_META_PIXEL_ID || "1128602393384926",
   currency: {
     symbol: "$",
     code: "COP",
