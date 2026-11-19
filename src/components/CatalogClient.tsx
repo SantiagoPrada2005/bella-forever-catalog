@@ -9,12 +9,15 @@ import CartToast, { type CartToastItem } from './ui/CartToast';
 import WhatsAppFloatingButton from './ui/WhatsAppFloatingButton';
 import { CONFIG } from '../config';
 import { getProductImage } from '../utils/image-helpers';
+import { getCustomerCookie } from '../utils/cookie';
 import type { ProductWithRelations, Category, Tone } from '../db/schema';
-import { trackEvent } from '../lib/analytics';
+import { applyMetaAdvancedMatching, trackEvent } from '../lib/analytics';
 
 export interface CatalogClientProps {
   initialProducts?: ProductWithRelations[];
   initialCategories?: Category[];
+  initialProductId?: string | null;
+  initialToneId?: string | null;
 }
 
 function normalizeSearchText(value: string): string {
@@ -25,10 +28,99 @@ function normalizeSearchText(value: string): string {
     .trim();
 }
 
+function matchesProductSearch(
+  product: ProductWithRelations,
+  activeCategory: string,
+  normalizedQuery: string
+): boolean {
+  const matchesCategory = activeCategory === 'todos' || product.category === activeCategory;
+  if (!matchesCategory) return false;
+  if (!normalizedQuery) return true;
+
+  const inName = normalizeSearchText(product.name).includes(normalizedQuery);
+  const inDesc = normalizeSearchText(product.description).includes(normalizedQuery);
+  const inCategory = normalizeSearchText(product.category).includes(normalizedQuery);
+  const inTones = Boolean(
+    product.tones?.some((t) => normalizeSearchText(t.name).includes(normalizedQuery))
+  );
+
+  return inName || inDesc || inCategory || inTones;
+}
+
+function syncCatalogUrl(
+  nextCategory: string,
+  nextProductId: string | null,
+  nextToneId: string | null
+): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const url = new URL(window.location.href);
+    const params = url.searchParams;
+
+    if (nextCategory && nextCategory !== 'todos') {
+      params.set('categoria', nextCategory);
+    } else {
+      params.delete('categoria');
+    }
+
+    if (nextProductId) {
+      params.set('producto', nextProductId);
+      if (nextToneId) {
+        params.set('tono', nextToneId);
+      } else {
+        params.delete('tono');
+      }
+    } else {
+      params.delete('producto');
+      params.delete('tono');
+    }
+
+    const queryStr = params.toString();
+    const nextRelativeUrl = `${url.pathname}${queryStr ? `?${queryStr}` : ''}${url.hash}`;
+    window.history.replaceState(null, '', nextRelativeUrl);
+  } catch {
+    // Ignorar errores de History API en entornos restringidos
+  }
+}
+
+function resolveInitialDeepLink(
+  products: ProductWithRelations[],
+  initialProductId: string | null,
+  initialToneId: string | null
+): { product: ProductWithRelations | null; tone: Tone | null } {
+  if (products.length === 0) {
+    return { product: null, tone: null };
+  }
+  const urlParams =
+    typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const targetProductId = initialProductId || urlParams?.get('producto')?.trim() || null;
+  if (!targetProductId) {
+    return { product: null, tone: null };
+  }
+
+  const targetProduct = products.find((p) => p.id === targetProductId) ?? null;
+  if (!targetProduct) {
+    return { product: null, tone: null };
+  }
+
+  const targetToneId = initialToneId || urlParams?.get('tono')?.trim() || null;
+  const matchedTone = targetToneId
+    ? targetProduct.tones?.find((t) => t.id === targetToneId)
+    : undefined;
+  const targetTone = matchedTone ?? targetProduct.tones?.[0] ?? null;
+
+  return { product: targetProduct, tone: targetTone };
+}
+
 export default function CatalogClient({
   initialProducts = [],
   initialCategories = [],
+  initialProductId = null,
+  initialToneId = null,
 }: CatalogClientProps) {
+  const [initialDeepLink] = useState(() =>
+    resolveInitialDeepLink(initialProducts, initialProductId, initialToneId)
+  );
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartLoaded, setIsCartLoaded] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -45,17 +137,47 @@ export default function CatalogClient({
     return 'todos';
   });
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedProduct, setSelectedProduct] = useState<ProductWithRelations | null>(null);
-  const [selectedProductTone, setSelectedProductTone] = useState<Tone | null>(null);
+  const [selectedProduct, setSelectedProduct] = useState<ProductWithRelations | null>(
+    initialDeepLink.product
+  );
+  const [selectedProductTone, setSelectedProductTone] = useState<Tone | null>(
+    initialDeepLink.tone
+  );
   const [cartToast, setCartToast] = useState<CartToastItem | null>(null);
   const [isCartBumping, setIsCartBumping] = useState(false);
   const bumpTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const didInitAnalyticsRef = useRef(false);
+  const lastTrackedSearchRef = useRef('');
 
   useEffect(() => {
     return () => {
       if (bumpTimerRef.current) clearTimeout(bumpTimerRef.current);
     };
   }, []);
+
+  useEffect(() => {
+    if (didInitAnalyticsRef.current) return;
+    didInitAnalyticsRef.current = true;
+
+    const savedCustomer = getCustomerCookie();
+    if (savedCustomer) {
+      applyMetaAdvancedMatching(savedCustomer);
+    }
+
+    if (initialDeepLink.product) {
+      trackEvent({
+        name: 'view_item',
+        product: {
+          id: initialDeepLink.product.id,
+          toneId: initialDeepLink.tone?.id || null,
+          name: initialDeepLink.product.name,
+          price: initialDeepLink.product.price,
+          category: initialDeepLink.product.category,
+          tone: initialDeepLink.tone?.name || null,
+        },
+      });
+    }
+  }, [initialDeepLink]);
 
   useEffect(() => {
     try {
@@ -95,6 +217,7 @@ export default function CatalogClient({
           toneId: selectedTone?.id || null,
           productName: product.name,
           toneName: selectedTone?.name || '',
+          category: product.category,
           price: product.price,
           quantity: 1,
           image: getProductImage(product, selectedTone),
@@ -120,6 +243,7 @@ export default function CatalogClient({
       name: 'add_to_cart',
       product: {
         id: product.id,
+        toneId: selectedTone?.id || null,
         name: product.name,
         price: product.price,
         category: product.category,
@@ -159,20 +283,36 @@ export default function CatalogClient({
 
   const normalizedQuery = normalizeSearchText(searchQuery);
 
-  const filteredProducts = initialProducts.filter((p) => {
-    const matchesCategory = activeCategory === 'todos' || p.category === activeCategory;
-    if (!matchesCategory) return false;
-    if (!normalizedQuery) return true;
+  const filteredProducts = initialProducts.filter((p) =>
+    matchesProductSearch(p, activeCategory, normalizedQuery)
+  );
 
-    const inName = normalizeSearchText(p.name).includes(normalizedQuery);
-    const inDesc = normalizeSearchText(p.description).includes(normalizedQuery);
-    const inCategory = normalizeSearchText(p.category).includes(normalizedQuery);
-    const inTones = Boolean(
-      p.tones?.some((t) => normalizeSearchText(t.name).includes(normalizedQuery))
-    );
+  useEffect(() => {
+    if (normalizedQuery.length < 2) {
+      lastTrackedSearchRef.current = '';
+      return;
+    }
 
-    return inName || inDesc || inCategory || inTones;
-  });
+    const searchKey = `${activeCategory}:${normalizedQuery}`;
+    if (searchKey === lastTrackedSearchRef.current) return;
+
+    const timer = setTimeout(() => {
+      lastTrackedSearchRef.current = searchKey;
+      const matchedIds = initialProducts
+        .filter((p) => matchesProductSearch(p, activeCategory, normalizedQuery))
+        .map((p) => p.tones?.[0]?.id || p.id);
+
+      trackEvent({
+        name: 'search',
+        query: searchQuery.trim(),
+        category: activeCategory,
+        productIds: matchedIds.slice(0, 20),
+        resultsCount: matchedIds.length,
+      });
+    }, 800);
+
+    return () => clearTimeout(timer);
+  }, [searchQuery, normalizedQuery, activeCategory, initialProducts]);
 
   const baseCategories =
     initialCategories.length > 0
@@ -184,6 +324,27 @@ export default function CatalogClient({
       ? 'de Estudio'
       : baseCategories.find((c) => c.id === activeCategory)?.name || activeCategory;
 
+  const handleCategoryChange = (nextCategory: string) => {
+    setActiveCategory(nextCategory);
+    syncCatalogUrl(nextCategory, selectedProduct?.id ?? null, selectedProductTone?.id ?? null);
+
+    if (nextCategory !== 'todos') {
+      const categoryLabel =
+        baseCategories.find((c) => c.id === nextCategory)?.name || nextCategory;
+      const productIds = initialProducts
+        .filter((p) => p.category === nextCategory)
+        .slice(0, 20)
+        .map((p) => p.tones?.[0]?.id || p.id);
+
+      trackEvent({
+        name: 'view_category',
+        category: nextCategory,
+        categoryLabel,
+        productIds,
+      });
+    }
+  };
+
   const handleOpenProductModal = (
     product: ProductWithRelations,
     defaultTone: Tone | null = null
@@ -193,11 +354,13 @@ export default function CatalogClient({
       (product.tones && product.tones.length > 0 ? product.tones[0] ?? null : null);
     setSelectedProduct(product);
     setSelectedProductTone(targetTone);
+    syncCatalogUrl(activeCategory, product.id, targetTone?.id ?? null);
 
     trackEvent({
       name: 'view_item',
       product: {
         id: product.id,
+        toneId: targetTone?.id || null,
         name: product.name,
         price: product.price,
         category: product.category,
@@ -209,6 +372,25 @@ export default function CatalogClient({
   const handleCloseProductModal = () => {
     setSelectedProduct(null);
     setSelectedProductTone(null);
+    syncCatalogUrl(activeCategory, null, null);
+  };
+
+  const handleModalToneChange = (product: ProductWithRelations, tone: Tone) => {
+    setSelectedProductTone(tone);
+    syncCatalogUrl(activeCategory, product.id, tone.id);
+
+    trackEvent({
+      name: 'view_item',
+      skipDb: true,
+      product: {
+        id: product.id,
+        toneId: tone.id,
+        name: product.name,
+        price: product.price,
+        category: product.category,
+        tone: tone.name,
+      },
+    });
   };
 
   return (
@@ -236,7 +418,7 @@ export default function CatalogClient({
           activeCategory={activeCategory}
           searchQuery={searchQuery}
           filteredCount={filteredProducts.length}
-          onCategoryChange={setActiveCategory}
+          onCategoryChange={handleCategoryChange}
           onSearchChange={setSearchQuery}
         />
 
@@ -248,7 +430,7 @@ export default function CatalogClient({
           searchQuery={searchQuery}
           onProductClick={handleOpenProductModal}
           onAddToCart={handleAddToCart}
-          onSelectCategory={setActiveCategory}
+          onSelectCategory={handleCategoryChange}
           onClearSearch={() => setSearchQuery('')}
         />
       </main>
@@ -261,6 +443,7 @@ export default function CatalogClient({
           onClose={handleCloseProductModal}
           onAddToCart={handleAddToCart}
           onSelectProduct={handleOpenProductModal}
+          onToneChange={handleModalToneChange}
         />
       )}
 

@@ -5,6 +5,7 @@ import { formatCop } from '../utils/currency';
 import { getProductImage } from '../utils/image-helpers';
 import { CONFIG } from '../config';
 import ProductGallery from './ProductGallery';
+import { trackEvent } from '../lib/analytics';
 import type { ProductWithRelations, Tone } from '../db/schema';
 
 export interface ProductModalProps {
@@ -14,6 +15,7 @@ export interface ProductModalProps {
   onClose: () => void;
   onAddToCart: (product: ProductWithRelations, tone: Tone | null) => void;
   onSelectProduct?: (product: ProductWithRelations, tone?: Tone | null) => void;
+  onToneChange?: (product: ProductWithRelations, tone: Tone) => void;
 }
 
 interface CategoryEditorialMeta {
@@ -173,6 +175,7 @@ export default function ProductModal({
   onClose,
   onAddToCart,
   onSelectProduct,
+  onToneChange,
 }: ProductModalProps) {
   const modalOverlay = useRef<HTMLDivElement>(null);
   const modalContent = useRef<HTMLDivElement>(null);
@@ -188,6 +191,15 @@ export default function ProductModal({
   const [manualCycleCount, setManualCycleCount] = useState(0);
   const addedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const relatedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const selectionSyncKey = `${product?.id ?? ''}:${initialTone?.id ?? ''}`;
+  const [lastSelectionSyncKey, setLastSelectionSyncKey] = useState(selectionSyncKey);
+  if (selectionSyncKey !== lastSelectionSyncKey) {
+    setLastSelectionSyncKey(selectionSyncKey);
+    setSelectedTone(
+      initialTone || (product?.tones && product.tones.length > 0 ? product.tones[0] ?? null : null)
+    );
+  }
 
   // Hacer scroll suave al tope del modal cuando cambia el producto activo
   useEffect(() => {
@@ -526,7 +538,10 @@ export default function ProductModal({
                           title={`${tone.name}${!toneReady ? ' (Agotado)' : ''}`}
                           aria-label={`Seleccionar tono ${tone.name}`}
                           aria-pressed={isSelected}
-                          onClick={() => setSelectedTone(tone)}
+                          onClick={() => {
+                            setSelectedTone(tone);
+                            onToneChange?.(product, tone);
+                          }}
                           className={`amuse-swatch-btn ${isSelected ? 'is-active' : ''} ${
                             !toneReady ? 'is-out' : ''
                           }`}
@@ -627,6 +642,21 @@ export default function ProductModal({
                 href={productWhatsappUrl}
                 target="_blank"
                 rel="noopener noreferrer"
+                onClick={() =>
+                  trackEvent({
+                    name: 'contact_whatsapp',
+                    source: 'product_modal',
+                    productName: product.name,
+                    product: {
+                      id: product.id,
+                      toneId: selectedTone?.id || null,
+                      name: product.name,
+                      price: product.price,
+                      category: product.category,
+                      tone: selectedTone?.name || null,
+                    },
+                  })
+                }
                 className="product-whatsapp-inline-link"
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">

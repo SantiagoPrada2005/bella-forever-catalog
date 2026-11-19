@@ -29,6 +29,7 @@ const schemaData = {
     "item": {
       "@type": "Product",
       "@id": `${siteUrl}/catalogo#product-${product.id}`,
+      "sku": product.id,
       "name": product.name,
       "description": product.description || `${product.name} - Bella Forever`,
       "image": product.mainImage?.startsWith('http') 
@@ -43,7 +44,7 @@ const schemaData = {
         "price": product.price,
         "priceCurrency": CONFIG.currency?.code || "COP",
         "availability": product.inStock !== false ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
-        "url": `${siteUrl}/catalogo`
+        "url": `${siteUrl}/catalogo?producto=${encodeURIComponent(product.id)}`
       }
     }
   }))

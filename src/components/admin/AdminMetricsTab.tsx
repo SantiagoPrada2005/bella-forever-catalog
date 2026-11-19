@@ -1,7 +1,8 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import type { OrderWithItems, ProductWithRelations, Category } from '../../db/schema';
 import type { AnalyticsSummary } from '../../lib/services';
 import { getDbAnalyticsMetrics } from '../../lib/api-client';
+import { computeMetaFeedStats } from '../../lib/catalog/meta-feed';
 import { formatCop } from '../../utils/currency';
 import { CONFIG } from '../../config';
 
@@ -24,6 +25,34 @@ export default function AdminMetricsTab({
   // Métricas almacenadas en la base de datos Cloudflare D1
   const [dbSummary, setDbSummary] = useState<AnalyticsSummary | null>(null);
   const [loadingDbMetrics, setLoadingDbMetrics] = useState(true);
+  const [feedUrl] = useState(() =>
+    typeof window !== 'undefined'
+      ? `${window.location.origin}/catalogo/meta-feed.xml`
+      : 'https://bella-forever.com/catalogo/meta-feed.xml'
+  );
+  const [copiedFeedUrl, setCopiedFeedUrl] = useState(false);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const feedStats = useMemo(() => computeMetaFeedStats(products), [products]);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    };
+  }, []);
+
+  const handleCopyFeedUrl = async () => {
+    try {
+      await navigator.clipboard.writeText(feedUrl);
+      setCopiedFeedUrl(true);
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+      copyTimerRef.current = setTimeout(() => {
+        setCopiedFeedUrl(false);
+      }, 2000);
+    } catch (err: unknown) {
+      console.error('No se pudo copiar la URL del feed:', err);
+    }
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -755,6 +784,88 @@ export default function AdminMetricsTab({
                 </div>
               </div>
             )}
+
+            {/* Bloque Feed de Catálogo Meta Commerce */}
+            <div
+              style={{
+                marginTop: '14px',
+                padding: '12px 14px',
+                backgroundColor: 'rgba(0, 0, 0, 0.35)',
+                borderRadius: '10px',
+                border: '1px solid rgba(215, 176, 106, 0.2)',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px', gap: '8px' }}>
+                <span style={{ fontSize: '0.76rem', color: 'var(--color-gold)', fontWeight: 700 }}>
+                  Feed de Catálogo Meta (Variantes y Tonos)
+                </span>
+                <span style={{ fontSize: '0.68rem', color: '#34d399', fontWeight: 600 }}>
+                  {feedStats.inStockItems} en stock
+                </span>
+              </div>
+
+              <p style={{ margin: '0 0 8px 0', fontSize: '0.74rem', color: 'rgba(255, 255, 255, 0.85)' }}>
+                {feedStats.totalFeedItems} ítems sincronizables ({feedStats.inStockItems} en stock · {feedStats.totalProducts} productos · {feedStats.totalTones} tonos)
+              </p>
+
+              <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginBottom: '8px' }}>
+                <input
+                  type="text"
+                  value={feedUrl}
+                  readOnly
+                  aria-label="URL del feed XML para Meta Commerce Manager"
+                  onClick={(e) => e.currentTarget.select()}
+                  style={{
+                    flex: '1 1 180px',
+                    minWidth: 0,
+                    backgroundColor: '#120709',
+                    border: '1px solid rgba(215, 176, 106, 0.25)',
+                    borderRadius: '6px',
+                    padding: '6px 8px',
+                    color: '#fff',
+                    fontSize: '0.72rem',
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleCopyFeedUrl}
+                  style={{
+                    backgroundColor: copiedFeedUrl ? 'rgba(16, 185, 129, 0.2)' : 'var(--color-gold)',
+                    color: copiedFeedUrl ? '#34d399' : '#120709',
+                    border: copiedFeedUrl ? '1px solid rgba(16, 185, 129, 0.45)' : '1px solid var(--color-gold)',
+                    borderRadius: '6px',
+                    padding: '6px 10px',
+                    fontSize: '0.72rem',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {copiedFeedUrl ? '¡URL Copiada!' : 'Copiar URL del Feed'}
+                </button>
+                <a
+                  href={feedUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    padding: '6px 10px',
+                    borderRadius: '6px',
+                    border: '1px solid rgba(215, 176, 106, 0.35)',
+                    color: 'var(--color-gold)',
+                    fontSize: '0.72rem',
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                  }}
+                >
+                  Ver XML ↗
+                </a>
+              </div>
+
+              <p style={{ margin: 0, fontSize: '0.68rem', color: 'var(--color-text-muted)', lineHeight: 1.4 }}>
+                Usa <code style={{ color: '#fff' }}>custom_label_0</code> (categoría), <code style={{ color: '#fff' }}>custom_label_1</code> (rango de precio), <code style={{ color: '#fff' }}>custom_label_2</code> (destacado/nuevo) y <code style={{ color: '#fff' }}>custom_label_3</code> (salud de stock) para crear Conjuntos de Productos en Meta Commerce Manager.
+              </p>
+            </div>
           </div>
 
           <div style={{ marginTop: '16px' }}>

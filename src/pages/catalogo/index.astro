@@ -27,13 +27,65 @@ try {
 const featured = productsList.filter(p => p.isFeatured || p.isNew);
 const lcpProduct = featured.length > 0 ? featured[0] : productsList[0];
 const lcpImageUrl = lcpProduct ? getProductImage(lcpProduct, lcpProduct.tones?.[0] ?? null) : null;
+
+const requestedProductId = Astro.url.searchParams.get('producto')?.trim() || null;
+const requestedToneId = Astro.url.searchParams.get('tono')?.trim() || null;
+const activeProduct = requestedProductId
+  ? productsList.find((p) => p.id === requestedProductId) ?? null
+  : null;
+const activeTone = activeProduct
+  ? (requestedToneId
+      ? activeProduct.tones?.find((t) => t.id === requestedToneId) ?? activeProduct.tones?.[0] ?? null
+      : activeProduct.tones?.[0] ?? null)
+  : null;
+
+const siteUrl = Astro.site ? Astro.site.toString().replace(/\/$/, '') : 'https://bella-forever.com';
+const pageTitle = activeProduct
+  ? activeTone
+    ? `${activeProduct.name} (${activeTone.name}) | Bella Forever`
+    : `${activeProduct.name} | Bella Forever`
+  : 'Catálogo de Maquillaje y Belleza | Bella Forever Roldanillo';
+const pageDescription = activeProduct
+  ? activeProduct.description
+    ? activeProduct.description.slice(0, 160)
+    : `Compra ${activeProduct.name} en Bella Forever Roldanillo.`
+  : 'Catálogo exclusivo de maquillaje en Roldanillo: rubores, labiales, pestañas y cosméticos de alta gama. Pide fácil y rápido por WhatsApp.';
+const pageImage = activeProduct
+  ? getProductImage(activeProduct, activeTone) || '/images/og-bella-forever.jpg'
+  : '/images/og-bella-forever.jpg';
+const pageType = activeProduct ? 'product' : 'website';
+const productOgUrl = activeProduct
+  ? activeTone
+    ? `${siteUrl}/catalogo?producto=${encodeURIComponent(activeProduct.id)}&tono=${encodeURIComponent(activeTone.id)}`
+    : `${siteUrl}/catalogo?producto=${encodeURIComponent(activeProduct.id)}`
+  : undefined;
+const isActiveAvailable = activeProduct
+  ? Boolean(activeProduct.inStock) &&
+    (activeTone ? Boolean(activeTone.inStock) && activeTone.stock > 0 : activeProduct.stock > 0)
+  : false;
+const retailerItemId = activeProduct ? (activeTone ? activeTone.id : activeProduct.id) : null;
 ---
 
 <Layout
-  title="Catálogo de Maquillaje y Belleza | Bella Forever Roldanillo"
-  description="Catálogo exclusivo de maquillaje en Roldanillo: rubores, labiales, pestañas y cosméticos de alta gama. Pide fácil y rápido por WhatsApp."
+  title={pageTitle}
+  description={pageDescription}
+  image={pageImage}
+  type={pageType}
+  ogUrl={productOgUrl}
 >
-  <JsonLdProductList slot="head" products={productsList} />
+  <JsonLdProductList slot="head" products={productsList} siteUrl={siteUrl} />
+  {activeProduct && retailerItemId && (
+    <Fragment slot="head">
+      <meta property="product:brand" content="Bella Forever" />
+      <meta property="product:availability" content={isActiveAvailable ? 'in stock' : 'out of stock'} />
+      <meta property="product:condition" content="new" />
+      <meta property="product:price:amount" content={String(Math.round(activeProduct.price))} />
+      <meta property="product:price:currency" content="COP" />
+      <meta property="product:retailer_item_id" content={retailerItemId} />
+      <meta property="product:item_group_id" content={activeProduct.id} />
+      <meta property="product:category" content={activeProduct.category} />
+    </Fragment>
+  )}
   <link rel="preload" as="image" href="/images/studio-hero-blush.webp" fetchpriority="high" slot="head" />
   {lcpImageUrl && (
     <link rel="preload" as="image" href={lcpImageUrl} fetchpriority="high" slot="head" />
@@ -42,5 +94,7 @@ const lcpImageUrl = lcpProduct ? getProductImage(lcpProduct, lcpProduct.tones?.[
     client:load
     initialProducts={productsList}
     initialCategories={categoriesList}
+    initialProductId={activeProduct?.id ?? null}
+    initialToneId={activeTone?.id ?? null}
   />
 </Layout>

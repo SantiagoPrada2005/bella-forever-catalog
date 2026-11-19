@@ -3,6 +3,7 @@ export interface AnalyticsProduct {
   name: string;
   price: number;
   category: string;
+  toneId?: string | null;
   tone?: string | null;
   quantity?: number;
 }
@@ -15,15 +16,19 @@ export interface AnalyticsCustomer {
   address?: string;
 }
 
+export type AnalyticsCustomerType = 'new' | 'returning';
+
 export type AnalyticsEvent =
   | {
       name: 'page_view';
       path?: string;
       title?: string;
+      skipPixel?: boolean;
     }
   | {
       name: 'view_item';
       product: AnalyticsProduct;
+      skipDb?: boolean;
     }
   | {
       name: 'add_to_cart';
@@ -33,6 +38,7 @@ export type AnalyticsEvent =
       name: 'initiate_checkout';
       items: AnalyticsProduct[];
       total: number;
+      customerType?: AnalyticsCustomerType;
     }
   | {
       name: 'purchase';
@@ -41,9 +47,24 @@ export type AnalyticsEvent =
       total: number;
       items: AnalyticsProduct[];
       customer?: AnalyticsCustomer;
+      customerType?: AnalyticsCustomerType;
     }
   | {
       name: 'contact_whatsapp';
       source: 'header' | 'hero' | 'cart' | 'product_modal' | 'floating_button';
       productName?: string;
+      product?: AnalyticsProduct;
+    }
+  | {
+      name: 'view_category';
+      category: string;
+      categoryLabel?: string;
+      productIds: string[];
+    }
+  | {
+      name: 'search';
+      query: string;
+      category?: string;
+      productIds: string[];
+      resultsCount: number;
     };

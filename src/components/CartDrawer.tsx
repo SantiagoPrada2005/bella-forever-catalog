@@ -14,6 +14,7 @@ export interface CartItem {
   toneId?: string | null;
   productName: string;
   toneName?: string;
+  category?: string;
   price: number;
   quantity: number;
   image: string;
@@ -71,20 +72,32 @@ export default function CartDrawer({
     }
   }, []);
 
+  const resolveItemCategory = (item: CartItem): string =>
+    item.category ||
+    initialProducts.find((p) => p.id === item.productId)?.category ||
+    'maquillaje';
+
+  const toAnalyticsProduct = (item: CartItem) => ({
+    id: item.productId,
+    toneId: item.toneId || null,
+    name: item.productName,
+    price: item.price,
+    quantity: item.quantity,
+    category: resolveItemCategory(item),
+    tone: item.toneName || null,
+  });
+
   useEffect(() => {
     if (cart.length > 0) {
       const totalAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
+      const savedCustomer = getCustomerCookie();
+      const customerType = savedCustomer?.lastOrderId ? 'returning' : 'new';
+
       trackEvent({
         name: 'initiate_checkout',
-        items: cart.map((item) => ({
-          id: item.productId,
-          name: item.productName,
-          price: item.price,
-          quantity: item.quantity,
-          category: 'maquillaje',
-          tone: item.toneName || null,
-        })),
+        items: cart.map(toAnalyticsProduct),
         total: totalAmount,
+        customerType,
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -204,6 +217,7 @@ export default function CartDrawer({
         })),
       };
 
+      const hadPreviousOrder = Boolean(getCustomerCookie()?.lastOrderId);
       const newOrder = await createOrder(orderPayload);
 
       if (rememberDevice) {
@@ -224,14 +238,7 @@ export default function CartDrawer({
         orderId: newOrder.id,
         orderNumber: newOrder.orderNumber,
         total: newOrder.total,
-        items: cart.map((item) => ({
-          id: item.productId,
-          name: item.productName,
-          price: item.price,
-          quantity: item.quantity,
-          category: 'maquillaje',
-          tone: item.toneName || null,
-        })),
+        items: cart.map(toAnalyticsProduct),
         customer: {
           name: customer.name,
           phone: customer.phone,
@@ -239,6 +246,7 @@ export default function CartDrawer({
           city: customer.city,
           address: customer.address,
         },
+        customerType: hadPreviousOrder ? 'returning' : 'new',
       });
 
       trackEvent({

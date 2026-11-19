@@ -14,13 +14,13 @@ export default defineConfig({
   integrations: [
     react(),
     sitemap({
-      filter: (page) => !page.includes('/admin') && !page.includes('/api'),
+      filter: (page) => !page.includes('/admin') && !page.includes('/api') && !page.endsWith('.xml'),
     }),
     robotsTxt({
       policy: [
         {
           userAgent: '*',
-          allow: '/',
+          allow: ['/', '/catalogo/meta-feed.xml', '/api/catalog/meta-feed.xml'],
           disallow: ['/admin', '/admin/*', '/api', '/api/*'],
         },
       ],

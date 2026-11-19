@@ -25,4 +25,5 @@ export function trackEvent(event: AnalyticsEvent): void {
   }
 }
 
+export { applyMetaAdvancedMatching } from './client-pixel';
 export * from './types';

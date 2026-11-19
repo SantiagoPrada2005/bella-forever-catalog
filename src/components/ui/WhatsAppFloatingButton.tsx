@@ -1,4 +1,5 @@
 import { CONFIG } from '../../config';
+import { trackEvent } from '../../lib/analytics';
 
 export interface WhatsAppFloatingButtonProps {
   isHidden?: boolean;
@@ -27,6 +28,7 @@ export default function WhatsAppFloatingButton({
       href={whatsappUrl}
       target="_blank"
       rel="noopener noreferrer"
+      onClick={() => trackEvent({ name: 'contact_whatsapp', source: 'floating_button' })}
       aria-label="Atención al cliente por WhatsApp al 311 788 7806"
       title="Atención al cliente por WhatsApp"
       className={classNames}

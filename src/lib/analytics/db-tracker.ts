@@ -27,6 +27,7 @@ export function dispatchDatabaseAnalytics(event: AnalyticsEvent): void {
 
   // Ignorar navegación dentro del panel de administración
   if (window.location.pathname.startsWith('/admin')) return;
+  if (event.name === 'view_item' && event.skipDb) return;
 
   const sessionId = getSessionId();
   const currentPath = window.location.pathname;
@@ -83,7 +84,25 @@ export function dispatchDatabaseAnalytics(event: AnalyticsEvent): void {
       payload = {
         ...payload,
         source: event.source,
-        productName: event.productName || null,
+        productId: event.product?.id || null,
+        productName: event.product?.name || event.productName || null,
+        category: event.product?.category || null,
+        value: event.product?.price ?? null,
+      };
+      break;
+
+    case 'view_category':
+      payload = {
+        ...payload,
+        category: event.category,
+      };
+      break;
+
+    case 'search':
+      payload = {
+        ...payload,
+        source: event.query.slice(0, 120),
+        category: event.category || null,
       };
       break;
   }
